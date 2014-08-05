@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_aeroo_add_print_button" model="ir.ui.view">
+            <field name="name">Add Print Button</field>
+            <field name="model">aeroo.add_print_button</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Add Print Button" version="7.0">
+                    <group>
+                        <field name="open_action" attrs="{'invisible':[('state','&lt;&gt;','add')]}"/>
+                        <group attrs="{'invisible':[('state','&lt;&gt;','exist')]}">
+                            <label string="Report Action already exist for this report."/>
+                        </group>
+                        <group attrs="{'invisible':[('state','&lt;&gt;','exception')]}">
+                            <label string="Can not be create print button for the Special report."/>
+                        </group>
+                        <group attrs="{'invisible':[('state','&lt;&gt;','done')]}">
+                            <label string="The print button is successfully added."/>
+                        </group>
+                    </group>
+                    <footer>
+                        <group>
+                            <button name="do_action" string="_Ok" states="add" type="object"/>
+                            <button special="cancel" string="_Cancel" states="add,exist,exception,done"/>
+                        </group>
+                    </footer>
+                    <field name="state" invisible="1"/>
+                </form>
+            </field>
+        </record>
+
+       <act_window name="Add Print Button"
+            res_model="aeroo.add_print_button"
+            src_model="ir.actions.report.xml"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            id="action_aeroo_add_print_button"/>
+
+    </data>
+</openerp>

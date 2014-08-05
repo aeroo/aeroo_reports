@@ -1,0 +1,72 @@
+<openerp>
+  <data>
+
+    <record id="view_aeroo_config_installer" model="ir.ui.view">
+      <field name="name">aeroo_config.installer.view</field>
+      <field name="model">aeroo_config.installer</field>
+      <field name="inherit_id" ref="base.res_config_installer"/>
+      <field name="arch" type="xml">
+          <data>
+                <form position="attributes" version="7.0">
+                  <attribute name="string">OpenOffice.org connection Configuration</attribute>
+                </form>
+                <footer position="replace">
+                    <footer>
+                        <button name="check" type="object" string="Connect" class="oe_highlight" states="init"/>
+                        <button name="action_next" type="object" string="Continue" class="oe_highlight" states="done"/>
+                        or
+                        <button special="cancel" string="Close" class="oe_link"/>
+                    </footer>
+                </footer>
+                <separator string="title" position="replace">
+                    <p class="oe_grey">
+                        Here you can configure Aeroo connection to OpenOffice.org and test now document conversion.
+                    </p>
+                  <group>
+                    <group width="25%%">
+                      <field name="config_logo" widget="image" nolabel="1" colspan="2"/>
+                    </group>
+                    <group width="75%%">
+                      <group states="init">
+                          <group colspan="4">
+                              <field name="host"/>
+                              <field name="port"/>
+                              <field name="ooo_restart_cmd" colspan="4"/>
+                          </group>
+                          <separator colspan="4"/>
+                          <field name="link" widget="url"/>
+                      </group>
+                      <group colspan="4" states="error,done">
+                          <field name="msg" colspan="4" nolabel="1"/>
+                      </group>
+                      <group colspan="4" states="error">
+                          <separator string="Details" colspan="4"/>
+                          <field name="error_details" colspan="4" nolabel="1"/>
+                      </group>
+                      <newline/>
+                      <field name="state" invisible="1"/>
+                    </group>
+                  </group>
+                </separator>
+          </data>
+      </field>
+    </record>
+
+    <record id="action_aeroo_config_installer" model="ir.actions.act_window">
+      <field name="name">OpenOffice.org connection Configuration</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">aeroo_config.installer</field>
+      <field name="view_id" ref="view_aeroo_config_installer"/>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <record id="aeroo_config_installer_todo" model="ir.actions.todo">
+        <field name="action_id" ref="action_aeroo_config_installer"/>
+        <field name="type">automatic</field>
+        <field name="sequence">3</field>
+    </record>
+
+  </data>
+</openerp>

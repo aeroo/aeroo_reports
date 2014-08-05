@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+        <record id="view_aeroo_remove_print_button" model="ir.ui.view">
+            <field name="name">Remove Print Button</field>
+            <field name="model">aeroo.remove_print_button</field>
+            <field name="type">form</field>
+            <field name="arch" type="xml">
+                <form string="Remove Print Button" version="7.0">
+                    <group attrs="{'invisible':[('state','&lt;&gt;','remove')]}">
+                        <label string="Or you want to remove print button for this report?"/>
+                    </group>
+                    <group attrs="{'invisible':[('state','&lt;&gt;','no_exist')]}">
+                        <label string="No Report Action to delete for this report."/>
+                    </group>
+                    <group attrs="{'invisible':[('state','&lt;&gt;','done')]}">
+                        <label string="The print button is successfully removed."/>
+                    </group>
+                    <footer>
+                        <group>
+                            <button name="do_action" string="_Ok" states="remove" type="object"/>
+                            <button special="cancel" string="_No" states="remove"/>
+                            <button special="cancel" string="_Cancel" states="no_exist,done"/>
+                        </group>
+                    </footer>
+                    <field name="state" invisible="1"/>
+                </form>
+            </field>
+        </record>
+
+       <act_window name="Remove Print Button"
+            res_model="aeroo.remove_print_button"
+            src_model="ir.actions.report.xml"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            id="action_aeroo_remove_print_button"/>
+
+    </data>
+</openerp>

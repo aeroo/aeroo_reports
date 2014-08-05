@@ -1,0 +1,47 @@
+<?xml version="1.0"?>
+<openerp>
+    <data noupdate="1">
+
+	    <record model="oo.config" id="oo_con_config">
+		    <field name="host">localhost</field>
+		    <field name="port">8100</field>
+	    </record>
+
+	    <record model="report.mimetypes" id="report_mimetypes_pdf_odt" >
+		    <field name="name">PDF - Portable Document Format (.pdf)</field>
+		    <field name="code">oo-pdf</field>
+		    <field name="compatible_types">oo-odt</field>
+		    <field name="filter_name">writer_pdf_Export</field>
+	    </record>
+
+	    <record model="report.mimetypes" id="report_mimetypes_pdf_ods" >
+		    <field name="name">PDF - Portable Document Format (.pdf)</field>
+		    <field name="code">oo-pdf</field>
+		    <field name="compatible_types">oo-ods</field>
+		    <field name="filter_name">calc_pdf_Export</field>
+	    </record>
+
+	    <record model="report.mimetypes" id="report_mimetypes_doc_odt" >
+		    <field name="name">Microsoft Word 97/2000/XP (.doc)</field>
+		    <field name="code">oo-doc</field>
+		    <field name="compatible_types">oo-odt</field>
+		    <field name="filter_name">MS Word 97</field>
+	    </record>
+
+	    <record model="report.mimetypes" id="report_mimetypes_xls_odt" >
+		    <field name="name">Microsoft Excel 97/2000/XP (.xls)</field>
+		    <field name="code">oo-xls</field>
+		    <field name="compatible_types">oo-ods</field>
+		    <field name="filter_name">MS Excel 97</field>
+	    </record>
+
+	    <record model="report.mimetypes" id="report_mimetypes_csv_ods" >
+		    <field name="name">Text CSV (.csv)</field>
+		    <field name="code">oo-csv</field>
+		    <field name="compatible_types">oo-ods</field>
+		    <field name="filter_name">Text - txt - csv (StarCalc)</field>
+	    </record>
+
+    </data>
+</openerp>
+

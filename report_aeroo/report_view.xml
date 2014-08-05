@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+		<record model="ir.ui.view" id="act_report_xml_view1">
+			<field name="name">ir.actions.report.xml.aeroo.form</field>
+			<field name="model">ir.actions.report.xml</field>
+            <field name="priority">14</field>
+			<field name="arch" type="xml">
+                <form string="Aeroo Report">
+                    <group col="6" colspan="4">
+                        <field name="name"/>
+                        <field name="model"/>
+                        <field name="report_name"/>
+                        <field name="usage"/>
+                        <field name="copies" attrs="{'invisible': [('report_name','in',['printscreen.list'])]}"/>
+                        <field name="report_wizard" attrs="{'invisible': [('report_name','in',['printscreen.list'])]}"/>
+                        <field name="report_type" invisible="1"/>
+                        <field name="type" invisible="1"/>
+                    </group>
+                    <group colspan="4">
+                        <group>
+                            <field name="in_format" required="1" on_change="change_input_format(in_format)"/>
+                        </group>
+                        <group>
+                            <field name="out_format" required="1" domain="[('compatible_types','=',in_format)]"/>
+                        </group>
+                    </group>
+
+                    <notebook colspan="4">
+                        <page string="Other Configuration">
+                            <separator string="Template" colspan="4"/>
+                            <group colspan="4" col="8">
+                                <field name="tml_source" colspan="2" required="1"/>
+                                <group colspan="6">
+                                    <field name="report_sxw_content_data" string="Template Content" attrs="{'invisible': [('tml_source','&lt;&gt;','database')],'required': [('tml_source','=','database')]}"/>
+                                    <field name="report_rml" string="Template path" attrs="{'invisible': [('tml_source','&lt;&gt;','file')],'required': [('tml_source','=','file')]}"/>
+                                </group>
+                            </group>
+                            <separator string="Stylesheet" colspan="4"/>
+                            <group colspan="4" col="8">
+                                <field name="styles_mode" colspan="2"/>
+                                <group colspan="6">
+                                    <field name="stylesheet_id" attrs="{'invisible': [('styles_mode','&lt;&gt;','specified')]}"/>
+                                </group>
+                            </group>
+                            <group attrs="{'invisible': [('in_format','&lt;&gt;','genshi-raw')]}" colspan="4" col="8">
+                                <field name="charset" colspan="2"/>
+                                <separator colspan="2"/>
+                            </group>
+                            <group col="2" colspan="2">
+                                <separator string="Attachments" colspan="2"/>
+                                <group colspan="2">
+                                    <field name="attachment"/>
+                                </group>
+                                <field name="attachment_use" colspan="2"/>
+                            </group>
+                            <group col="2" colspan="2">
+                                <separator string="Miscellaneous" colspan="2"/>
+                                <field name="multi" colspan="2"/>
+                            </group>
+                        </page>
+                        <page string="Parser">
+                            <group colspan="2">
+			                    <field name="parser_state"/>
+                            </group>
+                            <group attrs="{'invisible': [('parser_state','&lt;&gt;','def')]}" colspan="4" expand="1">
+                                <separator string="Parser Definition" colspan="4"/>
+		                        <field name="parser_def" nolabel="1"/>
+                            </group>
+	                        <field name="parser_loc" attrs="{'invisible': [('parser_state','&lt;&gt;','loc')],'required': [('parser_state','=','loc')]}"/>
+                        </page>
+                        <page string="Advanced">
+                            <group colspan="4" col="6">
+                                <field name="content_fname"/>
+                                <field name="replace_report_id" domain="[('model','=',model),('id','&lt;&gt;',active_id)]"/>
+                                <field name="preload_mode" attrs="{'invisible': ['|',('in_format','=','genshi-raw'),('tml_source','=','parser')]}"/>
+                                <field name="fallback_false" attrs="{'invisible': [('in_format','=','genshi-raw')]}"/>
+                                <field name="active"/>
+                                <field name="deferred"/>
+                                <field name="deferred_limit" attrs="{'invisible':['|',('deferred','=','off'),('deferred','=',False)]}"/>
+                                <newline/>
+                                <field name="xml_id" colspan="6"/>
+                            </group>
+                        </page>
+                        <page string="Security">
+                            <separator string="Groups" colspan="4"/>
+                            <field colspan="4" name="groups_id" nolabel="1"/>
+                        </page>
+                    </notebook>
+
+                </form>
+			</field>
+		</record>
+
+        <record id="act_aeroo_report_xml_view_tree" model="ir.ui.view">
+            <field name="name">ir.actions.report.xml.tree</field>
+            <field name="model">ir.actions.report.xml</field>
+            <field name="arch" type="xml">
+                <tree string="Report xml">
+                    <field name="name"/>
+                    <field name="model"/>
+                    <field name="report_name"/>
+                    <field name="in_format"/>
+                    <field name="out_format"/>
+                    <field name="tml_source"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="act_aeroo_report_xml_search_view" model="ir.ui.view">
+            <field name="name">ir.actions.report.xml.search</field>
+            <field name="model">ir.actions.report.xml</field>
+            <field name="arch" type="xml">
+                <search string="Report xml">
+                    <field name="name"
+                        filter_domain="['|', '|', '|', '|', ('name','ilike',self), ('model','ilike',self), ('type','ilike',self), ('report_name','ilike',self), ('report_type','ilike',self)]"
+                        string="Report"/>
+                    <filter name="active" string="Inactive" domain="[('active','=',False)]"/>
+                    <group expand="0" string="Group By" colspan="4">
+                        <filter string="Template Mime-type" icon="terp-stock_symbol-selection" domain="[]" context="{'group_by':'in_format'}"/>
+                        <filter string="Output Mime-type" icon="terp-stock_symbol-selection" domain="[]" context="{'group_by':'out_format'}"/>
+                        <separator orientation="vertical"/>
+                        <filter string="Template Source" icon="gtk-copy" domain="[]" context="{'group_by':'tml_source'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="act_aeroo_print_actions_view_form" model="ir.ui.view">
+            <field name="name">aeroo.print_actions.form</field>
+            <field name="model">aeroo.print_actions</field>
+            <field name="arch" type="xml">
+                <form string="Printing Options" version="7.0">
+                    <field name="state" invisible="1"/>
+                    <group states="draft">
+                        <field name="out_format" attrs="{'readonly':[('out_format_code','=','genshi-raw')]}" on_change="onchange_out_format(out_format)"/>
+                        <field name="out_format_code" invisible="1"/>
+                        <field name="copies"/>
+                    </group>
+                    <group states="confirm" expand="1" colspan="4">
+                        <field name="message" colspan="4" nolabel="1" readonly="1"/>
+                    </group>
+                    <footer>
+                        <button icon="gtk-yes" name="start_deferred" string="_Yes" type="object" states="confirm"/>
+                        <button icon="gtk-no" name="simple_print" string="_No" type="object" states="confirm"/>
+                        <button icon="gtk-cancel" special="cancel" string="_Cancel" type="object"/>
+                        <button icon="gtk-print" name="to_print" string="_Print" type="object" states="draft"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="act_aeroo_print_by_action_view_form" model="ir.ui.view">
+            <field name="name">aeroo.print_by_action.form</field>
+            <field name="model">aeroo.print_by_action</field>
+            <field name="arch" type="xml">
+                <form string="Test the report" version="7.0">
+                   <group>
+                        <field name="name"/>
+                        <field name="object_ids" default_focus="1"/>
+                   </group>
+                    <footer>
+                        <button icon="gtk-close" special="cancel" string="Close" type="object"/>
+                        <button icon="gtk-print" name="to_print" string="Print" type="object" default_focus="1"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="act_aeroo_report_import_view_form" model="ir.ui.view">
+            <field name="name">aeroo.report_import.form</field>
+            <field name="model">aeroo.report_import</field>
+            <field name="arch" type="xml">
+                <form string="Install Aeroo Report" version="7.0">
+                    <group colspan="4" fill="0" states="draft">
+                        <label string="This wizard installs prepackaged reports developed for Aeroo Reports engine." colspan="4"/>
+                        <field name="file" colspan="4"/>
+                    </group>
+                    <group colspan="4" states="info" expand="1">
+                        <separator string="Report Info" colspan="4"/>
+                        <field name="info" nolabel="1" width="320" height="200"/>
+                        <separator colspan="4"/>
+                    </group>
+                    <footer>
+                        <button icon="gtk-close" special="cancel" string="Close" type="object"/>
+                        <button icon="gtk-go-forward" name="next" string="Next" type="object" default_focus="1" states="draft"/>
+                        <button icon="gtk-execute" name="install_report" string="Install" type="object" default_focus="1" states="info"/>
+                    </footer>
+                    <field name="state" invisible="1"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_company_form1" model="ir.ui.view">
+            <field name="name">res.company.form</field>
+            <field name="model">res.company</field>
+			<field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+                <data>
+                    <xpath expr="//field[@name='rml_footer_readonly']" position="after">
+                        <field name="stylesheet_id"/>
+                    </xpath>
+                </data>
+            </field>
+        </record>
+
+        <record id="view_report_stylesheets_form" model="ir.ui.view">
+            <field name="name">report.stylesheets.form</field>
+            <field name="model">report.stylesheets</field>
+            <field name="arch" type="xml">
+                <form string="Report Stylesheet">
+                    <field name="name" select="1" colspan="4"/>
+                    <field name="report_styles"/>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_report_stylesheets_tree" model="ir.ui.view">
+            <field name="name">report.stylesheets.tree</field>
+            <field name="model">report.stylesheets</field>
+            <field name="arch" type="xml">
+                <tree string="Report Stylesheets">
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+
+		<record model="ir.actions.act_window" id="action_report_stylesheets">
+			<field name="name">Report Stylesheets</field>
+			<field name="res_model">report.stylesheets</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+        <record id="action_aeroo_print_by_action_wizard" model="ir.actions.act_window">
+            <field name="name">Test the report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">aeroo.print_by_action</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+        <record id="action_aeroo_report_import_wizard" model="ir.actions.act_window">
+            <field name="name">Install Aeroo Report</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">aeroo.report_import</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+        </record>
+
+	<act_window name="Translations"
+		domain="[('type', '=', 'report'),('res_id', '=', active_id)]"
+		view_type="form"
+		res_model="ir.translation"
+		src_model="ir.actions.report.xml"
+		id="act_translations"/>
+
+    <!-- For the original views -->
+    <record model="ir.actions.act_window.view" id="act_report_xml_tree_view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="base.act_report_xml_view_tree"/>
+        <field name="act_window_id" ref="base.ir_action_report_xml"/>
+    </record>
+
+    <record model="ir.actions.act_window.view" id="act_report_xml_form_view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="base.act_report_xml_view"/>
+        <field name="act_window_id" ref="base.ir_action_report_xml"/>
+    </record>
+    <!--========================-->
+
+   <act_window name="Test the report"
+        res_model="aeroo.print_by_action"
+        src_model="ir.actions.report.xml"
+        view_mode="form"
+        target="new"
+        key2="client_action_multi"
+        id="action_aeroo_print_by_action_window"/>
+
+    <function model="ir.actions.report.xml" name="_set_auto_false"/>
+
+    <menuitem name="Aeroo Reports" id="menu_ir_action_aeroo_reports_xml" parent="base.menu_custom"/>
+
+    <record id="action_aeroo_report_xml_tree" model="ir.actions.act_window">
+        <field name="name">Reports</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">ir.actions.report.xml</field>
+        <field name="view_type">form</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[('report_type','=','aeroo')]</field>
+        <field name="context">{'default_report_type': 'aeroo'}</field>
+        <field name="view_id" ref="act_aeroo_report_xml_view_tree"/>
+        <field name="search_view_id" ref="act_aeroo_report_xml_search_view"/>
+    </record>
+
+    <record model="ir.actions.act_window.view" id="act_aeroo_report_xml_tree_view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">tree</field>
+        <field name="view_id" ref="act_aeroo_report_xml_view_tree"/>
+        <field name="act_window_id" ref="action_aeroo_report_xml_tree"/>
+    </record>
+
+    <record model="ir.actions.act_window.view" id="act_aeroo_report_xml_form_view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="act_report_xml_view1"/>
+        <field name="act_window_id" ref="action_aeroo_report_xml_tree"/>
+    </record>
+
+    <menuitem action="action_aeroo_report_xml_tree" id="menu_ir_action_aeroo_report_xml" parent="menu_ir_action_aeroo_reports_xml"/>
+	<menuitem action="action_report_stylesheets" parent="menu_ir_action_aeroo_reports_xml" id="menu_report_stylesheets"/>
+    <menuitem action="action_aeroo_report_import_wizard" id="menu_aeroo_report_import_xml" parent="menu_ir_action_aeroo_reports_xml"/>
+
+    </data>
+</openerp>

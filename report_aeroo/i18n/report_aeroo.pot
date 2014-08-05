@@ -1,0 +1,909 @@
+# Translation of OpenERP Server.
+# This file contains the translation of the following modules:
+#	* report_aeroo
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: OpenERP Server 6.1-20120910-233309\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2013-06-15 09:09+0000\n"
+"PO-Revision-Date: 2013-06-15 09:09+0000\n"
+"Last-Translator: <>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: report_aeroo
+#: field:aeroo.print_by_action,name:0
+msgid "Object Model"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Other Configuration"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:680
+#: code:addons/report_aeroo/report_aeroo.py:759
+#, python-format
+msgid "Concat single documents"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.print_actions:0
+msgid "_Yes"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:840
+#, python-format
+msgid "Unknown report type: %s"
+msgstr ""
+
+#. module: report_aeroo
+#: help:ir.actions.report.xml,deferred:0
+msgid "Deferred (aka Batch) reporting, for reporting on large amount of data."
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Template"
+msgstr ""
+
+#. module: report_aeroo
+#: field:res.company,stylesheet_id:0
+msgid "Aeroo Global Stylesheet"
+msgstr ""
+
+#. module: report_aeroo
+#: view:report.aeroo.installer:0
+msgid "_Close"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+#: field:ir.actions.report.xml,parser_def:0
+msgid "Parser Definition"
+msgstr ""
+
+#. module: report_aeroo
+#: help:ir.actions.report.xml,parser_loc:0
+msgid "Path to the parser location. Beginning of the path must be start with the module name!\n"
+"Like this: {module name}/{path to the parser.py file}"
+msgstr ""
+
+#. module: report_aeroo
+#: help:ir.actions.report.xml,deferred_limit:0
+msgid "Records limit at which you are invited to start the deferred process."
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.actions.act_window,name:report_aeroo.action_report_stylesheets
+#: model:ir.model,name:report_aeroo.model_report_stylesheets
+#: model:ir.ui.menu,name:report_aeroo.menu_report_stylesheets
+#: view:report.stylesheets:0
+msgid "Report Stylesheets"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,wizard_id:0
+msgid "Wizard Action"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:848
+#, python-format
+msgid "Completed"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.actions.act_window,name:report_aeroo.action_report_aeroo_installer
+#: view:report.aeroo.installer:0
+msgid "Aeroo Reports Installation"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.remove_print_button,state:0
+msgid "Not Exist"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.add_print_button:0
+msgid "The print button is successfully added"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:248
+#, python-format
+msgid "Error! File not found:"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:236
+#, python-format
+msgid "HTTP Error %s! File not found:"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,content_fname:0
+msgid "Override Extension"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:239
+#: code:addons/report_aeroo/report_aeroo.py:242
+#: code:addons/report_aeroo/report_aeroo.py:378
+#: code:addons/report_aeroo/report_aeroo.py:481
+#: code:addons/report_aeroo/report_aeroo.py:683
+#: code:addons/report_aeroo/report_aeroo.py:762
+#: code:addons/report_aeroo/wizard/report_import_wizard.py:110
+#: code:addons/report_aeroo/wizard/report_import_wizard.py:136
+#, python-format
+msgid "Error!"
+msgstr ""
+
+#. module: report_aeroo
+#: help:report.stylesheets,report_styles:0
+msgid "OpenOffice.org stylesheet (.odt)"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/check_deps.py:50
+#, python-format
+msgid "Unmet python dependencies!"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:ir.actions.report.xml,styles_mode:0
+msgid "Global"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.remove_print_button:0
+msgid "No Report Action to delete for this report"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,report_wizard:0
+msgid "Report Wizard"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.print_actions,out_format_code:0
+msgid "Output format code"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.add_print_button:0
+#: view:aeroo.print_actions:0
+#: view:aeroo.remove_print_button:0
+msgid "_Cancel"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.report_import:0
+#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_report_import_wizard
+#: model:ir.ui.menu,name:report_aeroo.menu_aeroo_report_import_xml
+msgid "Install Aeroo Report"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/wizard/add_print_button.py:85
+#, python-format
+msgid "Client Events"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_report_aeroo_installer
+msgid "report.aeroo.installer"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.add_print_button:0
+msgid "Report Action already exist for this report."
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.print_actions,state:0
+msgid "Confirm"
+msgstr ""
+
+#. module: report_aeroo
+#: constraint:res.company:0
+msgid "Error! You can not create recursive companies."
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/wizard/report_print_actions.py:44
+#, python-format
+msgid "System Error !"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.report_import:0
+#: view:report.aeroo.installer:0
+msgid "Next"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.remove_print_button:0
+#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_remove_print_button
+msgid "Remove Print Button"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.add_print_button,state:0
+#: field:aeroo.print_actions,state:0
+#: field:aeroo.remove_print_button,state:0
+#: field:aeroo.report_import,state:0
+msgid "State"
+msgstr ""
+
+#. module: report_aeroo
+#: help:aeroo.print_by_action,object_ids:0
+msgid "Comma separated records ID"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:357
+#: selection:ir.actions.report.xml,parser_state:0
+#, python-format
+msgid "Location"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.print_by_action:0
+msgid "Print"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,preload_mode:0
+msgid "Preload Mode"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.print_actions,copies:0
+msgid "Number of copies"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,fallback_false:0
+msgid "Disable Format Fallback"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_aeroo_print_actions
+msgid "Aeroo reports print wizard"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.print_by_action,object_ids:0
+msgid "Object IDs"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.actions.act_window,name:report_aeroo.act_translations
+msgid "Translations"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Miscellaneous"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Group By"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/wizard/report_print_actions.py:44
+#, python-format
+msgid "Report was not registered in system or deactivated !"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.ui.menu,name:report_aeroo.menu_ir_action_aeroo_reports_xml
+#: view:report.aeroo.installer:0
+msgid "Aeroo Reports"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.add_print_button,state:0
+#: selection:aeroo.print_actions,state:0
+#: selection:aeroo.remove_print_button,state:0
+#: selection:aeroo.report_import,state:0
+msgid "Done"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:269
+#, python-format
+msgid "Error! Subreports not available!"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Advanced"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/check_deps.py:50
+#: code:addons/report_aeroo/wizard/report_import_wizard.py:74
+#, python-format
+msgid "Warning!"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.report_import,info:0
+#: selection:aeroo.report_import,state:0
+msgid "Info"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:491
+#, python-format
+msgid "Object model is not correct !"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,parser_state:0
+msgid "State of Parser"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.print_actions:0
+msgid "_Print"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/wizard/report_print_actions.py:100
+#, python-format
+msgid "This process may take too long for interactive processing. It is advisable to defer the process in background. Do you want to start a deferred process?"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,parser_loc:0
+msgid "Parser location"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_aeroo_remove_print_button
+msgid "Remove print button"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,deferred:0
+msgid "Deferred"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_report_xml_tree
+#: model:ir.ui.menu,name:report_aeroo.menu_ir_action_aeroo_report_xml
+msgid "Reports"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:474
+#: code:addons/report_aeroo/report_xml.py:554
+#, python-format
+msgid "Report was not registered in system !"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.print_by_action:0
+#: view:aeroo.report_import:0
+msgid "Close"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Security"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.add_print_button:0
+#: view:aeroo.remove_print_button:0
+msgid "_Ok"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/wizard/report_import_wizard.py:136
+#, python-format
+msgid "Is not Aeroo report file."
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:578
+#, python-format
+msgid "PDF generator temporarily offline, please wait a minute"
+msgstr ""
+
+#. module: report_aeroo
+#: field:report.aeroo.installer,config_logo:0
+msgid "Image"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+#: selection:ir.actions.report.xml,tml_source:0
+msgid "Parser"
+msgstr ""
+
+#. module: report_aeroo
+#: help:ir.actions.report.xml,content_fname:0
+msgid "Here you can override output file extension"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_aeroo_add_print_button
+msgid "Add print button"
+msgstr ""
+
+#. module: report_aeroo
+#: help:ir.actions.report.xml,xml_id:0
+msgid "ID of the report defined in xml file"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.print_actions,print_ids:0
+msgid "unknown"
+msgstr ""
+
+#. module: report_aeroo
+#: help:ir.actions.report.xml,active:0
+msgid "Disables the report if unchecked."
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:437
+#, python-format
+msgid "For more reference inspect error logs."
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_ir_actions_report_xml
+msgid "ir.actions.report.xml"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Template Content"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.print_actions:0
+#: view:aeroo.remove_print_button:0
+msgid "_No"
+msgstr ""
+
+#. module: report_aeroo
+#: sql_constraint:res.company:0
+msgid "The company name must be unique !"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.add_print_button,state:0
+msgid "Add"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.print_actions,state:0
+#: selection:aeroo.report_import,state:0
+msgid "Draft"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:373
+#: selection:ir.actions.report.xml,deferred:0
+#, python-format
+msgid "Adaptive"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.remove_print_button:0
+msgid "The print button is successfully removed"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.add_print_button:0
+#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_add_print_button
+msgid "Add Print Button"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:683
+#: code:addons/report_aeroo/report_aeroo.py:762
+#, python-format
+msgid "Unsupported combination of formats!"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:378
+#: code:addons/report_aeroo/report_aeroo.py:481
+#, python-format
+msgid "No template found!"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:491
+#, python-format
+msgid "Please check \"Object\" field !"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Groups"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,active:0
+msgid "Active"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,copies:0
+msgid "Number of Copies"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:356
+#: selection:ir.actions.report.xml,parser_state:0
+#, python-format
+msgid "Definition"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.add_print_button,state:0
+msgid "Exception"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,charset:0
+msgid "Charset"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,deferred_limit:0
+msgid "Deferred Records Limit"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.remove_print_button:0
+msgid "Or you want to remove print button for this report?"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:ir.actions.report.xml,tml_source:0
+msgid "Database"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:355
+#: selection:ir.actions.report.xml,parser_state:0
+#, python-format
+msgid "Default"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,extras:0
+msgid "Extra options"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:423
+#, python-format
+msgid "Document conversion"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_res_company
+msgid "Companies"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.print_actions,out_format:0
+msgid "Output format"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,tml_source:0
+msgid "Template source"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:444
+#, python-format
+msgid "Started"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:574
+#, python-format
+msgid "Module \"report_aeroo_ooo\" not installed."
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:559
+#: code:addons/report_aeroo/report_aeroo.py:565
+#: code:addons/report_aeroo/report_aeroo.py:574
+#: code:addons/report_aeroo/report_aeroo.py:576
+#, python-format
+msgid "OpenOffice.org related error!"
+msgstr ""
+
+#. module: report_aeroo
+#: view:report.stylesheets:0
+msgid "Report Stylesheet"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.report_import:0
+msgid "Install"
+msgstr ""
+
+#. module: report_aeroo
+#: field:report.mimetypes,filter_name:0
+msgid "Filter Name"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.add_print_button,open_action:0
+msgid "Open added action"
+msgstr ""
+
+#. module: report_aeroo
+#: field:report.mimetypes,code:0
+msgid "Code"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Attachments"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,xml_id:0
+msgid "XML ID"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.add_print_button,state:0
+msgid "Exist"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:544
+#, python-format
+msgid "Generate document"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:ir.actions.report.xml,styles_mode:0
+msgid "Specified"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Aeroo Report"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:751
+#, python-format
+msgid "Create attachment error!"
+msgstr ""
+
+#. module: report_aeroo
+#: field:report.mimetypes,compatible_types:0
+msgid "Compatible Mime-Types"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,replace_report_id:0
+msgid "Replace Report"
+msgstr ""
+
+#. module: report_aeroo
+#: field:report.aeroo.installer,link:0
+msgid "Original developer"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:437
+#, python-format
+msgid "Aeroo Reports: Error while generating the report."
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:474
+#: code:addons/report_aeroo/report_xml.py:554
+#, python-format
+msgid "Report registration error !"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.report_import,file:0
+msgid "Aeroo report file"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/wizard/report_import_wizard.py:110
+#, python-format
+msgid "Aeroo report file is invalid!"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:415
+#, python-format
+msgid "Insert subreports"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+#: field:ir.actions.report.xml,in_format:0
+msgid "Template Mime-type"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+#: field:ir.actions.report.xml,styles_mode:0
+msgid "Stylesheet"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.add_print_button:0
+msgid "Can not be create print button for the Special report."
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_aeroo_report_import
+msgid "Aeroo report import wizard"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+#: field:ir.actions.report.xml,out_format:0
+msgid "Output Mime-type"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:430
+#, python-format
+msgid "Report generation error!"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:345
+#: selection:ir.actions.report.xml,preload_mode:0
+#, python-format
+msgid "Preload"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Template path"
+msgstr ""
+
+#. module: report_aeroo
+#: view:report.aeroo.installer:0
+msgid "Aeroo Reports for OpenERP is a comprehensive reporting engine based on Aeroo Library."
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:344
+#: selection:ir.actions.report.xml,preload_mode:0
+#, python-format
+msgid "Static"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/wizard/report_import_wizard.py:74
+#, python-format
+msgid "Report with service name \"%s\" already exist in system!"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.print_actions:0
+msgid "Printing Options"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:ir.actions.report.xml,styles_mode:0
+msgid "Not used"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:372
+#: selection:ir.actions.report.xml,deferred:0
+#, python-format
+msgid "Off"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.report_import,name:0
+#: field:report.mimetypes,name:0
+#: field:report.stylesheets,name:0
+msgid "Name"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Report xml"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:aeroo.remove_print_button,state:0
+msgid "Remove"
+msgstr ""
+
+#. module: report_aeroo
+#: field:aeroo.print_actions,message:0
+msgid "Message"
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.report_import:0
+msgid "Report Info"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_aeroo_print_by_action
+msgid "aeroo.print_by_action"
+msgstr ""
+
+#. module: report_aeroo
+#: model:ir.model,name:report_aeroo.model_report_mimetypes
+msgid "Report Mime-Types"
+msgstr ""
+
+#. module: report_aeroo
+#: view:ir.actions.report.xml:0
+msgid "Template Source"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_xml.py:123
+#: code:addons/report_aeroo/report_xml.py:134
+#, python-format
+msgid "Syntax Error !"
+msgstr ""
+
+#. module: report_aeroo
+#: field:ir.actions.report.xml,stylesheet_id:0
+#: field:report.stylesheets,report_styles:0
+msgid "Template Stylesheet"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:223
+#, python-format
+msgid "Error! Include document not available!"
+msgstr ""
+
+#. module: report_aeroo
+#: selection:ir.actions.report.xml,tml_source:0
+msgid "File"
+msgstr ""
+
+#. module: report_aeroo
+#: view:report.aeroo.installer:0
+msgid "title"
+msgstr ""
+
+#. module: report_aeroo
+#: code:addons/report_aeroo/report_aeroo.py:576
+#, python-format
+msgid "Can not connect to OpenOffice.org."
+msgstr ""
+
+#. module: report_aeroo
+#: view:aeroo.print_by_action:0
+#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_print_by_action_window
+#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_print_by_action_wizard
+msgid "Test the report"
+msgstr ""
+

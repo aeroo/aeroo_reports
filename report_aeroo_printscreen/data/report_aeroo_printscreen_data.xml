@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<openerp>
+  <data noupdate='1'>
+    <record model='ir.actions.report.xml' id='ir_actions_report_xml_aeroo_printscreen_list'>
+      <field name='report_type'>aeroo</field>
+      <field name='in_format'>oo-ods</field>
+      <field name='out_format' eval="ref('report_aeroo.report_mimetypes_ods_ods')"/>
+      <field name='multi' eval='False'/>
+      <field name='name'>Printscreen List</field>
+      <field name='report_rml'>report_aeroo_printscreen/data/template.ods</field>
+      <field name='report_name'>aeroo.printscreen.list</field>
+      <field name='model'>ir.ui.view</field>
+      <field name='type'>ir.actions.report.xml</field>
+      <field name='attachment_use' eval='False'/>
+      <field name='parser_loc'>report_aeroo_printscreen/parser.py</field>
+      <field name='tml_source'>file</field>
+      <field name='parser_state'>loc</field>
+      <field name='styles_mode'>default</field>
+    </record>
+  </data>
+</openerp>

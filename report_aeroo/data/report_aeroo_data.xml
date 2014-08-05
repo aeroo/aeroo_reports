@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<openerp>
+    <data noupdate="1">
+
+	    <record model="report.mimetypes" id="report_mimetypes_odt_odt" >
+		    <field name="name">ODF Text Document (.odt)</field>
+		    <field name="code">oo-odt</field>
+		    <field name="compatible_types">oo-odt</field>
+	    </record>
+
+	    <record model="report.mimetypes" id="report_mimetypes_ods_ods" >
+		    <field name="name">ODF Spreadsheet (.ods)</field>
+		    <field name="code">oo-ods</field>
+		    <field name="compatible_types">oo-ods</field>
+	    </record>
+
+	    <record model="report.mimetypes" id="report_mimetypes_raw" >
+		    <field name="name">Generic</field>
+		    <field name="code">genshi-raw</field>
+		    <field name="compatible_types">genshi-raw</field>
+	    </record>
+
+    </data>
+</openerp>
+

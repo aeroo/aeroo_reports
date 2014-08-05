@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<openerp>
+  <data noupdate="1">
+    <record model='ir.rule' id='report_aeroo_direct_print_rule'>
+	  <field search="[(u'model', '=', 'aeroo.printers')]" name='model_id'/>
+      <field name='domain_force'>['|',('group_ids', 'in', map(lambda g: g.id, user.groups_id)),('group_ids','=',False)]</field>
+      <field name='name'>Print to Printer</field>
+      <field name='perm_create' eval='False'/>
+      <field name='perm_read' eval='True'/>
+      <field name='perm_unlink' eval='False'/>
+      <field name='perm_write' eval='False'/>
+    </record>  
+  </data>
+</openerp>

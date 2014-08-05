@@ -1,0 +1,5 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+"report_stylesheets","report.stylesheets","model_report_stylesheets","base.group_system",1,1,1,1
+"report_stylesheets_user","report.stylesheets.user","model_report_stylesheets",,1,0,0,0
+"report_mimetypes_system","report.mimetypes.system","model_report_mimetypes","base.group_system",1,1,1,1
+"report_mimetypes_user","report.mimetypes.user","model_report_mimetypes","base.group_user",1,0,0,0
