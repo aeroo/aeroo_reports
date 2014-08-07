@@ -285,9 +285,7 @@ class report_xml(osv.osv):
         res = orig_ids and super(report_xml, self)._report_content(cursor, 1, orig_ids, name, arg, context) or {}
         for report in self.read(cursor, 1, aeroo_ids, ['tml_source','report_type','report_sxw_content_data', 'report_sxw','report_rml','report_file'], context=context):
             data = report[name + '_data']
-            #logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>1..."+str(report), exc_info=True)
             if report['report_type']=='aeroo' and report['tml_source']=='file' or not data and report[name[:-8]]:
-                #logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>2..."+(data and str(len(data)) or ''), exc_info=True)
                 fp = None
                 try:
                     #TODO: Probably there's a need to check if path to the report template actually present (???)
@@ -306,7 +304,6 @@ class report_xml(osv.osv):
                     if fp:
                         fp.close()
             res[report['id']] = data
-            #logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>3..."+(data and str(len(data)) or ''), exc_info=True)
         return res
 
     def _get_encodings(self, cursor, user, context={}):
@@ -504,10 +501,7 @@ class report_xml(osv.osv):
         return res_id
 
     def write(self, cr, user, ids, vals, context={}):
-        #logger.error("=========================================== Values to be written: "+str(vals))
         import traceback
-        #logger.error("=========================================== "+str(traceback.format_exc()))
-        #print 1/0
         if 'report_sxw_content_data' in vals:
             if vals['report_sxw_content_data']:
                 try:

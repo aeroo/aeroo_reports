@@ -39,7 +39,6 @@ import random
 
 class Parser(rml_parse):
     def __init__(self, cr, uid, name, context):
-        logger.error("|||||||||||||||||||||||||||||"+str(Parser)+"    "+str(type(self))+"    "+str(self.__class__), exc_info=True)
         super(self.__class__, self).__init__(cr, uid, name, context)
         self.localcontext.update({
             'lorem':lorem.do_lorem,
