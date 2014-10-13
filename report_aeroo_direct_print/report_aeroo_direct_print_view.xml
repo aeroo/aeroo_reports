@@ -151,8 +151,8 @@
           <field name="context">{'menu':True}</field>
         </record>
 
-    	<menuitem id="menu_aeroo_direct_print_wizard" action="action_aeroo_direct_print_wizard" icon="STOCK_CONVERT" parent="report_aeroo.menu_ir_action_aeroo_reports_xml"/>
-	    <menuitem id="menu_aeroo_printers" action="action_aeroo_printers" parent="report_aeroo.menu_ir_action_aeroo_reports_xml" sequence="3"/>
+	    <menuitem id="menu_aeroo_printers" action="action_aeroo_printers" parent="report_aeroo.menu_ir_action_aeroo_reports_xml" sequence="10"/>
+    	<menuitem id="menu_aeroo_direct_print_wizard" action="action_aeroo_direct_print_wizard" icon="STOCK_CONVERT" parent="report_aeroo.menu_ir_action_aeroo_reports_xml" sequence="10"/>
 
     </data>
 </openerp>

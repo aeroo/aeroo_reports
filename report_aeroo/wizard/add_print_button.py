@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2008-2012 Alistek Ltd (http://www.alistek.com) All Rights Reserved.
+# Copyright (c) 2008-2014 Alistek (http://www.alistek.com) All Rights Reserved.
 #                    General contacts <info@alistek.com>
 #
 # WARNING: This program as such is intended to be used by professional
@@ -29,7 +29,6 @@
 #
 ##############################################################################
 
-import openerp.pooler as pooler
 from openerp.tools.translate import _
 from openerp.osv import osv, fields
 
@@ -54,7 +53,7 @@ class aeroo_add_print_button(osv.osv_memory):
     _description = 'Add print button'
 
     def _check(self, cr, uid, context):
-        ir_values_obj = self.pool.get('ir.values')
+        irval_mod = self.pool.get('ir.values')
         report = self.pool.get(context['active_model']).browse(cr, uid, context['active_id'], context=context)
         if report.report_name in special_reports:
             return 'exception'
@@ -67,28 +66,29 @@ class aeroo_add_print_button(osv.osv_memory):
                     return 'exist'
             return 'add'
         else:
-            ids = ir_values_obj.search(cr, uid, [('value','=',report.type+','+str(report.id))])
+            ids = irval_mod.search(cr, uid, [('value','=',report.type+','+str(report.id))])
             if not ids:
 	            return 'add'
             else:
 	            return 'exist'
 
     def do_action(self, cr, uid, ids, context):
+        irval_mod = self.pool.get('ir.values')
         this = self.browse(cr, uid, ids[0], context=context)
         report = self.pool.get(context['active_model']).browse(cr, uid, context['active_id'], context=context)
-        event_id = self.pool.get('ir.values').set_action(cr, uid, report.report_name, 'client_print_multi', report.model, 'ir.actions.report.xml,%d' % context['active_id'])
+        event_id = irval_mod.set_action(cr, uid, report.report_name, 'client_print_multi', report.model, 'ir.actions.report.xml,%d' % context['active_id'])
         if report.report_wizard:
             report._set_report_wizard(report.id)
-        this.write({'state':'done'}, context=context)
+        this.write({'state':'done'})
         if not this.open_action:
             return _reopen(self, this.id, this._model)
 
-        mod_obj = pooler.get_pool(cr.dbname).get('ir.model.data')
-        act_obj = pooler.get_pool(cr.dbname).get('ir.actions.act_window')
+        irmod_mod = self.pool.get('ir.model.data')
+        iract_mod = self.pool.get('ir.actions.act_window')
 
-        mod_id = mod_obj.search(cr, uid, [('name', '=', 'act_values_form_action')])[0]
-        res_id = mod_obj.read(cr, uid, mod_id, ['res_id'])['res_id']
-        act_win = act_obj.read(cr, uid, res_id, [])
+        mod_id = irmod_mod.search(cr, uid, [('name', '=', 'act_values_form_action')])[0]
+        res_id = irmod_mod.read(cr, uid, mod_id, ['res_id'])['res_id']
+        act_win = iract_mod.read(cr, uid, res_id, [])
         act_win['domain'] = [('id','=',event_id)]
         act_win['name'] = _('Client Events')
         return act_win

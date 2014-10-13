@@ -1,6 +1,5 @@
-##############################################################################
 #
-# Copyright (c) 2008-2012 Alistek Ltd (http://www.alistek.com) All Rights Reserved.
+# Copyright (c) 2008-2014 Alistek Ltd (http://www.alistek.com) All Rights Reserved.
 #                    General contacts <info@alistek.com>
 #
 # WARNING: This program as such is intended to be used by professional
@@ -29,13 +28,8 @@
 #
 ##############################################################################
 
-import openerp.pooler as pooler
 from openerp.tools.translate import _
 from openerp.osv import osv, fields
-
-def ir_del(cr, uid, id):
-    obj = pooler.get_pool(cr.dbname).get('ir.values')
-    return obj.unlink(cr, uid, [id])
 
 def _reopen(self, res_id, model):
     return {'type': 'ir.actions.act_window',
@@ -68,7 +62,8 @@ class aeroo_remove_print_button(osv.osv_memory):
             else:
                 values['state'] = 'no_exist'
         else:
-            ids = self.pool.get('ir.values').search(cr, uid, [('value','=',report.type+','+str(report.id))])
+            irval_mod = self.pool.get('ir.values')
+            ids = irval_mod.search(cr, uid, [('value','=',report.type+','+str(report.id))])
             if not ids:
 	            values['state'] = 'no_exist'
             else:
@@ -81,9 +76,10 @@ class aeroo_remove_print_button(osv.osv_memory):
         report = self.pool.get(context['active_model']).browse(cr, uid, context['active_id'], context=context)
         if report.report_wizard:
             report._unset_report_wizard()
-        event_id = self.pool.get('ir.values').search(cr, uid, [('value','=','ir.actions.report.xml,%d' % context['active_id'])])[0]
-        res = ir_del(cr, uid, event_id)
-        this.write({'state':'done'}, context=context)
+        irval_mod = self.pool.get('ir.values')
+        event_id = irval_mod.search(cr, uid, [('value','=','ir.actions.report.xml,%d' % context['active_id'])])[0]
+        res = irval_mod.unlink(cr, uid, [event_id])
+        this.write({'state':'done'})
         return _reopen(self, this.id, this._model)
     
     _columns = {

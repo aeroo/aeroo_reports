@@ -83,6 +83,7 @@ class ctt_language(object):
 
     def currency_to_text(self, sum, currency):
         #--------------for currencies with 100 fractions
+        currency = currency.upper()
         sum = float(sum)
         sum = round(sum, 2)
         # find out digits before floating point - currency

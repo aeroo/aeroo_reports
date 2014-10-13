@@ -7,9 +7,12 @@
       <field name="inherit_id" ref="base.res_config_installer"/>
       <field name="arch" type="xml">
           <data>
+                <form position="attributes">
+                    <attribute name="string">Install New Printers</attribute>
+                </form>
                 <footer position="replace">
                     <footer>
-                        <button name="process" type="object" string="Process" class="oe_highlight" states="init"/>
+                        <button name="process" type="object" string="Install" class="oe_highlight" states="init"/>
                         <button name="action_next" type="object" string="Continue" class="oe_highlight" states="done"/>
                         or
                         <button special="cancel" string="Close" class="oe_link"/>
@@ -40,7 +43,7 @@
     </record>
 
     <record id="action_aeroo_printer_installer" model="ir.actions.act_window">
-      <field name="name">Aeroo direct printing Configuration</field>
+      <field name="name">Aeroo Direct Printing Configuration</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">aeroo_printer.installer</field>
       <field name="view_id" ref="view_aeroo_printer_installer"/>

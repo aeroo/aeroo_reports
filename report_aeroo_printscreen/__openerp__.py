@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Copyright (c) 2008-2013 Alistek Ltd (http://www.alistek.com) All Rights Reserved.
+# Copyright (c) 2008-2014 Alistek (http://www.alistek.com) All Rights Reserved.
 #                    General contacts <info@alistek.com>
 #
 # WARNING: This program as such is intended to be used by professional
@@ -38,7 +38,7 @@ Shows "Printscreen List" report on each OpenERP object.
 
 Using report_aeroo_ooo OpenERP module by Alistek, you can set output to one of these (xls, pdf, csv) formats.
 """,
-    'author': 'Alistek Ltd',
+    'author': 'Alistek',
     'website': 'http://www.alistek.com',
     'depends': ['base','report_aeroo'],
     'data': ['data/report_aeroo_printscreen_data.xml',

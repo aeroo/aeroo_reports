@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 ##############################################################################
 #
-# Copyright (c) 2008-2013 Alistek Ltd (http://www.alistek.com) All Rights Reserved.
+# Copyright (c) 2008-2014 Alistek (http://www.alistek.com) All Rights Reserved.
 #                    General contacts <info@alistek.com>
 #
 # WARNING: This program as such is intended to be used by professional
@@ -61,9 +61,9 @@ Features:
 System Dependencies:
 Direct print module requires Aeroo Reports core module and pycups Python library
 For more reference visit - https://pypi.python.org/pypi/pycups""",
-    'author': 'Alistek Ltd',
+    'author': 'Alistek',
     'website': 'http://www.alistek.com',
-    'depends': ['base','report_aeroo'],
+    'depends': ['report_aeroo'],
     'data': ["data/report_aeroo_direct_data.xml",
                    "installer.xml",
                    "report_aeroo_direct_print_view.xml",

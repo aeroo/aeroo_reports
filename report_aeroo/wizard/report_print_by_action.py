@@ -29,34 +29,65 @@
 #
 ##############################################################################
 
+from openerp import models, fields, api, _
+from openerp.exceptions import Warning
+import re
 
-from openerp.osv import osv, fields
-
-class report_print_by_action(osv.osv_memory):
+class report_print_by_action(models.TransientModel):
     _name = 'aeroo.print_by_action'
-
-    def to_print(self, cr, uid, ids, context=None):
-        this = self.browse(cr, uid, ids[0], context=context)
-        report_xml = self.pool.get(context['active_model']).browse(cr, uid, context['active_id'], context=context)
-        print_ids = eval("[%s]" % this.object_ids, {})
-        data = {'model':report_xml.model, 'ids':print_ids, 'id':print_ids[0], 'report_type': 'aeroo'}
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': report_xml.report_name,
-            'datas': data,
-            'context':context
-        }
     
-    _columns = {
-        'name':fields.text('Object Model', readonly=True),
-        'object_ids':fields.char('Object IDs', size=250, required=True, help="Comma separated records ID"),
-                
-    }
-
-    def _get_model(self, cr, uid, context):
-        return self.pool.get(context['active_model']).read(cr, uid, context['active_id'], ['model'], context=context)['model']
+    @api.multi
+    def to_print(recs):
+        valid_input = re.match('^\s*\[?\s*((\d+)(\s*,\s*\d+)*)\s*\]?\s*$', recs[0].object_ids)
+        valid_input = valid_input and valid_input.group(1) or False
+        if not valid_input:
+            raise Warning(_("Input single record ID or number of comma separated IDs!"))
+        print_ids = eval("[%s]" % valid_input, {})
+        rep_obj = recs.env['ir.actions.report.xml']
+        report = rep_obj.browse(recs.env.context['active_ids'])[0]
+        data = {
+                'model': report.model,
+                'ids': print_ids,
+                'id': print_ids[0],
+                'report_type': 'aeroo'
+                }
+        res =  {
+                'type': 'ir.actions.report.xml',
+                'report_name': report.report_name,
+                'datas': data,
+                'context': recs.env.context
+                }
+        return res
+    
+    ### Fields
+    name = fields.Text('Object Model', readonly=True)
+    object_ids = fields.Char('Object IDs', size=250, required=True,
+        help="Single ID or number of comma separated record IDs")
+    ### ends Fields
+        
+    @api.model
+    def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
+        if self.env.context.get('active_id'):
+            report = self.env['ir.actions.report.xml'].browse(self.env.context['active_ids'])
+            if report.report_name == 'aeroo.printscreen.list':
+                raise Warning(_("Print Screen report does not support this functionality!"))
+        res = super(report_print_by_action, self).fields_view_get(view_id, 
+            view_type, toolbar=toolbar, submenu=submenu)
+        return res
+    
+    @api.model
+    def _get_model(self):
+        rep_obj = self.env['ir.actions.report.xml']
+        report = rep_obj.browse(self.env.context['active_ids'])
+        return report[0].model
+    
+    @api.model
+    def _get_last_ids(self):
+        last_call = self.search([('name','=',self._get_model()),('create_uid','=',self.env.uid)])
+        return last_call and last_call[-1].object_ids or False
 
     _defaults = {
-        'name': _get_model,
+       'name': _get_model,
+       'object_ids': _get_last_ids,
     }
 

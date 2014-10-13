@@ -29,18 +29,18 @@
 #
 ##############################################################################
 
-from openerp.osv import osv, fields
+from openerp import api, models, fields, _
+from openerp.exceptions import except_orm, Warning
+
 from openerp.report import interface
 
-from openerp.tools.translate import _
-
-class report_print_actions(osv.osv_memory):
+class report_print_actions(models.TransientModel):
     _name = 'aeroo.print_actions'
     _description = 'Aeroo reports print wizard'
-
+    
     def check_report(self, report_name):
         if 'report.%s' % report_name not in interface.report_int._reports: # check if report exist in register of reports
-            raise osv.except_osv(_('System Error !'), _('Report was not registered in system or deactivated !'))
+            raise except_orm(_('System Error !'), _('Report was not registered in system or deactivated !'))
         return True
 
     def _reopen(self, res_id, model):
@@ -118,30 +118,30 @@ Do you want to start a deferred process?"),'print_ids':print_ids}, context=conte
             'context':context
         }
 
-    def _out_format_get(self, cr, uid, context={}):
-        obj = self.pool.get('report.mimetypes')
-        report_action_id = context.get('report_action_id',False)
+    @api.model
+    def _out_format_get(self):
+        report_action_id = self.env.context.get('report_action_id',False)
         if report_action_id:
-            in_format = self.pool.get('ir.actions.report.xml').read(cr, uid, report_action_id, ['in_format'])['in_format']
-            ids = obj.search(cr, uid, [('compatible_types','=',in_format)], context=context)
-            res = obj.read(cr, uid, ids, ['name'], context)
-            return [(str(r['id']), r['name']) for r in res]
+            report = self.env['ir.actions.report.xml'].browse(report_action_id)
+            mtyp_obj = self.env['report.mimetypes']
+            mtyp_ids = mtyp_obj.search([('compatible_types','=',report.in_format)])
+            return [(str(r.id), r.name) for r in mtyp_ids]
         else:
             return []
     
-    _columns = {
-        'out_format': fields.selection(_out_format_get, 'Output format', required=True),
-        'out_format_code':fields.char('Output format code', size=16, required=False, readonly=True),
-        'copies': fields.integer('Number of copies', required=True),
-        'message': fields.text('Message'),
-        'state':fields.selection([
-            ('draft','Draft'),
-            ('confirm','Confirm'),
-            ('done','Done'),
-            
-        ],'State', select=True, readonly=True),
-        #'print_ids':fields.serialized(), #TODO v8?
-    }
+    ### Fields
+    
+    out_format = fields.Selection(selection=_out_format_get,
+        string='Output format', required=True)
+    out_format_code = fields.Char(string='Output format code', 
+        size=16, required=False, readonly=True)
+    copies = fields.Integer(string='Number of copies', required=True)
+    message = fields.Text('Message')
+    state = fields.Selection([('draft','Draft'),('confirm','Confirm'),
+        ('done','Done'),],'State', select=True, readonly=True)
+    #'print_ids':fields.serialized() #TODO v8?
+    
+    ### ends Fields
 
     def onchange_out_format(self, cr, uid, ids, out_format_id):
         if not out_format_id:
@@ -150,7 +150,7 @@ Do you want to start a deferred process?"),'print_ids':print_ids}, context=conte
         return { 'value':
             {'out_format_code': out_format['code']}
         }
-
+    
     def _get_default_outformat(field):
         def get_default_outformat(self, cr, uid, context):
             report_action_id = context.get('report_action_id',False)
@@ -160,13 +160,18 @@ Do you want to start a deferred process?"),'print_ids':print_ids}, context=conte
             else:
                 return False
         return get_default_outformat
-
-    def _get_default_number_of_copies(self, cr, uid, context):
-        report_action_id = context.get('report_action_id',False)
+    
+    @api.model
+    def _get_active_ids(self):
+        return self.env.context.get('active_ids')
+    
+    @api.model
+    def _get_default_number_of_copies(self):
+        report_action_id = self.env.context.get('report_action_id',False)
         if not report_action_id:
             return False
-        report_xml = self.pool.get('ir.actions.report.xml').browse(cr, uid, context['report_action_id'])
-        return report_xml.copies
+        report_xml = self.env['ir.actions.report.xml'].browse(report_action_id)
+        return report_xml[0].copies
 
     _defaults = {
         'out_format': _get_default_outformat('id'),

@@ -18,9 +18,10 @@
                     </group>
                     <footer>
                         <group>
-                            <button name="do_action" string="_Ok" states="remove" type="object"/>
+                            <button name="do_action" string="_Ok" states="remove" type="object" class="oe_highlight"/>
                             <button special="cancel" string="_No" states="remove"/>
-                            <button special="cancel" string="_Cancel" states="no_exist,done"/>
+                              or  
+                            <button special="cancel" string="_Cancel" states="no_exist,done" class="oe_link"/>
                         </group>
                     </footer>
                     <field name="state" invisible="1"/>

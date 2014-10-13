@@ -1,6 +1,6 @@
-##############################################################################
+################################################################################
 #
-# Copyright (c) 2009-2012 Alistek Ltd (http://www.alistek.com) All Rights Reserved.
+# Copyright (c) 2009-2014 Alistek ( http://www.alistek.com ) All Rights Reserved.
 #                    General contacts <info@alistek.com>
 #
 # WARNING: This program as such is intended to be used by professional
@@ -27,7 +27,7 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #
-##############################################################################
+################################################################################
 
 import aeroolib
 from genshi.template import NewTextTemplate
@@ -37,13 +37,16 @@ check_list = [
     'import genshi',
     'from genshi.template import NewTextTemplate',
     'from xml.dom import minidom',
+    'from pyPdf import PdfFileWriter, PdfFileReader',
 ]
 
 from check_deps import check_deps
 check_deps(check_list)
 
+
 import installer
 import translate
 import report_xml
 import report_aeroo
+#import add_aeroo_hack
 import wizard
