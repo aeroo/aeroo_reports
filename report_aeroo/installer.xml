@@ -89,6 +89,11 @@
                                   <field name="host" attrs="{'readonly': [('enabled','=',False)]}"/>
                                   <field name="port" attrs="{'readonly': [('enabled','=',False)]}"/>
                               </group>
+                              <field name="auth_type" attrs="{'readonly': [('enabled','=',False)]}"/>
+                              <group colspan="4" attrs="{'invisible': [('auth_type','=',False)]}">
+                                <field name="username" attrs="{'required': [('auth_type','=','simple')], 'readonly': [('enabled','=',False)]}"/>
+                                <field name="password" password="True" attrs="{'required': [('auth_type','=','simple')], 'readonly': [('enabled','=',False)]}"/>
+                              </group>
                           </group>
                           <separator colspan="4"/>
                       </group>

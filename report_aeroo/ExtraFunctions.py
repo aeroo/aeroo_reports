@@ -168,7 +168,7 @@ class ExtraFunctions(object):
         if isinstance(val, osv.orm.browse_null):
             return ''
         elif isinstance(val, osv.orm.browse_record):
-            return val.name_get(context={'lang':self._get_lang()})[0][1]
+            return val.with_context(lang=self._get_lang()).name_get()[0][1]
         return _filter(val)
 
     def _perm_read(self, cr, uid):

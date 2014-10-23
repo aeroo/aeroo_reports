@@ -48,5 +48,4 @@ import installer
 import translate
 import report_xml
 import report_aeroo
-#import add_aeroo_hack
 import wizard

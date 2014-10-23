@@ -110,7 +110,7 @@ class report_xml(models.Model):
 
             for mod_path in mod_path_list:
                 if os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]):
-                    filepath=mod_path+os.path.sep+path
+                    filepath = mod_path+os.path.sep+path
                     filepath = os.path.normpath(filepath)
                     sys.path.append(os.path.dirname(filepath))
                     mod_name,file_ext = os.path.splitext(os.path.split(filepath)[-1])
@@ -133,8 +133,10 @@ class report_xml(models.Model):
         except Exception, e:
             logger.error('Error loading report parser: %s'+(filepath and ' "%s"' % filepath or ''), e)
             return None
-
+    
+    @api.model
     def load_from_source(self, source):
+        source = "from openerp.report import report_sxw\n" + source
         expected_class = 'Parser'
         context = {'Parser':None}
         try:
@@ -143,7 +145,8 @@ class report_xml(models.Model):
         except SyntaxError, e:
             raise except_orm(_('Syntax Error !'), e)
         except Exception, e:
-            logger.error("Error in 'load_from_source' method", __name__, exc_info=True)
+            logger.error("Error in 'load_from_source' method",
+                __name__, exc_info=True)
             return None
 
     def link_inherit_report(self, cr, uid, report, new_replace_report_id=False, context={}):
@@ -228,11 +231,11 @@ class report_xml(models.Model):
         report = self.env.cr.dictfetchall()
         if report:
             report = report[-1]
-            parser=rml_parse
+            parser = rml_parse
             if report['parser_state']=='loc' and report['parser_loc']:
-                parser=self.load_from_file(report['parser_loc'], report['id']) or parser
+                parser = self.load_from_file(report['parser_loc'], report['id']) or parser
             elif report['parser_state']=='def' and report['parser_def']:
-                parser=self.load_from_source("from report import report_sxw\n"+report['parser_def']) or parser
+                parser = self.load_from_source(report['parser_def']) or parser
             self.register_report(report['report_name'], report['model'], report['report_rml'], parser)
 
     @api.model
@@ -249,11 +252,11 @@ class report_xml(models.Model):
             record = cr.dictfetchone()
             if record['report_type'] == 'aeroo':
                 if record['active'] == True:
-                    parser=rml_parse
+                    parser = rml_parse
                     if record['parser_state']=='loc' and record['parser_loc']:
                         parser = self.load_from_file(record['parser_loc'], record['id']) or parser
                     elif record['parser_state']=='def' and record['parser_def']:
-                        parser = self.load_from_source("from report import report_sxw\n"+record['parser_def']) or parser
+                        parser = self.load_from_source(record['parser_def']) or parser
                     new_report = self.register_report(name, record['model'], record['report_rml'], parser)
                 else:
                     new_report = False
@@ -268,9 +271,7 @@ class report_xml(models.Model):
         res = orig_ids and super(report_xml, self)._report_content(cursor, 1, orig_ids, name, arg, context) or {}
         for report in self.read(cursor, 1, aeroo_ids, ['tml_source','report_type','report_sxw_content_data', 'report_sxw','report_rml','report_file'], context=context):
             data = report[name + '_data']
-            #logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>1..."+str(report), exc_info=True)
             if report['report_type']=='aeroo' and report['tml_source']=='file' or not data and report[name[:-8]]:
-                #logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>2..."+(data and str(len(data)) or ''), exc_info=True)
                 fp = None
                 try:
                     #TODO: Probably there's a need to check if path to the report template actually present (???)
@@ -289,7 +290,6 @@ class report_xml(models.Model):
                     if fp:
                         fp.close()
             res[report['id']] = data
-            #logger.error(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>3..."+(data and str(len(data)) or ''), exc_info=True)
         return res
 
     def _get_encodings(self, cursor, user, context={}):
@@ -505,7 +505,7 @@ class report_xml(models.Model):
             if vals['parser_state']=='loc' and vals['parser_loc']:
                 parser=self.load_from_file(vals['parser_loc'], vals['name'].lower().replace(' ','_')) or parser
             elif vals['parser_state']=='def' and vals['parser_def']:
-                parser=self.load_from_source("from report import report_sxw\n"+vals['parser_def']) or parser
+                parser=self.load_from_source(vals['parser_def']) or parser
             res_id = super(report_xml, self).create(vals)
             if vals.get('report_wizard'):
                 wizard_id = self._set_report_wizard(self.env.cr, self.env.uid, vals['replace_report_id'] or res_id, \
@@ -554,19 +554,19 @@ class report_xml(models.Model):
         if p_state == 'loc':
             parser = recs.load_from_file(vals.get('parser_loc', False) or recs.parser_loc, recs.id) or parser
         elif p_state == 'def':
-            parser = recs.load_from_source("from report import report_sxw\n"+(vals.get('parser_loc', False) or recs.parser_def or '')) or parser
+            parser = recs.load_from_source((vals.get('parser_loc', False) or recs.parser_def or '')) or parser
         elif p_state == 'default':
             parser = rml_parse
         elif recs.parser_state=='loc':
             parser = recs.load_from_file(recs.parser_loc, recs.id) or parser
         elif recs.parser_state=='def':
-            parser = recs.load_from_source("from report import report_sxw\n"+recs.parser_def) or parser
+            parser = recs.load_from_source(recs.parser_def) or parser
         elif recs.parser_state=='default':
             parser = rml_parse
         if vals.get('parser_loc', False):
             parser = recs.load_from_file(vals['parser_loc'], recs.id) or parser
         elif vals.get('parser_def', False):
-            parser = recs.load_from_source("from report import report_sxw\n"+vals['parser_def']) or parser
+            parser = recs.load_from_source(vals['parser_def']) or parser
         if vals.get('report_name', False) and vals['report_name'] != recs.report_name:
             recs.delete_report_service(recs.report_name)
             report_name = vals['report_name']

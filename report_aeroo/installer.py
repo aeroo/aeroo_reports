@@ -124,6 +124,11 @@ class docs_config_installer(models.TransientModel):
     enabled = fields.Boolean('Enabled')
     host = fields.Char('Host', size=64, required=True)
     port = fields.Integer('Port', required=True)
+    auth_type = fields.Selection([
+            ('simple','Simple Authentication')
+        ],'Authentication')
+    username = fields.Char('Username', size=32)
+    password = fields.Char('Password', size=32)
     state = fields.Selection([
             ('init','Init'),
             ('error','Error'),
@@ -142,6 +147,9 @@ class docs_config_installer(models.TransientModel):
         defaults['enabled'] = enabled == 'True' and True or False
         defaults['host'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_host') or 'localhost'
         defaults['port'] = int(icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_port')) or 8989
+        defaults['auth_type'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_auth_type') or False
+        defaults['username'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_username') or 'anonymous'
+        defaults['password'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_password') or 'anonymous'
         return defaults
     
     @api.one
@@ -150,6 +158,9 @@ class docs_config_installer(models.TransientModel):
         icp.set_param('aeroo.docs_enabled', str(self.enabled))
         icp.set_param('aeroo.docs_host', self.host)
         icp.set_param('aeroo.docs_port', self.port)
+        icp.set_param('aeroo.docs_auth_type', self.auth_type)
+        icp.set_param('aeroo.docs_username', self.username)
+        icp.set_param('aeroo.docs_password', self.password)
         
 #        try:
 #            fp = tools.file_open('report_aeroo_ooo/test_temp.odt', mode='rb')
@@ -207,6 +218,9 @@ class docs_config_installer(models.TransientModel):
         'config_logo': _get_image,
         'host':'localhost',
         'port':8989,
+        'auth_type':False,
+        'username':'anonymous',
+        'password':'anonymous',
         'state':'init',
         'enabled': False,
     }

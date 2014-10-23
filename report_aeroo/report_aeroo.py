@@ -48,6 +48,7 @@ except ImportError:
 
 from xml.dom import minidom
 import base64
+from openerp import models
 from openerp.osv import osv
 from openerp.tools.translate import _
 import openerp.tools as tools
@@ -78,6 +79,18 @@ try:
 except Exception:
     err_msg = "Could not instantiate Aeroo lock!!!"
     logger.critical(msg)
+    
+from genshi.template.eval import StrictLookup
+class DynamicLookup(StrictLookup):
+
+    @classmethod
+    def lookup_name(cls, data, name):
+        orig = super(DynamicLookup, cls).lookup_name(data, name)
+        if isinstance(orig, models.Model):
+            new_lang = data.get('getLang')()
+            if orig.env.context.get('lang') != new_lang:
+                orig = orig.with_context(lang = new_lang)
+        return orig
 
 class Counter(object):
     def __init__(self, name, start=0, interval=1):
@@ -506,7 +519,7 @@ class Aeroo_report(report_sxw):
                 template_io.write(file_data or base64.decodestring(report_xml.report_sxw_content) )
                 serializer = OOSerializer(template_io, oo_styles=style_io)
             try:
-                basic = Template(source=template_io, serializer=serializer)
+                basic = Template(source=template_io, serializer=serializer, lookup=DynamicLookup)
             except Exception, e:
                 self._raise_exception(e, print_id)
 
@@ -559,9 +572,12 @@ class Aeroo_report(report_sxw):
         #DC = oo_config_obj and pool.get('oo.config').get()
         #TODO
         icp = pool.get('ir.config_parameter')
-        docs_host = icp.get_param(cr, 1, 'aeroo.docs_host') 
-        docs_port = icp.get_param(cr, 1, 'aeroo.docs_port')
-        docs_client = DOCSConnection(docs_host or 'localhost', docs_port or '8989')
+        docs_host = icp.get_param(cr, 1, 'aeroo.docs_host') or 'localhost'
+        docs_port = icp.get_param(cr, 1, 'aeroo.docs_port') or '8989'
+        docs_auth_type = icp.get_param(cr, 1, 'aeroo.docs_auth_type') or False
+        docs_username = icp.get_param(cr, 1, 'aeroo.docs_username') or 'anonymous'
+        docs_password = icp.get_param(cr, 1, 'aeroo.docs_password') or 'anonymous'
+        docs_client = DOCSConnection(docs_host, docs_port, username=docs_username, password=docs_password)
         #if (output!=report_xml.in_format[3:] or self.oo_subreports.get(print_id)):
         if output!=report_xml.in_format[3:] or aeroo_print.subreports:
             if aeroo_docs and docs_client:
@@ -786,9 +802,7 @@ class Aeroo_report(report_sxw):
     def create(self, cr, uid, ids, data, context=None):
         if not context:
             context = {}
-        print ">>>>>>>>>+++++", type(context), isinstance(context, dict)
         if not isinstance(context, dict):
-            print ">>>>>>>>>+++++", type(context)
         context = dict(context)
         deferred = context.get('deferred_process')
         #### Get Aeroo print object ###
@@ -796,7 +810,6 @@ class Aeroo_report(report_sxw):
         aeroo_print.start_total_time = time.time()
         aeroo_print.start_time = time.time()
         self.active_prints[aeroo_print.id] = aeroo_print
-        print "-)))))))>", type(context)
         context['print_id'] = aeroo_print.id
         ###############################
         self.logger("Start process %s (%s)" % (self.name, self.table), logging.INFO) # debug mode
