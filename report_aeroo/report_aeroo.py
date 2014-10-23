@@ -802,7 +802,6 @@ class Aeroo_report(report_sxw):
     def create(self, cr, uid, ids, data, context=None):
         if not context:
             context = {}
-        if not isinstance(context, dict):
         context = dict(context)
         deferred = context.get('deferred_process')
         #### Get Aeroo print object ###
