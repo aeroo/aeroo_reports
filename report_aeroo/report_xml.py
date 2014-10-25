@@ -652,7 +652,9 @@ class report_xml(models.Model):
             act_id = recs.env['ir.actions.act_window'].create(action_data)
             event_id.value = "ir.actions.act_window,%s" % act_id.id
 
-            translations = trans_obj.search([('res_id','=',recs.id),('src','=',recs.name),('name','=','ir.actions.report.xml,name')])
+            translations = trans_obj.search([('res_id','=',recs.id),
+                ('src','=',recs.name),
+                ('name','=','ir.actions.report.xml,name')])
             for trans in translations:
                 trans.copy(default={'name':'ir.actions.act_window,name','res_id':act_id.id})
             return act_id.id
@@ -663,23 +665,30 @@ class report_xml(models.Model):
         ir_values_obj = recs.env['ir.values']
         trans_obj = recs.env['ir.translation']
         act_win_obj = recs.env['ir.actions.act_window']
-        act_win_ids = act_win_obj.search([('res_model','=','aeroo.print_actions')])
+        act_win_ids = act_win_obj.search([('res_model','=','aeroo.print_actions'),
+            ('context','like',str(recs.id))])
         for act_win in act_win_ids:
             act_win_context = eval(act_win.context, {})
-            if act_win_context.get('report_action_id') == recs.id:
+            if recs.id in act_win_context.get('report_action_id'):
                 event_id = ir_values_obj.search([('value','=',"ir.actions.act_window,%s" % act_win.id)])
                 if event_id:
                     event_id[0].value = "ir.actions.report.xml,%s" % recs.id
                 ##### Copy translation from window action #####
-                report_xml_trans = trans_obj.search([('res_id','=',recs.id),('src','=',act_win.name),('name','=','ir.actions.report.xml,name')])
+                report_xml_trans = trans_obj.search([('res_id','=',recs.id),
+                    ('src','=',act_win.name),
+                    ('name','=','ir.actions.report.xml,name')])
                 trans_langs = map(lambda t: t['lang'], report_xml_trans.read(['lang']))
-                act_window_trans = trans_obj.search([('res_id','=',act_win.id),('src','=',act_win.name), \
-                                            ('name','=','ir.actions.act_window,name'),('lang','not in',trans_langs)])
+                act_window_trans = trans_obj.search([('res_id','=',act_win.id),
+                    ('src','=',act_win.name),
+                    ('name','=','ir.actions.act_window,name'),
+                    ('lang','not in',trans_langs)])
                 for trans in act_window_trans:
                     trans.copy(default={'name':'ir.actions.report.xml,name','res_id':recs.id})
                 ####### Delete wizard name translations #######
-                act_window_trans = trans_obj.search([('res_id','=',act_win.id),('src','=',act_win.name),('name','=','ir.actions.act_window,name')])
-                trans_obj.unlink(cr, uid, act_window_trans, context)
+                act_window_trans = trans_obj.search([('res_id','=',act_win.id),
+                    ('src','=',act_win.name),
+                    ('name','=','ir.actions.act_window,name')])
+                act_window_trans.unlink()
                 ###############################################
                 act_win.unlink()
                 return True
