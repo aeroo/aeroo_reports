@@ -30,9 +30,10 @@
 ##############################################################################
 
 {
-    'name': 'Aeroo Reports - Print Screen Addon',
+    'name': 'Aeroo Reports - Print Screen',
     'version': '1.1',
     'category': 'Generic Modules/Aeroo Reporting',
+    'summary': 'Report any model in a spreadsheet report',
     'description': """
 Shows "Printscreen List" report on each OpenERP object.
 
@@ -47,5 +48,6 @@ Using report_aeroo_ooo OpenERP module by Alistek, you can set output to one of t
     "license" : "GPL-3 or any later version",
     'installable': True,
     'web': True,
+    'application': True,
     'active': False,
 }

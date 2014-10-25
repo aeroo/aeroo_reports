@@ -34,33 +34,38 @@
     'name': 'Aeroo Reports - Direct printing to printer',
     'summary': 'Print Aeroo Reports directly to a printer',
     'version': '1.0',
-    'category': 'Generic Modules/Aeroo Reporting',
-    'description': """Direct Print module for Aeroo Reports enables printing a report directly to
+    'category': 'Generic Modules/Aeroo Reports',
+    'description': """
+Direct Print module for Aeroo Reports enables printing a report directly to
 server configured printer without opening the report on the user's screen.
 
 Module supports network printing.
 
-Common Applications:
-    POS receipts;
-    Shipping/mailing labels;
-    Barcode labels;
-    Admission tickets;
-    Shipment documents;
-    Pick-lists;
-    Invoices;
+Common Applications
+--------------------------------------------------------------------------------
+* POS receipts;
+* Shipping/mailing labels;
+* Barcode labels;
+* Admission tickets;
+* Shipment documents;
+* Pick-lists;
+* Invoices;
 
-Features:
-    Set default general purpose and label printers for a user;
-    Directly print the report to the printer from UI button or code;
-    Configure a "pseudo" printer for a report to print to user's desktop;
-    Use system pre-configured (CUPS) printers;
-    Printer discovery wizard;
-    UI user preferences integration;
-    Per group user rights on printers;
+Features
+--------------------------------------------------------------------------------
+* Set default general purpose and label printers for a user;
+* Directly print the report to the printer from UI button or code;
+* Configure a "pseudo" printer for a report to print to user's desktop;
+* Use system pre-configured (CUPS) printers;
+* Printer discovery wizard;
+* UI user preferences integration;
+* Per group user rights on printers;
     
-System Dependencies:
+System Dependencies
+--------------------------------------------------------------------------------
 Direct print module requires Aeroo Reports core module and pycups Python library
-For more reference visit - https://pypi.python.org/pypi/pycups""",
+For more reference visit - https://pypi.python.org/pypi/pycups
+""",
     'author': 'Alistek',
     'website': 'http://www.alistek.com',
     'depends': ['report_aeroo'],
@@ -71,5 +76,6 @@ For more reference visit - https://pypi.python.org/pypi/pycups""",
                    "security/ir.model.access.csv"],
     "license" : "GPL-3 or any later version",
     'installable': True,
+    'application': True,
     'active': False,
 }

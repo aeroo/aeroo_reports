@@ -36,24 +36,40 @@
 {
     'name': 'Aeroo Reports',
     'version': '1.2.1',
-    'category': 'Generic Modules/Aeroo Reporting',
+    'category': 'Generic Modules/Aeroo Reports',
+    'summary': 'Enterprise grade reporting solution',
     'description': """
+Enterprise grade reporting solution for Odoo
+--------------------------------------------------------------------------------
 Aeroo Reports for Odoo is a comprehensive and versatile reporting engine based
-on Aeroo Library.
+on Aeroo Library. For more information on how this technology differs from other
+reporting options, please reference reporting engine comparison matrix:
+[aaa|http://www.alistek.com/wiki/index.php/Comparison_matrix_of_reporting_engines_for_OpenERP]
 
-Report templates in the following formats:
-================================================================================
+Modules in this category
+--------------------------------------------------------------------------------
+* Aeroo Reports (report_aeroo), this module
+* Aeroo Reports Direct Print (report_aeroo_direct_print), print reports without preview
+* Aeroo Reports Prinscreen (report_aeroo_printscreen), report any model in a spreadsheet report
+* Aeroo Reports demo (report_aeroo_sample), just a demo
+
+More information and documentation
+--------------------------------------------------------------------------------
+http://www.alistek.com/wiki/index.php/Main_Page
+
+Report templates in the following formats
+--------------------------------------------------------------------------------
 * Open Document Format (ODF) - .odt, .ods;
 * Other ASCII based formats, like HTML, CSV, etc.
 
 Output formats:
-================================================================================
+--------------------------------------------------------------------------------
 * Open Document Format (ODF) - .odt, .ods;
 * Other ASCII based formats, like HTML, CSV, etc. 
 * using Aeroo DOCS - PDF, DOC, XLS, CSV.
 
-Reporting engine features:
-================================================================================
+Reporting engine features
+--------------------------------------------------------------------------------
 * Add reports from UI "on the fly";
 * Install reports from module;
 * Dynamic template load/unload;
@@ -75,14 +91,29 @@ Reporting engine features:
 * Override report file extension (for direct printing, etc);
 * Separate input/output format selections;
 
-Input - Output format pairs:
-================================================================================
+Input - Output format pairs
+--------------------------------------------------------------------------------
 * odt - odt/doc/pdf;
 * ods - ods/xls/pdf/csv;
 * html - html;
 
+Sponsors of Aeroo Reports port for Odoo v8
+--------------------------------------------------------------------------------
+* Serpent Consulting Services - http://www.serpentcs.com/
+* Openworx - http://www.openworx.nl/
+* Avanzosc - https://www.avanzosc.es/
+* big-consulting - http://www.openbig.org/
+* Tech-Receptives - http://www.techreceptives.com/
+* OpenGLOBE - http://www.openglobe.pl/
+* Open2bizz - http://www.open2bizz.nl/
+* Aserti Global Solutions - http://www.aserti.es/
+
+Original work and inspiration
+--------------------------------------------------------------------------------
+This module is based on the original work of Simone Orsi (Domsense)
+
 """,
-    'author': 'Alistek & Simone Orsi (Domsense)',
+    'author': 'Alistek',
     'website': 'http://www.alistek.com',
     'complexity': "easy",
     'depends': ['base'],

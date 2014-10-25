@@ -5,7 +5,7 @@
 		<record model="ir.ui.view" id="act_report_xml_view1">
 			<field name="name">ir.actions.report.xml.aeroo.form</field>
 			<field name="model">ir.actions.report.xml</field>
-            <field name="priority">14</field>
+            <field name="priority">16</field>
 			<field name="arch" type="xml">
                 <form string="Aeroo Report">
                     <group col="6" colspan="4">
@@ -28,10 +28,12 @@
                     </group>
 
                     <notebook colspan="4">
-                        <page string="Other Configuration">
+                        <page string="Generic">
                             <separator string="Template" colspan="4"/>
                             <group colspan="4" col="8">
-                                <field name="tml_source" colspan="2" required="1"/>
+                                <group colspan="2" col="2">
+                                    <field name="tml_source" colspan="2" required="1"/>
+                                </group>
                                 <group colspan="6">
                                     <field name="report_sxw_content_data" string="Template Content" attrs="{'invisible': [('tml_source','&lt;&gt;','database')],'required': [('tml_source','=','database')]}"/>
                                     <field name="report_rml" string="Template path" attrs="{'invisible': [('tml_source','&lt;&gt;','file')],'required': [('tml_source','=','file')]}"/>
@@ -60,16 +62,6 @@
                                 <field name="multi" colspan="2"/>
                             </group>
                         </page>
-                        <page string="Parser">
-                            <group colspan="2">
-			                    <field name="parser_state"/>
-                            </group>
-                            <group attrs="{'invisible': [('parser_state','&lt;&gt;','def')]}" colspan="4" expand="1">
-                                <separator string="Parser Definition" colspan="4"/>
-		                        <field name="parser_def" nolabel="1"/>
-                            </group>
-	                        <field name="parser_loc" attrs="{'invisible': [('parser_state','&lt;&gt;','loc')],'required': [('parser_state','=','loc')]}"/>
-                        </page>
                         <page string="Advanced">
                             <group colspan="4" col="6">
                                 <field name="content_fname"/>
@@ -80,6 +72,18 @@
                                 <field name="active"/>
                                 <field name="deferred"/>
                                 <field name="deferred_limit" attrs="{'invisible':['|',('deferred','=','off'),('deferred','=',False)]}"/>
+                            </group>
+                            <group string="Parser" colspan="4" col="6">
+                            <group colspan="2">
+			                    <field name="parser_state"/>
+                            </group>
+                            <group colspan="4">
+                                <field name="parser_loc" attrs="{'invisible': [('parser_state','&lt;&gt;','loc')],'required': [('parser_state','=','loc')]}"/>
+                            </group>
+                            <group attrs="{'invisible': [('parser_state','&lt;&gt;','def')]}" colspan="6" expand="1">
+                                <separator string="Parser Definition" colspan="4"/>
+		                        <field name="parser_def" nolabel="1"/>
+                            </group>
                             </group>
                         </page>
                         <page string="Security">

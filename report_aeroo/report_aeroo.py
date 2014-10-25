@@ -60,9 +60,10 @@ from random import randint
 from openerp.modules import load_information_from_description_file
 import openerp.release as release
 
-import aeroolib
+from aeroolib import __version__ as aeroolib_version
 from aeroolib.plugins.opendocument import Template, OOSerializer
 from genshi.template import NewTextTemplate
+from genshi.template.eval import StrictLookup
 from genshi import __version__ as genshi_version
 import openerp.pooler as pooler
 from lxml import etree
@@ -79,10 +80,12 @@ try:
 except Exception:
     err_msg = "Could not instantiate Aeroo lock!!!"
     logger.critical(msg)
-    
-from genshi.template.eval import StrictLookup
-class DynamicLookup(StrictLookup):
 
+class DynamicLookup(StrictLookup):
+    '''
+    Dynamically changes language in a context
+    according to Parser's current language
+    '''
     @classmethod
     def lookup_name(cls, data, name):
         orig = super(DynamicLookup, cls).lookup_name(data, name)
@@ -551,7 +554,7 @@ class Aeroo_report(report_sxw):
         basic.Serializer.add_creation_user(user_name)
         module_info = load_information_from_description_file('report_aeroo')
         version = module_info['version']
-        basic.Serializer.add_generator_info('Aeroo Lib/%s Aeroo Reports/%s' % (aeroolib.__version__, version))
+        basic.Serializer.add_generator_info('Aeroo Lib/%s Aeroo Reports/%s' % (aeroolib_version, version))
         basic.Serializer.add_custom_property('Aeroo Reports %s' % version, 'Generator')
         basic.Serializer.add_custom_property('Odoo %s' % release.version, 'Software')
         basic.Serializer.add_custom_property(module_info['website'], 'URL')

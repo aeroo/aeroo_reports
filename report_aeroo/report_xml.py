@@ -59,7 +59,8 @@ class report_stylesheets(models.Model):
     
     ### Fields
     name = fields.Char('Name', size=64, required=True)
-    report_styles = fields.Binary('Template Stylesheet', help='OpenOffice.org stylesheet (.odt)')
+    report_styles = fields.Binary('Template Stylesheet',
+        help='OpenOffice.org stylesheet (.odt)')
     ### ends Fields
 
 class res_company(models.Model):
@@ -67,7 +68,8 @@ class res_company(models.Model):
     _inherit = 'res.company'
 
     ### Fields
-    stylesheet_id = fields.Many2one('report.stylesheets', 'Aeroo Global Stylesheet')
+    stylesheet_id = fields.Many2one('report.stylesheets', 
+        'Aeroo Global Stylesheet')
     ### ends Fields
 
 class report_mimetypes(models.Model):
@@ -80,7 +82,8 @@ class report_mimetypes(models.Model):
     ### Fields
     name = fields.Char('Name', size=64, required=True, readonly=True)
     code = fields.Char('Code', size=16, required=True, readonly=True)
-    compatible_types = fields.Char('Compatible Mime-Types', size=128, readonly=True)
+    compatible_types = fields.Char('Compatible Mime-Types', size=128, 
+        readonly=True)
     filter_name = fields.Char('Filter Name', size=128, readonly=True)
     ### ends Fields
 
@@ -227,7 +230,9 @@ class report_xml(models.Model):
         service_name = 'report.%s' % name
         if interface.report_int._reports.has_key( service_name ):
             del interface.report_int._reports[service_name]
-        self.env.cr.execute("SELECT * FROM ir_act_report_xml WHERE report_name = %s and active = true ORDER BY id", (name,))
+        self.env.cr.execute("SELECT * FROM ir_act_report_xml WHERE \
+                             report_name = %s and active = true \
+                             ORDER BY id", (name,))
         report = self.env.cr.dictfetchall()
         if report:
             report = report[-1]
@@ -321,7 +326,8 @@ class report_xml(models.Model):
         if recs.aeroo_docs_enabled():
             result.append('aeroo_ooo')
         ##### Check deferred_processing module #####
-        recs.env.cr.execute("SELECT id, state FROM ir_module_module WHERE name='deferred_processing'")
+        recs.env.cr.execute("SELECT id, state FROM ir_module_module WHERE \
+                             name='deferred_processing'")
         deferred_proc_module = recs.env.cr.dictfetchone()
         if deferred_proc_module and deferred_proc_module['state'] in ('installed', 'to upgrade'):
             result.append('deferred_processing')
@@ -352,27 +358,28 @@ class report_xml(models.Model):
         ], string='Template source', default='database', select=True)
     parser_def = fields.Text('Parser Definition')
     parser_loc = fields.Char('Parser location', size=128,
-        help="Path to the parser location. Beginning of the path must be start with the module name!\nLike this: {module name}/{path to the parser.py file}")
+        help="Path to the parser location. Beginning of the path must be start \
+              with the module name!\n Like this: {module name}/{path to the \
+              parser.py file}")
     parser_state = fields.Selection([
         ('default',_('Default')),
         ('def',_('Definition')),
         ('loc',_('Location')),
         ],'State of Parser', select=True)
-    report_type = fields.Selection(selection_add=[('aeroo', 'Aeroo Reports')]) #TODO v8
-    # v8 hack, although above line adds aeroo, there's no option of importing xml with field set to aeroo
-    #report_type = fields.Selection(selection=[('qweb-pdf', 'PDF'),('qweb-html', 'HTML'),('controller', 'Controller'),
-    #    ('pdf', 'RML pdf (deprecated)'),('sxw', 'RML sxw (deprecated)'),('webkit', 'Webkit (deprecated)'),('aeroo', 'Aeroo Reports')],
-    #    string='Report Type', required=True, help="HTML will open the report directly in your browser, PDF will use wkhtmltopdf to render the HTML into a PDF file and let you download it, Controller allows you to define the url of a custom controller outputting any kind of report.")
-    ###
-    process_sep = fields.Boolean('Process Separately')
-    in_format = fields.Selection(selection='_get_in_mimetypes', string='Template Mime-type')
+    report_type = fields.Selection(selection_add=[('aeroo', 'Aeroo Reports')])
+    process_sep = fields.Boolean('Process Separately',
+        help='Generate the report for each object separately, then merge reports.')
+    in_format = fields.Selection(selection='_get_in_mimetypes',
+        string='Template Mime-type')
     out_format = fields.Many2one('report.mimetypes', 'Output Mime-type')
     #report_sxw_content = fields.Binary('SXW content', compute='_report_content',
     #    fnct_inv=_report_content_inv, method=True) #TODO v8
     active = fields.Boolean('Active', help='Disables the report if unchecked.')
-    report_wizard = fields.Boolean('Report Wizard')
+    report_wizard = fields.Boolean('Report Wizard',
+        help='Adds a standard wizard when the report gets invoked.')
     copies = fields.Integer(string='Number of Copies')
-    fallback_false = fields.Boolean('Disable Format Fallback')
+    fallback_false = fields.Boolean('Disable Format Fallback', 
+        help='Raises error on format convertion failure. Prevents returning original report file type if no convertion is available.')
     extras = fields.Char('Extra options', compute='_get_extras', method=True,
         size=256)
     deferred = fields.Selection([
@@ -382,14 +389,21 @@ class report_xml(models.Model):
         help='Deferred (aka Batch) reporting, for reporting on large amount of data.')
     deferred_limit = fields.Integer('Deferred Records Limit',
         help='Records limit at which you are invited to start the deferred process.')
-    replace_report_id = fields.Many2one('ir.actions.report.xml', 'Replace Report')
+    replace_report_id = fields.Many2one('ir.actions.report.xml', 'Replace Report',
+        help='Select a report that should be replaced.')
     wizard_id = fields.Many2one('ir.actions.act_window', 'Wizard Action')
     ### ends Fields
     
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
-        res = super(report_xml, self).fields_view_get(view_id, 
-            view_type, toolbar=toolbar, submenu=submenu)
+        if self.env.context.get('default_report_type')=='aeroo':
+            mda_mod = self.env['ir.model.data']
+            if view_type == 'form':
+                view_id = mda_mod.get_object_reference('report_aeroo', 'act_report_xml_view1')[1]
+            elif view_type == 'tree':
+                view_id = mda_mod.get_object_reference('report_aeroo', 'act_aeroo_report_xml_view_tree')[1]
+        res = super(report_xml, self).fields_view_get(view_id, view_type,
+            toolbar=toolbar, submenu=submenu)
         if view_type=='form' and self.env.context.get('default_report_type')=='aeroo':
             cr = self.env.cr
             ##### Check deferred_processing module #####
@@ -406,8 +420,8 @@ class report_xml(models.Model):
             ############################################
         return res
     
-    #TODO v8: Remove when issue https://github.com/odoo/odoo/issues/2899 gets
-    #really resolved.
+    # TODO Odoo v8: Remove when issue https://github.com/odoo/odoo/issues/2899 gets
+    # really resolved.
     @api.v7
     def read(self, cr, user, ids, fields=None, context=None, load='_classic_read'):
         ##### check new model fields, that while not exist in database #####
