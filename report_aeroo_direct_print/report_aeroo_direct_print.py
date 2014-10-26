@@ -57,47 +57,33 @@ class report_print_actions(models.TransientModel):
         else:
             raise osv.except_osv(_('Warning!'), _('Unsupported report format "%s". Is not possible direct print to printer.') % res[1])
         return False
-
-    def to_print(self, cr, uid, ids, context={}):
-        this = self.browse(cr, uid, ids[0], context=context)
-        report_xml = self.pool.get('ir.actions.report.xml').browse(cr, uid, context['report_action_id'])
-        self.check_report(report_xml.report_name)
-        if this.printer:
-            data = {'model':  report_xml.model, 'id': this.print_ids[0], 'report_type': 'aeroo'}
-            report = self.pool['ir.actions.report.xml']._lookup_report(cr, report_xml.report_name)
-            res = report.create(cr, uid, this.print_ids, data, context=context)
+    
+    @api.multi
+    def to_print(recs):
+        rep_mod = recs.env['ir.actions.report.xml']
+        report_xml = rep_mod.browse(recs.env.context['report_action_id'])[0]
+        obj_print_ids = recs.get_strids()
+        if recs.printer:
+            data = {'model':  report_xml.model,
+                    'id': obj_print_ids[0],
+                    'report_type': 'aeroo'}
+            report = rep_mod._lookup_report(report_xml.report_name)
+            res = report.create(recs.env.cr, recs.env.uid, obj_print_ids, data, 
+                context=dict(recs.env.context))
             if res[1] in SUPPORTED_PRINT_FORMAT:
-                with NamedTemporaryFile(suffix='', prefix='aeroo-print-', delete=False) as temp_file:
+                with NamedTemporaryFile(suffix='', 
+                    prefix='aeroo-print-', delete=False) as temp_file:
                     temp_file.write(res[0])
                 conn = cups.Connection()
-                conn.printFile(this.printer, temp_file.name, 'Aeroo Print', {'copies': this.copies > 0 and str(this.copies) or '1'})
+                conn.printFile(recs.printer, temp_file.name,
+                    '%s (Aeroo Reports Print)' % report_xml.name , 
+                    {'copies': recs.copies > 0 and str(recs.copies) or '1'})
                 return {
                     'type': 'ir.actions.act_window_close'
                 }
-
-        print_ids = []
-        if this.copies<=0:
-            print_ids = this.print_ids
-        else:
-            while(this.copies):
-                print_ids.extend(this.print_ids)
-                this.copies -= 1
-        if str(report_xml.out_format.id) != this.out_format:
-            report_xml.write({'out_format':this.out_format}, context=context)
-        if self.check_if_deferred(report_xml, this.print_ids):
-            this.write({'state':'confirm','message':_("This process may take too long for interactive processing. \
-It is advisable to defer the process in background. \
-Do you want to start a deferred process?"),'print_ids':print_ids}, context=context)
-            return self._reopen(this.id, this._model)
-
-        data = {'model':report_xml.model, 'ids':print_ids, 'id':context['active_id'], 'report_type': 'aeroo'}
-        context['aeroo_dont_print_to_pinter'] = True
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': report_xml.report_name,
-            'datas': data,
-            'context':context
-        }
+        new_recs = recs.with_context(aeroo_dont_print_to_pinter = True)
+        res = super(report_print_actions, new_recs).to_print()
+        return res
     
     @api.model
     def _get_printers(self):

@@ -242,14 +242,12 @@ class report_xml(models.Model):
             elif report['parser_state']=='def' and report['parser_def']:
                 parser = self.load_from_source(report['parser_def']) or parser
             self.register_report(report['report_name'], report['model'], report['report_rml'], parser)
-
-    @api.model
-    def _lookup_report(self):
-        name = self.env.args[1] #TODO v8 How to get name attribute???? Adding it to method's def raises error
+    
+    @api.cr
+    def _lookup_report(self, cr, name):
         if 'report.' + name in interface.report_int._reports:
             new_report = interface.report_int._reports['report.' + name]
         else:
-            cr = self.env.cr
             cr.execute("SELECT id, active, report_type, parser_state, \
                         parser_loc, parser_def, model, report_rml \
                         FROM ir_act_report_xml \
@@ -259,14 +257,14 @@ class report_xml(models.Model):
                 if record['active'] == True:
                     parser = rml_parse
                     if record['parser_state']=='loc' and record['parser_loc']:
-                        parser = self.load_from_file(record['parser_loc'], record['id']) or parser
+                        parser = self.load_from_file(cr, 1, record['parser_loc'], record['id']) or parser
                     elif record['parser_state']=='def' and record['parser_def']:
-                        parser = self.load_from_source(record['parser_def']) or parser
-                    new_report = self.register_report(name, record['model'], record['report_rml'], parser)
+                        parser = self.load_from_source(cr, 1, record['parser_def']) or parser
+                    new_report = self.register_report(cr, 1, name, record['model'], record['report_rml'], parser)
                 else:
                     new_report = False
             else:
-                new_report = super(report_xml, self)._lookup_report(name)
+                new_report = super(report_xml, self)._lookup_report(cr, name)
         return new_report
 
     def _report_content(self, cursor, user, ids, name, arg, context=None):

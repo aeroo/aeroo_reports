@@ -33,15 +33,11 @@ from openerp import api, models, fields, _
 from openerp.exceptions import except_orm, Warning
 
 from openerp.report import interface
+import re
 
 class report_print_actions(models.TransientModel):
     _name = 'aeroo.print_actions'
     _description = 'Aeroo reports print wizard'
-    
-    def check_report(self, report_name):
-        if 'report.%s' % report_name not in interface.report_int._reports: # check if report exist in register of reports
-            raise except_orm(_('System Error !'), _('Report was not registered in system or deactivated !'))
-        return True
 
     def _reopen(self, res_id, model):
         return {'type': 'ir.actions.act_window',
@@ -50,7 +46,7 @@ class report_print_actions(models.TransientModel):
                 'res_id': res_id,
                 'res_model': self._name,
                 'target': 'new',
-        }
+            }
 
     def check_if_deferred(self, report_xml, print_ids):
         extras = report_xml.extras.split(',')
@@ -71,16 +67,17 @@ class report_print_actions(models.TransientModel):
 
         mod_id = mod_obj.search(cr, uid, [('name', '=', 'action_deferred_processing_task_deferred_processing')])[0]
         res_id = mod_obj.read(cr, uid, mod_id, ['res_id'])['res_id']
-        act_win = act_obj.read(cr, uid, res_id, ['name','type','view_id','res_model','view_type', \
+        act_win = act_obj.read(cr, uid, res_id, ['name','type','view_id','res_model','view_type',
                                                 'search_view_id','view_mode','target','context'])
         act_win['res_id'] = process_id
         act_win['view_type'] = 'form'
         act_win['view_mode'] = 'form,tree'
         return act_win
-
+    
+    
     def simple_print(self, cr, uid, ids, context):
-        this = self.browse(cr, uid, ids[0], context=context)
-        report_xml = self.pool.get('ir.actions.report.xml').browse(cr, uid, context['report_action_id'])
+        rep_mod = recs.env['ir.actions.report.xml']
+        report_xml = rep_mod.browse(recs.env.context['report_action_id'])
         data = {'model':report_xml.model, 'ids':this.print_ids, 'id':context['active_id'], 'report_type': 'aeroo'}
         if str(report_xml.out_format.id) != this.out_format:
             report_xml.write({'out_format':this.out_format}, context=context)
@@ -90,33 +87,52 @@ class report_print_actions(models.TransientModel):
             'datas': data,
             'context':context
         }
-
-    def to_print(self, cr, uid, ids, context=None):
-        this = self.browse(cr, uid, ids[0], context=context)
-        report_xml = self.pool.get('ir.actions.report.xml').browse(cr, uid, context['report_action_id'])
-        #self.check_report(report_xml.report_name) #TODO
+    
+    @api.multi
+    def get_strids(recs):
+        valid_input = re.match('^\[\s*((\d+)(\s*,\s*\d+)*)\s*\]$',
+            recs.print_ids)
+        if not valid_input:
+            raise Warning(_("Wrong or not ids!"))
+        return eval(recs.print_ids, {})
+    
+    @api.multi
+    def to_print(recs=None):
+        rep_mod = recs.env['ir.actions.report.xml']
+        report_xml = rep_mod.browse(recs.env.context['report_action_id'])[0]
+        obj_print_ids = recs.get_strids()
         print_ids = []
-        if this.copies<=0:
-            print_ids = this.print_ids
+        if recs.copies <= 0:
+            print_ids = obj_print_ids
         else:
-            while(this.copies):
-                print_ids.extend(this.print_ids)
-                this.copies -= 1
-        if str(report_xml.out_format.id) != this.out_format:
-            report_xml.write({'out_format':this.out_format}, context=context)
-        if self.check_if_deferred(report_xml, print_ids):
-            this.write({'state':'confirm','message':_("This process may take too long for interactive processing. \
-It is advisable to defer the process in background. \
-Do you want to start a deferred process?"),'print_ids':print_ids}, context=context)
-            return self._reopen(this.id, this._model)
+            while(recs.copies):
+                print_ids.extend(obj_print_ids)
+                recs.copies -= 1
+        if str(report_xml.out_format.id) != recs.out_format:
+            report_xml.write({'out_format':recs.out_format})
+        if recs.check_if_deferred(report_xml, print_ids):
+            recs.write({
+                'state': 'confirm',
+                'message': _("This process may take too long for interactive \
+                    processing. It is advisable to defer the process in \
+                    background. Do you want to start a deferred process?"),
+                'print_ids': str(print_ids)
+                })
+            return self._reopen(recs.id, recs._model)
         ##### Simple print #####
-        data = {'model':report_xml.model, 'ids':print_ids, 'id':context['active_id'], 'report_type': 'aeroo'}
-        return {
-            'type': 'ir.actions.report.xml',
-            'report_name': report_xml.report_name,
-            'datas': data,
-            'context':context
-        }
+        data = {
+                'model': report_xml.model,
+                'ids': print_ids,
+                'id': print_ids[0],
+                'report_type': 'aeroo'
+                }
+        res = {
+               'type': 'ir.actions.report.xml',
+               'report_name': report_xml.report_name,
+               'datas': data,
+               'context': recs.env.context
+               }
+        return res
 
     @api.model
     def _out_format_get(self):
@@ -139,7 +155,7 @@ Do you want to start a deferred process?"),'print_ids':print_ids}, context=conte
     message = fields.Text('Message')
     state = fields.Selection([('draft','Draft'),('confirm','Confirm'),
         ('done','Done'),],'State', select=True, readonly=True)
-    #'print_ids':fields.serialized() #TODO v8?
+    print_ids = fields.Text()
     
     ### ends Fields
 
@@ -178,6 +194,6 @@ Do you want to start a deferred process?"),'print_ids':print_ids}, context=conte
         'out_format_code': _get_default_outformat('code'),
         'copies': _get_default_number_of_copies,
         'state': 'draft',
-        #'print_ids': lambda self,cr,uid,ctx: ctx.get('active_ids') #TODO v8?
+        'print_ids': lambda self,cr,uid,ctx: ctx.get('active_ids')
     }
 

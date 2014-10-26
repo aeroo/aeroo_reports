@@ -165,7 +165,7 @@
                         <field name="object_ids" default_focus="1"/>
                    </group>
                     <footer>
-                        <button icon="gtk-print" name="to_print" string="Print" type="object" default_focus="1" class="oe_highlight"/>
+                        <button icon="gtk-print" name="to_print" string="_Print" type="object" default_focus="1" class="oe_highlight"/>
                          or 
                         <button special="cancel" string="Close" type="object" class="oe_link"/>
                     </footer>

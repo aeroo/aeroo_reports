@@ -308,12 +308,12 @@ class ExtraFunctions(object):
             if isinstance(obj, (str,unicode)):
                 model = obj
             else:
-                model = obj._table_name
+                model = obj._name
             if isinstance(obj, (str,unicode)) or hasattr(obj, field):
                 labels = self.pool.get(model).fields_get(self.cr, self.uid, allfields=[field], context=self.context)
                 return labels[field]['string']
         except Exception, e:
-            return ''
+            raise e
 
     def _field_size(self, obj, field):
         try:
