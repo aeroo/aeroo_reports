@@ -91,6 +91,11 @@ class report_xml(models.Model):
     _name = 'ir.actions.report.xml'
     _inherit = 'ir.actions.report.xml'
 
+    def __init__(self, pool, cr):
+        if not('aeroo','Aeroo Report') in self._columns['report_type'].selection:
+            self._columns['report_type'].selection.append(('aeroo','Aeroo Report'))
+        super(report_xml, self).__init__(pool, cr)
+
     @api.model
     def aeroo_docs_enabled(self):
         '''
