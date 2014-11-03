@@ -151,36 +151,39 @@ class report_xml(models.Model):
             logger.error("Error in 'load_from_source' method",
                 __name__, exc_info=True)
             return None
-
-    def link_inherit_report(self, cr, uid, report, new_replace_report_id=False, context={}):
+    
+    @api.one
+    def link_inherit_report(recs, new_replace_report_id=False):
         res = {}
         if new_replace_report_id:
-            inherit_report = self.browse(cr, uid, new_replace_report_id, context=context)
+            inherit_report = recs.browse(new_replace_report_id)
         else:
             inherit_report = report.replace_report_id
 
         if inherit_report:
-            ir_values_obj = self.pool.get('ir.values')
+            ir_values_obj = recs.env['ir.values']
             if inherit_report.report_wizard:
                 src_action_type = 'ir.actions.act_window'
-                action_id = report.wizard_id
+                action_id = recs.wizard_id
             else:
                 src_action_type = 'ir.actions.report.xml'
                 action_id = inherit_report.id
-            event_id = ir_values_obj.search(cr, uid, [('value','=',"%s,%s" % (src_action_type,action_id))])
-            if event_id:
-                event_id = event_id[0]
-                if report.report_wizard:
+            events = ir_values_obj.search(
+                [('value','=',"%s,%s" % (src_action_type,action_id))])
+            if events:
+                event = events[0]
+                if recs.report_wizard:
                     dest_action_type = 'ir.actions.act_window'
-                    if report.wizard_id:
-                        action_id = report.wizard_id
+                    if recs.wizard_id:
+                        action_id = recs.wizard_id
                     else:
-                        action_id = self._set_report_wizard(cr, uid, inherit_report.id, report.id, linked_report_id=report.id, report_name=report.name, context=context)
+                        action_id = inherit_report._set_report_wizard(recs.id, 
+                            linked_report_id=recs.id, report_name=recs.name)[0]
                         res['wizard_id'] = action_id
                 else:
                     dest_action_type = 'ir.actions.report.xml'
-                    action_id = report.id
-                ir_values_obj.write(cr, uid, event_id, {'value':"%s,%s" % (dest_action_type,action_id)}, context=context)
+                    action_id = recs.id
+                event.write({'value':"%s,%s" % (dest_action_type,action_id)})
         return res
     
     @api.one
@@ -197,7 +200,8 @@ class report_xml(models.Model):
             else:
                 src_action_type = 'ir.actions.report.xml'
                 action_id = recs.id
-            event_ids = irval_obj.search([('value','=',"%s,%s" % (src_action_type,action_id))])
+            event_ids = irval_obj.search(
+                [('value','=',"%s,%s" % (src_action_type,action_id))])
             if event_ids:
                 event_id = event_ids[0]
                 if recs.replace_report_id.report_wizard:
@@ -206,10 +210,10 @@ class report_xml(models.Model):
                 else:
                     dest_action_type = 'ir.actions.report.xml'
                     action_id = recs.replace_report_id.id
-                irval_obj.write(cr, uid, event_id, {'value':"%s,%s" % (dest_action_type,action_id)}, context=context)
+                event_id.write({'value':"%s,%s" % (dest_action_type,action_id)})
 
             if not keep_wizard and recs.wizard_id and not res.get('wizard_id',True):
-                recs.wizard_id.unlink(context=context)
+                recs.wizard_id.unlink()
         return res
 
     def delete_report_service(self, name):
@@ -591,15 +595,13 @@ class report_xml(models.Model):
         if 'replace_report_id' in vals and vals.get('active', recs.active):
             if vals['replace_report_id']:
                 if recs.replace_report_id and vals['replace_report_id'] != recs.replace_report_id.id:
-                    #ctx = context.copy()
-                    #ctx['keep_wizard'] = True # keep window action for wizard, if only inherit report changed
                     recs_new = recs.with_context(keep_wizard = True)
                     link_vals.update(recs_new.unlink_inherit_report())
                     now_unlinked = True
-                #TODO v8#link_vals.update(self.link_inherit_report(cr, user, record, new_replace_report_id=vals['replace_report_id'], context=context))
+                link_vals.update(recs.link_inherit_report(new_replace_report_id=vals['replace_report_id'])[0])
                 recs.register_report(report_name, vals.get('model', recs.model), vals.get('report_rml', recs.report_rml), parser)
             else:
-                link_vals.update(recs.unlink_inherit_report())
+                link_vals.update(recs.unlink_inherit_report()[0])
                 now_unlinked = True
         ##########################################
         try:

@@ -409,14 +409,14 @@ class Aeroo_report(report_sxw):
 
         aeroo_print.epl_images = []
         basic = NewTextTemplate(source=base64.decodestring(file_data))
-        #try:
-        if genshi_version<='0.6':
-            data = preprocess(basic.generate(**oo_parser.localcontext).render().decode('utf8').encode(report_xml.charset), aeroo_print)
-        else:
-            data = preprocess(basic.generate(**oo_parser.localcontext).render().encode(report_xml.charset), aeroo_print)
-        #except Exception, e:
-        #    self.logger(str(e), logging.ERROR)
-        #    return False, output
+        try:
+            if genshi_version<='0.6':
+                data = preprocess(basic.generate(**oo_parser.localcontext).render().decode('utf8').encode(report_xml.charset), aeroo_print)
+            else:
+                data = preprocess(basic.generate(**oo_parser.localcontext).render().encode(report_xml.charset), aeroo_print)
+        except Exception, e:
+            self.logger(str(e), logging.ERROR)
+            return False, output
 
         if report_xml.content_fname:
             output = report_xml.content_fname
@@ -436,14 +436,11 @@ class Aeroo_report(report_sxw):
                 #self.oo_subreports = []
                 #del self.oo_subreports[print_id]
             if report_xml.out_format.code=='oo-dbf':
-                #data = DC.saveByStream(report_xml.out_format.filter_name, "78") #TODO v8 remove
-                data = docs.convert(token, report_xml.out_format.filter_name, "78")
+                data = docs.convert(token)#, report_xml.out_format.filter_name, "78") #TODO v8 check the filter name
             else:
                 if deferred:
                     deferred.set_status(_('Document conversion'))
-                #data = DC.saveByStream(report_xml.out_format.filter_name) #TODO v8 remove
                 data = docs.convert(token)#, report_xml.out_format.filter_name) #TODO v8 check the filter name
-            #DC.closeDocument() #TODO v8 remove
         return data
 
     def _raise_exception(self, e, print_id):
@@ -457,6 +454,17 @@ class Aeroo_report(report_sxw):
                     os.unlink(sub_report)
         raise Exception(_("Aeroo Reports: Error while generating the report."), e, str(e), _("For more reference inspect error logs."))
 
+    def get_docs_conn(self, cr):
+        pool = pooler.get_pool(cr.dbname)
+        icp = pool.get('ir.config_parameter')
+        docs_host = icp.get_param(cr, 1, 'aeroo.docs_host') or 'localhost'
+        docs_port = icp.get_param(cr, 1, 'aeroo.docs_port') or '8989'
+        docs_auth_type = icp.get_param(cr, 1, 'aeroo.docs_auth_type') or False
+        docs_username = icp.get_param(cr, 1, 'aeroo.docs_username') or 'anonymous'
+        docs_password = icp.get_param(cr, 1, 'aeroo.docs_password') or 'anonymous'
+        docs_client = DOCSConnection(docs_host, docs_port, username=docs_username, password=docs_password)
+        return docs_client
+        
     def create_aeroo_report(self, cr, uid, ids, data, report_xml, context=None, output='odt'):
         """ Returns an aeroo report generated with aeroolib
         """
@@ -568,19 +576,7 @@ class Aeroo_report(report_sxw):
             raise
         except Exception, e:
             self._raise_exception(e, print_id)
-
-        ######### OpenOffice extras #########
-        #DC = netsvc.Service._services.get('openoffice')
-        #oo_config_obj = pool.get('oo.config',False)
-        #DC = oo_config_obj and pool.get('oo.config').get()
-        #TODO
-        icp = pool.get('ir.config_parameter')
-        docs_host = icp.get_param(cr, 1, 'aeroo.docs_host') or 'localhost'
-        docs_port = icp.get_param(cr, 1, 'aeroo.docs_port') or '8989'
-        docs_auth_type = icp.get_param(cr, 1, 'aeroo.docs_auth_type') or False
-        docs_username = icp.get_param(cr, 1, 'aeroo.docs_username') or 'anonymous'
-        docs_password = icp.get_param(cr, 1, 'aeroo.docs_password') or 'anonymous'
-        docs_client = DOCSConnection(docs_host, docs_port, username=docs_username, password=docs_password)
+        docs_client = self.get_docs_conn(cr)
         #if (output!=report_xml.in_format[3:] or self.oo_subreports.get(print_id)):
         if output!=report_xml.in_format[3:] or aeroo_print.subreports:
             if aeroo_docs and docs_client:
@@ -599,9 +595,9 @@ class Aeroo_report(report_sxw):
                 if report_xml.fallback_false:
                     #TODO should be removed or changed with DOCS
                     if not aeroo_docs:
-                        raise osv.except_osv(_('OpenOffice.org related error!'), _('Aeroo DOCS connection is disabled.'))
+                        raise osv.except_osv(_('Aeroo DOCS related error!'), _('Aeroo DOCS connection is disabled.'))
                     elif not docs_client:
-                        raise osv.except_osv(_('OpenOffice.org related error!'), _('Could not create Aeroo DOCS connection object.'))
+                        raise osv.except_osv(_('Aeroo DOCS related error!'), _('Could not create Aeroo DOCS connection object.'))
                 else:
                     self.logger(_("PDF generator temporarily offline, please wait a minute"), logging.WARNING)
                     output=report_xml.in_format[3:]
@@ -740,14 +736,6 @@ class Aeroo_report(report_sxw):
                 aname = attach and eval(attach, {'object':obj, 'time':time}) or False
                 result = False
                 if report_xml.attachment_use and aname and context.get('attachment_use', True):
-                    #aids = pool.get('ir.attachment').search(cr, uid, [('datas_fname','=',aname+'.odt'),('res_model','=',self.table),('res_id','=',obj.id)])
-                    #if aids:
-                    #    brow_rec = pool.get('ir.attachment').browse(cr, uid, aids[0])
-                    #    if not brow_rec.datas:
-                    #        continue
-                    #    d = base64.decodestring(brow_rec.datas)
-                    #    results.append((d,'odt'))
-                    #    continue
                     cr.execute("SELECT id, datas_fname FROM ir_attachment WHERE datas_fname ilike %s and res_model=%s and res_id=%s LIMIT 1", (aname+'.%',self.table,obj.id))
                     search_res = cr.dictfetchone()
                     if search_res:
@@ -778,26 +766,22 @@ class Aeroo_report(report_sxw):
                 except Exception,e:
                      self.logger(_("Create attachment error!")+'\n'+str(e), logging.ERROR)
                 results.append(result)
-
-        #DC = netsvc.Service._services.get('openoffice')
-        oo_config_obj = pool.get('oo.config',False)
-        DC = oo_config_obj and pool.get('oo.config').get()
+        docs_client = self.get_docs_conn(cr)
         if results and len(results)==1:
             return results[0]
-        elif results and DC:
+        elif results and docs_client:
             if deferred:
-                deferred.set_status(_('Concat single documents'))
+                deferred.set_status(_('Concatenating single documents'))
             not_odt = filter(lambda r: r[1]!='odt', results)
             if not_odt:
                 raise osv.except_osv(_('Error!'), _('Unsupported combination of formats!'))
-            results.reverse()
-            data = results.pop()
             with aeroo_lock:
-                DC.putDocument(data[0])
-                DC.joinDocuments([r[0] for r in results])
-                result = DC.saveByStream()
-                DC.closeDocument()
-            return (result, data[1])
+                docs_ids = []
+                for r in results:
+                    docs_id = docs_client.upload(r[0])
+                    docs_ids.append(docs_id)
+                result = docs_client.join(docs_ids, out_mime=results[0][1])
+            return (result, results[0][1])
         else:
             return self.create_single_pdf(cr, uid, ids, data, report_xml, context)
 

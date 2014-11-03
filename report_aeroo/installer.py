@@ -158,7 +158,7 @@ class docs_config_installer(models.TransientModel):
         icp.set_param('aeroo.docs_enabled', str(self.enabled))
         icp.set_param('aeroo.docs_host', self.host)
         icp.set_param('aeroo.docs_port', self.port)
-        icp.set_param('aeroo.docs_auth_type', self.auth_type)
+        icp.set_param('aeroo.docs_auth_type', self.auth_type or 'simple')
         icp.set_param('aeroo.docs_username', self.username)
         icp.set_param('aeroo.docs_password', self.password)
         

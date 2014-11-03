@@ -75,7 +75,8 @@ class DOCSConnection():
             data=testfile.read()
         identifier = self.upload(data)
         if not identifier:
-            raise ServerException("Upload failded, no upload identifier returned from server.")
+            raise ServerException('Upload failded, no upload identifier '\
+                                  'returned from server.')
         conv_result = self.convert(identifier)
         if not conv_result:
             raise ServerException("Document conversion error.")
@@ -94,7 +95,8 @@ class DOCSConnection():
             chunk = data[i:i+CHUNK_LENGTH]
             is_last = (i+CHUNK_LENGTH) >= data_size
             payload = self._initpack('upload')
-            payload['params'].update({'data':chunk, 'identifier':identifier, 'is_last': is_last})
+            payload['params'].update({'data':chunk, 'identifier':identifier,
+                                       'is_last': is_last})
             response = requests.post(
                 self.url, data = json.dumps(payload), headers=HEADERS).json()
             self._checkerror(response)
@@ -108,15 +110,17 @@ class DOCSConnection():
         return identifier or False
 
 
-    def convert(self, identifier):
+    def convert(self, data=False, identifier=False, in_mime=False, out_mime=False):
         payload = self._initpack('convert')
         payload['params'].update({'identifier': identifier})
+        if out_mime:
+            payload['params'].update({'out_mime': out_mime})
         response = requests.post(
             self.url, data = json.dumps(payload), headers=HEADERS).json()
         self._checkerror(response)
         return 'result' in response and b64decode(response['result']) or False
         
-    def join(self, idents):
+    def join(self, idents, out_mime='odt'):
         payload = self._initpack('join')
         payload['params'].update({'idents': idents})
         response = requests.post(
