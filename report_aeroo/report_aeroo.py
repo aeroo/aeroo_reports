@@ -81,6 +81,8 @@ except Exception:
     err_msg = "Could not instantiate Aeroo lock!!!"
     logger.critical(msg)
 
+mime_dict = {'oo-pdf':'pdf', 'oo-doc':'doc'}
+
 class DynamicLookup(StrictLookup):
     '''
     Dynamically changes language in a context
@@ -436,11 +438,11 @@ class Aeroo_report(report_sxw):
                 #self.oo_subreports = []
                 #del self.oo_subreports[print_id]
             if report_xml.out_format.code=='oo-dbf':
-                data = docs.convert(token)#, report_xml.out_format.filter_name, "78") #TODO v8 check the filter name
+                data = docs.convert(identifier=token)#, report_xml.out_format.filter_name, "78") #TODO v8 check the filter name
             else:
                 if deferred:
                     deferred.set_status(_('Document conversion'))
-                data = docs.convert(token)#, report_xml.out_format.filter_name) #TODO v8 check the filter name
+                data = docs.convert(identifier=token, out_mime=mime_dict[report_xml.out_format.code])
         return data
 
     def _raise_exception(self, e, print_id):
