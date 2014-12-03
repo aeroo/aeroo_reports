@@ -352,7 +352,7 @@ class ExtraFunctions(object):
                     model = obj
                     field_val = value
                 else:
-                    model = obj._table_name
+                    model = obj._name
                     field_val = getattr(obj, field)
                 if kind=='item':
                     if field_val:
