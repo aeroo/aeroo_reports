@@ -30,6 +30,7 @@
 #
 ################################################################################
 
+from openerp import registry, models, _
 from barcode import barcode
 from openerp.tools import translate
 #from currency_to_text import currency_to_text
@@ -37,11 +38,9 @@ from ctt_objects import supported_language
 import base64
 import StringIO
 from PIL import Image
-import openerp.pooler as pooler
 import time
 import openerp.osv as osv
 from openerp.report import report_sxw
-from openerp.tools.translate import _
 import openerp.netsvc as netsvc
 from openerp.tools.safe_eval import safe_eval as eval
 from aeroolib.plugins.opendocument import _filter
@@ -109,7 +108,7 @@ class ExtraFunctions(object):
     def __init__(self, cr, uid, report_id, context):
         self.cr = cr
         self.uid = uid
-        self.pool = pooler.get_pool(self.cr.dbname)
+        self.registry = registry(self.cr.dbname)
         self.report_id = report_id
         self.context = context
         self.functions = {
@@ -180,7 +179,7 @@ class ExtraFunctions(object):
         return get_log
 
     def _get_report_xml(self):
-        return self.pool.get('ir.actions.report.xml').browse(self.cr, self.uid, self.report_id)
+        return self.registry['ir.actions.report.xml'].browse(self.cr, self.uid, self.report_id)
 
     def _get_lang(self, source='current'):
         if source=='current':
@@ -225,7 +224,7 @@ class ExtraFunctions(object):
         return c_to_text
 
     def _translate_text(self, source):
-        trans_obj = self.pool.get('ir.translation')
+        trans_obj = self.registry['ir.translation']
         trans = trans_obj.search(self.cr,self.uid,[('res_id','=',self.report_id),('type','=','report'),('src','=',source),('lang','=',self.context['lang'] or self.context['user_lang'])])
         if not trans:
             #trans_obj.create(self.cr, self.uid, {'src':source,'type':'report','lang':self._get_lang(),'res_id':self.report_id,'name':('ir.actions.report.xml,%s' % source)[:128]})
@@ -286,17 +285,8 @@ class ExtraFunctions(object):
         return localspace['value_list']
 
     def _get_name(self, obj):
-        if obj.__class__==osv.orm.browse_record:
-            return self.pool.get(obj._table_name).name_get(self.cr, self.uid, [obj.id], context={'lang':self._get_lang()})[0][1]
-        elif type(obj)==str: # only for fields in root record
-            model = self.context['model']
-            field, rec_id = obj.split(',')
-            rec_id = int(rec_id)
-            if rec_id:
-                field_data = self.pool.get(model).fields_get(self.cr, self.uid, [field], context=self.context)
-                return self.pool.get(field_data[field]['relation']).name_get(self.cr, self.uid, [rec_id], context={'lang':self._get_lang()})[0][1]
-            else:
-                return ''
+        if isinstance(obj, models.Model):
+            return obj.name_get()[0][1]
         return ''
 
     def _get_label(self, obj, field):
@@ -310,7 +300,7 @@ class ExtraFunctions(object):
             else:
                 model = obj._name
             if isinstance(obj, (str,unicode)) or hasattr(obj, field):
-                labels = self.pool.get(model).fields_get(self.cr, self.uid, allfields=[field], context=self.context)
+                labels = self.registry[model].fields_get(self.cr, self.uid, allfields=[field], context=self.context)
                 return labels[field]['string']
         except Exception, e:
             raise e
@@ -324,7 +314,7 @@ class ExtraFunctions(object):
             else:
                 model = obj._table_name
             if isinstance(obj, (str,unicode)) or hasattr(obj, field):
-                size = self.pool.get(model)._columns[field].size
+                size = self.registry[model]._columns[field].size
                 return size
         except Exception, e:
             return ''
@@ -338,7 +328,7 @@ class ExtraFunctions(object):
             else:
                 model = obj._table_name
             if isinstance(obj, (str,unicode)) or hasattr(obj, field):
-                digits = self.pool.get(model)._columns[field].digits
+                digits = self.registry[model]._columns[field].digits
                 return digits or [16,2]
         except Exception:
             return []
@@ -356,16 +346,16 @@ class ExtraFunctions(object):
                     field_val = getattr(obj, field)
                 if kind=='item':
                     if field_val:
-                        return dict(self.pool.get(model).fields_get(self.cr, self.uid, allfields=[field], context=self.context)[field]['selection'])[field_val]
+                        return dict(self.registry[model].fields_get(self.cr, self.uid, allfields=[field], context=self.context)[field]['selection'])[field_val]
                 elif kind=='items':
-                    return self.pool.get(model).fields_get(self.cr, self.uid, allfields=[field], context=self.context)[field]['selection']
+                    return self.registry[model].fields_get(self.cr, self.uid, allfields=[field], context=self.context)[field]['selection']
                 return ''
             except Exception:
                 return ''
         return get_selection_item
 
     def _get_attachments(self, o, index=None, raw=False):
-        attach_obj = self.pool.get('ir.attachment')
+        attach_obj = self.registry['ir.attachment']
         srch_param = [('res_model','=',o._name),('res_id','=',o.id)]
         if type(index)==str:
             srch_param.append(('name','=',index))
@@ -471,11 +461,11 @@ class ExtraFunctions(object):
             yield l[i:i+n]
 
     def _search_ids(self, model, domain):
-        obj = self.pool.get(model)
+        obj = self.registry[model]
         return obj.search(self.cr, self.uid, domain)
 
     def _search(self, model, domain):
-        obj = self.pool.get(model)
+        obj = self.registry[model]
         ids = obj.search(self.cr, self.uid, domain)
         return obj.browse(self.cr, self.uid, ids, {'lang':self._get_lang()})
 
@@ -489,7 +479,7 @@ class ExtraFunctions(object):
             model, id = args
         else:
             raise None
-        return self.pool.get(model).browse(self.cr, self.uid, id)
+        return self.registry[model].browse(self.cr, self.uid, id)
 
     def _get_safe(self, expression, obj):
         try:

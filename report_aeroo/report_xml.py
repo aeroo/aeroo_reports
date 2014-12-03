@@ -1,3 +1,4 @@
+
 # -*- encoding: utf-8 -*-
 ################################################################################
 #
@@ -271,21 +272,26 @@ class report_xml(models.Model):
                 new_report = super(report_xml, self)._lookup_report(cr, name)
         return new_report
 
-    def _report_content(self, cursor, user, ids, name, arg, context=None):
+    @api.multi
+    @api.depends('report_type', 'tml_source', 'report_sxw')
+    def _report_content(recs):
         res = {}
-        aeroo_ids = self.search(cursor, 1, [('report_type','=','aeroo'),('id','in',ids)], context=context)
-        orig_ids = list(set(ids).difference(aeroo_ids))
-        res = orig_ids and super(report_xml, self)._report_content(cursor, 1, orig_ids, name, arg, context) or {}
-        for report in self.read(cursor, 1, aeroo_ids, ['tml_source','report_type','report_sxw_content_data', 'report_sxw','report_rml','report_file'], context=context):
+        aeroo_ids = recs.search([('report_type','=','aeroo'),('id','in',recs.ids)])
+        orig_ids = list(set(recs.ids).difference(aeroo_ids.ids))
+        name = 'report_sxw_content'
+        ancestor = recs.pool.get('ir.actions.report.xml')
+        #TODO v8 how to call original function, where to get 'name' param?
+        #res = orig_ids and super(report_xml, recs)._report_content({name=name) or {}
+        for report in aeroo_ids:
             data = report[name + '_data']
-            if report['report_type']=='aeroo' and report['tml_source']=='file' or not data and report[name[:-8]]:
+            if report.report_type == 'aeroo' and report.tml_source == 'file' or not data and report.report_sxw:
                 fp = None
                 try:
                     #TODO: Probably there's a need to check if path to the report template actually present (???)
                     fp = tools.file_open(report[name[:-8]], mode='rb')
-                    data = report['report_type']=='aeroo' and base64.encodestring(fp.read()) or fp.read()
+                    data = report.report_type == 'aeroo' and base64.encodestring(fp.read()) or fp.read()
                 except IOError, e:
-                    if e.errno==13: # Permission denied on the template file
+                    if e.errno == 13: # Permission denied on the template file
                         raise osv.except_osv(_(e.strerror), e.filename)
                     else:
                         logger.error("Error in '_report_content' method", exc_info=True)
@@ -296,8 +302,7 @@ class report_xml(models.Model):
                 finally:
                     if fp:
                         fp.close()
-            res[report['id']] = data
-        return res
+            report.report_sxw_content = data
 
     def _get_encodings(self, cursor, user, context={}):
         l = list(set(encodings._aliases.values()))
@@ -307,7 +312,7 @@ class report_xml(models.Model):
     @api.one
     def _report_content_inv(recs, name, value, arg):
         if value:
-            recs.write({name+'_data': value})
+            recs.report_sxw_content = value
     
     def change_input_format(self, cr, uid, ids, in_format):
         out_format = self.pool.get('report.mimetypes').search(cr, uid, [('code','=',in_format)])
@@ -376,6 +381,7 @@ class report_xml(models.Model):
     out_format = fields.Many2one('report.mimetypes', 'Output Mime-type')
     #report_sxw_content = fields.Binary('SXW content', compute='_report_content',
     #    fnct_inv=_report_content_inv, method=True) #TODO v8
+    report_sxw_content = fields.Binary('SXW content', compute='_report_content', inverse="_report_content_inv")
     active = fields.Boolean('Active', help='Disables the report if unchecked.')
     report_wizard = fields.Boolean('Report Wizard',
         help='Adds a standard wizard when the report gets invoked.')
@@ -395,6 +401,18 @@ class report_xml(models.Model):
         help='Select a report that should be replaced.')
     wizard_id = fields.Many2one('ir.actions.act_window', 'Wizard Action')
     ### ends Fields
+    
+    @api.model
+    def search(self, args, offset=0, limit=None, order=None, count=False, context=None):
+        orig_res = super(report_xml, self).search(args, offset=offset, limit=limit, order=order)
+        by_name = len(args) == 1 and [x for x in args if x[0] == 'report_name']
+        if by_name and orig_res and 'print_id' not in self.env.context:
+            report_name = by_name[0][2]
+            replace_rep = super(report_xml, self).search([('replace_report_id','=',orig_res.ids[0])], offset=offset, limit=limit, order=order)
+            if len(replace_rep):
+                return replace_rep
+        return orig_res
+    
     
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
@@ -451,6 +469,7 @@ class report_xml(models.Model):
                         res[exf] = defaults.get(exf, False)
         ####################################################################################
         return res    
+    
     @api.v8
     @api.multi
     def read(recs, fields=None, load='_classic_read'):
