@@ -37,7 +37,7 @@
     'description': """
 Shows "Printscreen List" report on each OpenERP object.
 
-Using report_aeroo_ooo OpenERP module by Alistek, you can set output to one of these (xls, pdf, csv) formats.
+Using aeroo_docs daemon by Alistek, you can convert output to one of these (xls, pdf, csv) formats.
 """,
     'author': 'Alistek',
     'website': 'http://www.alistek.com',

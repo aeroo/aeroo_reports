@@ -163,7 +163,6 @@ class Aeroo_report(report_sxw):
                 report_xml = ir_obj.browse(cr, 1, report_xml_ids[0])
             else:
                 report_xml = False
-            
             #TODO v8 remove, preload_mode is deprecated, as reports themselves are not preloaded
             #if report_xml and report_xml.preload_mode == 'preload':
             #    file_data = report_xml.report_sxw_content

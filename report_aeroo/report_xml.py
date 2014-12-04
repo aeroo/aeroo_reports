@@ -381,7 +381,8 @@ class report_xml(models.Model):
     out_format = fields.Many2one('report.mimetypes', 'Output Mime-type')
     #report_sxw_content = fields.Binary('SXW content', compute='_report_content',
     #    fnct_inv=_report_content_inv, method=True) #TODO v8
-    report_sxw_content = fields.Binary('SXW content', compute='_report_content', inverse="_report_content_inv")
+    #report_sxw_content = fields.Binary('SXW content', compute='_report_content', inverse="_report_content_inv")
+    report_sxw_content = fields.Binary('SXW content', compute='_report_content')
     active = fields.Boolean('Active', help='Disables the report if unchecked.')
     report_wizard = fields.Boolean('Report Wizard',
         help='Adds a standard wizard when the report gets invoked.')

@@ -312,7 +312,7 @@ class ExtraFunctions(object):
             if isinstance(obj, (str,unicode)):
                 model = obj
             else:
-                model = obj._table_name
+                model = obj._name
             if isinstance(obj, (str,unicode)) or hasattr(obj, field):
                 size = self.registry[model]._columns[field].size
                 return size
@@ -326,7 +326,7 @@ class ExtraFunctions(object):
             if isinstance(obj, (str,unicode)):
                 model = obj
             else:
-                model = obj._table_name
+                model = obj._name
             if isinstance(obj, (str,unicode)) or hasattr(obj, field):
                 digits = self.registry[model]._columns[field].digits
                 return digits or [16,2]
@@ -342,7 +342,7 @@ class ExtraFunctions(object):
                     model = obj
                     field_val = value
                 else:
-                    model = obj._table_name
+                    model = obj._name
                     field_val = getattr(obj, field)
                 if kind=='item':
                     if field_val:
