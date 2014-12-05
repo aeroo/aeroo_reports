@@ -823,9 +823,10 @@ class Aeroo_report(report_sxw):
             #report_rml.report_sxw = None
             copies_ids = []
             if not report_xml.report_wizard and report_xml.id > 1:
-                while(report_xml.copies):
+                copies = report_xml.copies
+                while(copies):
                     copies_ids.extend(ids)
-                    report_xml.copies -= 1
+                    copies -= 1
             ids = copies_ids or ids
         else:
             title = ''
