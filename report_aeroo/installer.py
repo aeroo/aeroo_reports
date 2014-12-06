@@ -1,4 +1,4 @@
-# -*- encoding: utf-8 -*-
+# -*- coding: utf-8 -*-
 ################################################################################
 #
 # Copyright (c) 2009-2014 Alistek ( http://www.alistek.com ) All Rights Reserved.
@@ -32,11 +32,11 @@
 
 from openerp import models, fields, api, _
 
-import openerp.netsvc as netsvc
 import openerp.tools as tools
 import os, base64
 import urllib2
-# import aeroo_lock #TODO
+from docs_client_lib import DOCSConnection
+from openerp.addons.report_aeroo.report_aeroo import aeroo_lock
 
 try:
     from cStringIO import StringIO
@@ -60,7 +60,8 @@ class report_aeroo_installer(models.TransientModel):
             if im.headers.maintype!='image':
                 raise TypeError(im.headers.maintype)
         except Exception, e:
-            path = os.path.join('report_aeroo','config_pixmaps','module_banner.png')
+            path = os.path.join('report_aeroo','config_pixmaps',\
+                    'module_banner.png')
             image_file = file_data = tools.file_open(path,'rb')
             try:
                 file_data = image_file.read()
@@ -77,7 +78,6 @@ class report_aeroo_installer(models.TransientModel):
         image = recs._get_image()
         for rec in recs:
             rec.config_logo = image
-        #return dict.fromkeys(ids, image) # ok to use .fromkeys() as the image is same for all 
     
     ### Fields
     link = fields.Char('Original developer', size=128, readonly=True)
@@ -104,7 +104,8 @@ class docs_config_installer(models.TransientModel):
             if im.headers.maintype != 'image':
                 raise TypeError(im.headers.maintype)
         except Exception, e:
-            path = os.path.join('report_aeroo','config_pixmaps','module_banner.png')
+            path = os.path.join('report_aeroo','config_pixmaps',
+                    'module_banner.png')
             image_file = file_data = tools.file_open(path,'rb')
             try:
                 file_data = image_file.read()
@@ -145,14 +146,19 @@ class docs_config_installer(models.TransientModel):
         defaults = super(docs_config_installer, self).default_get(allfields)
         enabled = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_enabled')
         defaults['enabled'] = enabled == 'True' and True or False
-        defaults['host'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_host') or 'localhost'
-        defaults['port'] = int(icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_port')) or 8989
-        defaults['auth_type'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_auth_type') or False
-        defaults['username'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_username') or 'anonymous'
-        defaults['password'] = icp.get_param(self.env.cr, self.env.uid, 'aeroo.docs_password') or 'anonymous'
+        defaults['host'] = icp.get_param(self.env.cr, self.env.uid, 
+                            'aeroo.docs_host') or 'localhost'
+        defaults['port'] = int(icp.get_param(self.env.cr, self.env.uid, 
+                            'aeroo.docs_port')) or 8989
+        defaults['auth_type'] = icp.get_param(self.env.cr, self.env.uid, 
+                            'aeroo.docs_auth_type') or False
+        defaults['username'] = icp.get_param(self.env.cr, self.env.uid, 
+                            'aeroo.docs_username') or 'anonymous'
+        defaults['password'] = icp.get_param(self.env.cr, self.env.uid, 
+                            'aeroo.docs_password') or 'anonymous'
         return defaults
     
-    @api.one
+    @api.multi
     def check(self):
         icp = self.env['ir.config_parameter']
         icp.set_param('aeroo.docs_enabled', str(self.enabled))
@@ -161,58 +167,40 @@ class docs_config_installer(models.TransientModel):
         icp.set_param('aeroo.docs_auth_type', self.auth_type or 'simple')
         icp.set_param('aeroo.docs_username', self.username)
         icp.set_param('aeroo.docs_password', self.password)
-        
-#        try:
-#            fp = tools.file_open('report_aeroo_ooo/test_temp.odt', mode='rb')
-#            file_data = fp.read()
-#            oo = registry['oo.config']
-#            DC = OpenOffice_service(cr, data['host'], data['port'])
-#            oo.set(DC)
-#            with aeroo_lock:
-#                pass
-#                DC.putDocument(file_data)
-#                DC.saveByStream()
-#                fp.close()
-#                DC.closeDocument()
-#                del DC
-#        except DocumentConversionException, e:
-#            oo.remove()
-#            error_details = str(e)
-#            state = 'error'
-#        except Exception, e:
-#            error_details = str(e)
-#            state = 'error'
-#        else:
-#            error_details = ''
-#            state = 'done'
-
-#        if state=='error':
-#            msg = _('Failure! Connection to DOCS service was not established or convertion to PDF unsuccessful!')
-#        else:
-#            msg = _('Success! Connection to the DOCS service was successfully established and PDF convertion is working.')
-        #self.write(cr, uid, ids, {'msg':msg,'error_details':error_details,'state':state})
-        state = 'done'
-        msg = 'Connection to DOCS service was not established or convertion to PDF unsuccessful!'
         error_details = ''
+        state = 'done'
+        
+        if self.enabled:
+            try:
+                fp =tools.file_open('report_aeroo_ooo/test_temp.odt', mode='rb')
+                file_data = fp.read()
+                with aeroo_lock:
+                    docs_client = DOCSConnection(self.host, self.port,
+                        username=self.username, password=self.password)
+                    token = docs_client.upload(file_data)
+                    data = docs_client.convert(identifier=token, out_mime='pdf')
+            except Exception as e:
+                error_details = str(e)
+                state = 'error'
+        if state=='error':
+            msg = _('Failure! Connection to DOCS service was not established ' +
+                    'or convertion to PDF unsuccessful!')
+        elif state=='done' and not self.enabled:
+            msg = _('Connection to Aeroo DOCS disabled!')
+        else:
+            msg = _('Success! Connection to the DOCS service was successfully '+
+                    'established and PDF convertion is working.')
         self.msg = msg
         self.error_details = error_details
         self.state = state
         mod_obj = self.env['ir.model.data']
         act_obj = self.env['ir.actions.act_window']
-        result = mod_obj.get_object_reference('report_aeroo', 'action_docs_config_wizard')
+        result = mod_obj.get_object_reference('report_aeroo',
+                     'action_docs_config_wizard')
         act_id = result and result[1] or False
         result = act_obj.search([('id','=',act_id)]).read()[0]
         result['res_id'] = self.id
         return result
-        
-        #mod_obj = self.pool.get('ir.model.data')
-        #act_obj = self.pool.get('ir.actions.act_window')
-        #result = mod_obj.get_object_reference(self.env.cr, self.env.uid, 'report_aeroo_docs', 'action_docs_config_wizard')
-        #id = result and result[1] or False
-        #result = act_obj.read(self.env.cr, self.env.uid, id, context=self.env.context)
-        #result['res_id'] = self.id
-        #return result
-
 
     _defaults = {
         'config_logo': _get_image,

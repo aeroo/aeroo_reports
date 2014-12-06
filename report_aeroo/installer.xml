@@ -69,7 +69,7 @@
                     <footer>
                         <button name="check" type="object" string="Apply and Test" class="oe_highlight" states="init"/>
                         <button name="action_next" type="object" string="Finish" class="oe_highlight" states="done"/>
-                        or
+                        <label string="or" attrs="{'invisible': [('state','=',False)]}" class="oe_inline"/>
                         <button special="cancel" string="Close" class="oe_link"/>
                     </footer>
                 </footer>
