@@ -139,6 +139,7 @@
                     <group states="draft">
                         <field name="out_format" attrs="{'readonly':[('out_format_code','=','genshi-raw')]}" on_change="onchange_out_format(out_format)"/>
                         <field name="out_format_code" invisible="1"/>
+                        <field name="report_id" invisible="1"/>
                         <field name="copies"/>
                     </group>
                     <group states="confirm" expand="1" colspan="4">
