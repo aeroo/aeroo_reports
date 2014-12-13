@@ -97,7 +97,7 @@ def domain2statement(domain):
                 operator=False
         statement+=' o.'+str(d[0])+' '+(d[1]=='=' and '==' or d[1])+' '+(isinstance(d[2], str) and '\''+d[2]+'\'' or str(d[2]))
         if d!=domain[-1]:
-             statement+=operator or ' and'
+            statement+=operator or ' and'
         operator=False
     return statement
 
@@ -524,7 +524,7 @@ class ExtraFunctions(object):
         try:
             return ''.join(map(lambda a: toesc.get(a, a), s))
         except TypeError:
-           return s
+            return s
 
     def _http_prettyuri(self, s):
         def do_filter(c):
