@@ -41,7 +41,6 @@ from pyPdf import PdfFileWriter, PdfFileReader
 
 from openerp.osv.orm import browse_record_list #TODO v8?
 from docs_client_lib import DOCSConnection
-import errno
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -54,7 +53,6 @@ from openerp.osv import osv
 from openerp.tools.translate import _
 import openerp.tools as tools
 import time
-import re
 import copy
 import threading
 from random import randint
@@ -696,8 +694,8 @@ class Aeroo_report(report_sxw):
                         )
                         cr.commit()
                 except Exception,e:
-                     tb_s = reduce(lambda x, y: x+y, traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
-                     logger.error(str(e))
+                    tb_s = reduce(lambda x, y: x+y, traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
+                    logger.error(str(e))
                 results.append(result)
             if results and len(results)==1:
                 return results[0]
@@ -766,7 +764,7 @@ class Aeroo_report(report_sxw):
                         )
                         cr.commit()
                 except Exception,e:
-                     self.logger(_("Create attachment error!")+'\n'+str(e), logging.ERROR)
+                    self.logger(_("Create attachment error!")+'\n'+str(e), logging.ERROR)
                 results.append(result)
         docs_client = self.get_docs_conn(cr)
         if results and len(results)==1:
@@ -871,7 +869,7 @@ class Aeroo_report(report_sxw):
 
 class ReportTypeException(Exception):
     def __init__(self, value):
-      self.parameter = value
+        self.parameter = value
     def __str__(self):
-      return repr(self.parameter)
+        return repr(self.parameter)
 
