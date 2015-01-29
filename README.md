@@ -18,13 +18,13 @@ For simpler reports, the following xml fragment can give you the necessary setup
 and your only task will be to create the report templates:
 
 ```xml
-<report id="myreport">
-  <string="Report's name">
-  <model="res.partner">
-  <report_type="aeroo">
-  <file="my_addon/path/to/template/mytemplate.odt">
-  <name="dotted.name.for.the.report">
-</report>
+<report id="myreport"
+  string="Report's name"
+  model="res.partner"
+  report_type="aeroo"
+  file="my_addon/path/to/template/mytemplate.odt"
+  name="dotted.name.for.the.report"
+/>
 
   <record id="myreport" model="ir.actions.report.xml">
   <field name="in_format">oo-odt</field>
