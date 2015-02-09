@@ -172,7 +172,7 @@ class docs_config_installer(models.TransientModel):
         
         if self.enabled:
             try:
-                fp =tools.file_open('report_aeroo_ooo/test_temp.odt', mode='rb')
+                fp =tools.file_open('report_aeroo/test_temp.odt', mode='rb')
                 file_data = fp.read()
                 with aeroo_lock:
                     docs_client = DOCSConnection(self.host, self.port,
