@@ -100,8 +100,8 @@ def extend_trans_generate(lang, modules, cr):
 
         if model=='ir.ui.view':
             d = etree.XML(encode(obj.arch))
-            for t in trans_parse_view(d):
-                push_translation(module, 'view', encode(obj.model), 0, t)
+            push_view = lambda t,l: push_translation(module, 'view', obj.model, xml_name, t)
+            trans_parse_view(d, push_view)
 
         elif model=='ir.model.fields':
             try:
@@ -168,7 +168,7 @@ def extend_trans_generate(lang, modules, cr):
                     except (IOError, etree.XMLSyntaxError):
                         _logger.exception("couldn't export translation for report %s %s %s", name, report_type, fname)
 
-        for field_name,field_def in obj._table._columns.items():
+        for field_name,field_def in getattr(obj._table, '_columns', obj._columns).items():
             if field_def.translate:
                 name = model + "," + field_name
                 try:
