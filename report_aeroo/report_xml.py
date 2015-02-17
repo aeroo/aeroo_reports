@@ -548,7 +548,6 @@ class report_xml(models.Model):
                             res_id, linked_report_id=res_id, report_name=vals['name'], context=self.env.context)
                 res_id.write({'wizard_id': wizard_id})
             if vals.get('replace_report_id'):
-                report = self.browse(cr, user, res_id, context=context)
                 self.link_inherit_report(self.env.cr, self.env.uid, res_id, new_replace_report_id=vals['replace_report_id'], context=self.env.context)
             try:
                 if vals.get('active', False):
