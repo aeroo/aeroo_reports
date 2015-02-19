@@ -113,6 +113,8 @@ class DOCSConnection():
     def convert(self, data=False, identifier=False, in_mime=False, out_mime=False):
         payload = self._initpack('convert')
         payload['params'].update({'identifier': identifier})
+        if in_mime:
+            payload['params'].update({'in_mime': in_mime})
         if out_mime:
             payload['params'].update({'out_mime': out_mime})
         response = requests.post(
@@ -120,9 +122,13 @@ class DOCSConnection():
         self._checkerror(response)
         return 'result' in response and b64decode(response['result']) or False
         
-    def join(self, idents, out_mime='odt'):
+    def join(self, idents, in_mime=False, out_mime=False):
         payload = self._initpack('join')
         payload['params'].update({'idents': idents})
+        if in_mime:
+            payload['params'].update({'in_mime':in_mime})
+        if out_mime:
+            payload['params'].update({'out_mime':out_mime})
         response = requests.post(
             self.url, data = json.dumps(payload), headers=HEADERS).json()
         self._checkerror(response)
