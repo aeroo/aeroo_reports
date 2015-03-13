@@ -98,7 +98,7 @@ class DOCSConnection():
             payload['params'].update({'data':chunk, 'identifier':identifier,
                                        'is_last': is_last})
             response = requests.post(
-                self.url, data = json.dumps(payload), headers=HEADERS).json()
+                self.url, data = json.dumps(payload), headers=HEADERS).json
             self._checkerror(response)
             if 'result' not in response:
                 break
@@ -116,7 +116,7 @@ class DOCSConnection():
         if out_mime:
             payload['params'].update({'out_mime': out_mime})
         response = requests.post(
-            self.url, data = json.dumps(payload), headers=HEADERS).json()
+            self.url, data = json.dumps(payload), headers=HEADERS).json
         self._checkerror(response)
         return 'result' in response and b64decode(response['result']) or False
         
@@ -124,7 +124,7 @@ class DOCSConnection():
         payload = self._initpack('join')
         payload['params'].update({'idents': idents})
         response = requests.post(
-            self.url, data = json.dumps(payload), headers=HEADERS).json()
+            self.url, data = json.dumps(payload), headers=HEADERS).json
         self._checkerror(response)
         return 'result' in response and b64decode(response['result']) or False
         
