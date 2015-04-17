@@ -78,4 +78,7 @@ For more reference visit - https://pypi.python.org/pypi/pycups
     'installable': True,
     'application': True,
     'active': False,
+    'external_dependencies': {
+        'python': ['cups'],
+    },
 }

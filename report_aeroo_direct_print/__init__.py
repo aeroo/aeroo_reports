@@ -29,12 +29,5 @@
 #
 ##############################################################################
 
-check_list = [
-    'import cups',
-]
-
-from check_deps import check_deps
-check_deps(check_list)
-
 import report_aeroo_direct_print
 import installer
