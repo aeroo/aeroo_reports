@@ -32,9 +32,12 @@
 from openerp import api, models, fields, _
 
 from openerp.report import interface
-import cups
 from tempfile import NamedTemporaryFile
 import md5
+try:
+    import cups
+except ImportError:
+    pass
 
 SUPPORTED_PRINT_FORMAT = ('pdf','raw')
 SPECIAL_PRINTERS = ('user-def-gen-purpose-printer','user-def-label-printer')
