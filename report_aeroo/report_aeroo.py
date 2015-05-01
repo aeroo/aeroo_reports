@@ -80,7 +80,13 @@ except Exception:
     err_msg = "Could not instantiate Aeroo lock!!!"
     logger.critical(msg)
 
-mime_dict = {'oo-pdf':'pdf', 'oo-doc':'doc'}
+mime_dict = {'oo-odt':'odt',
+             'oo-ods':'ods',
+             'oo-pdf':'pdf',
+             'oo-doc':'doc',
+             'oo-xls':'xls',
+             'oo-csv':'csv',
+            }
 
 class DynamicLookup(StrictLookup):
     '''
@@ -440,7 +446,7 @@ class Aeroo_report(report_sxw):
             else:
                 if deferred:
                     deferred.set_status(_('Document conversion'))
-                data = docs.convert(identifier=token, out_mime=mime_dict[report_xml.out_format.code])
+                data = docs.convert(identifier=token, out_mime=mime_dict[report_xml.out_format.code], in_mime=mime_dict[report_xml.in_format])
         return data
 
     def _raise_exception(self, e, print_id):
