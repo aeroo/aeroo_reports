@@ -226,10 +226,17 @@ class ExtraFunctions(object):
     def _translate_text(self, source):
         trans_obj = self.registry['ir.translation']
         trans = trans_obj.search(self.cr,self.uid,[('res_id','=',self.report_id),('type','=','report'),('src','=',source),('lang','=',self.context['lang'] or self.context['user_lang'])])
-        if not trans:
-            #trans_obj.create(self.cr, self.uid, {'src':source,'type':'report','lang':self._get_lang(),'res_id':self.report_id,'name':('ir.actions.report.xml,%s' % source)[:128]})
-            trans_obj.create(self.cr, self.uid, {'src':source,'type':'report','lang':self._get_lang(),'res_id':self.report_id,'name':'ir.actions.report.xml'})
-        return translate(self.cr, 'ir.actions.report.xml', 'report', self._get_lang(), source) or source
+        if trans:
+            return trans_obj._get_source(self.cr, self.uid, 'ir.actions.report.xml', 'report', self._get_lang(), source=source, res_id=self.report_id)
+
+        trans = trans_obj.search(self.cr,self.uid,[('type','=','report'),('src','=',source),('lang','=',self.context['lang'] or self.context['user_lang'])])
+        if trans:
+            return trans_obj._get_source(self.cr, self.uid, 'ir.actions.report.xml', 'report', self._get_lang(), source=source)
+
+        trans_obj.create(self.cr, self.uid, {'src':source,'type':'report','lang':self._get_lang(),'res_id':self.report_id,'name':'ir.actions.report.xml'})
+        return trans_obj._get_source(self.cr, self.uid, 'ir.actions.report.xml', 'report', self._get_lang(), source=source, res_id=self.report_id)
+
+        # return translate(self.cr, 'ir.actions.report.xml', 'report', self._get_lang(), source) or source
 
     def _countif(self, attr, domain):
         statement = domain2statement(domain)
