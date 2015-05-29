@@ -286,8 +286,10 @@ class ExtraFunctions(object):
 
     def _get_name(self, obj, context=None):
         if isinstance(obj, models.Model):
-            if context:
-                return obj.with_context(context).name_get()[0][1]
+            if context and isinstance(context, dict):
+                new_context = obj._context.copy()
+                new_context.update(context)
+                return obj.with_context(new_context).name_get()[0][1]
             else:
                 return obj.name_get()[0][1]
         return ''
