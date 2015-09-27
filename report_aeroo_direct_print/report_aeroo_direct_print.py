@@ -44,6 +44,7 @@ class report_print_actions(models.TransientModel):
     _inherit = 'aeroo.print_actions'
 
     def report_to_printer(self, cr, uid, ids, report_id, printer, context={}):
+        ids = context.get('active_ids', ids)
         context['active_ids'] = ids
         report_xml = self.pool.get('ir.actions.report.xml').browse(cr, uid, report_id, context=context)
         data = {'model':  report_xml.model, 'id': context['active_ids'][0], 'report_type': 'aeroo'}
