@@ -286,8 +286,8 @@ print_actions_obj.report_to_printer(cr, uid, [obj.id], report_action_id, printer
             if event_ids:
                 event_ids[0].value = "ir.actions.report.xml,%s" % recs.id
             srv_act_code = act_srv_id.code.splitlines()
-            ctx = context.copy()
-            ctx['report_action_id'] = recs.id
+            #ctx = context.copy()
+            #ctx['report_action_id'] = recs.id
             printer = recs.env['aeroo.print_actions']._get_default_printer() #TODO v8
             srv_act_code.insert(2, "printer = '%s'" % printer)
             srv_act_code.pop(-2) # remove line: printer = print_actions_obj._get_default_printer(cr, uid, context)
