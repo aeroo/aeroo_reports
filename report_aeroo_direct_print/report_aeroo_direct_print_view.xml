@@ -5,7 +5,7 @@
         <record id="act_aeroo_direct_print_actions_view_form" model="ir.ui.view">
             <field name="name">aeroo.print_actions.form.direct_print</field>
             <field name="model">aeroo.print_actions</field>
-    		<field name="inherit_id" ref="report_aeroo.act_aeroo_print_actions_view_form"/>
+            <field name="inherit_id" ref="report_aeroo.act_aeroo_print_actions_view_form"/>
             <field name="arch" type="xml">
                 <field name="copies" position="after">
                     <field name="printer" attrs="{'invisible':[('out_format_code','not in',('genshi-raw','oo-pdf'))]}"/>
@@ -18,17 +18,21 @@
             <field name="model">aeroo.printers</field>
             <field name="arch" type="xml">
                 <form string="Printers for Aeroo direct print">
-                    <field name="name" readonly="0"/>
-                    <field name="code"/>
-                    <field name="state"/>
-                    <newline/>
-                    <separator string="Details" colspan="2"/>
-                    <separator string="Groups" colspan="2"/>
-                    <field name="note" colspan="2" nolabel="1" readonly="1"/>
-                    <field name="group_ids" colspan="2" nolabel="1" readonly="0"/>
-                    <separator colspan="4"/>
-                    <button name="refresh" string="Refresh" icon="gtk-refresh" type="object" colspan="2"/>
-                    <field name="active"/>
+                    <header>
+                        <button name="refresh" string="Refresh" type="object" class="oe_highlight"/>
+                    </header>
+                    <group name="main">
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="state"/>
+                        <field name="active"/>
+                    </group>
+                    <group name="groups" string="Groups">
+                        <field name="group_ids" nolabel="1"/>
+                    </group>
+                    <group name="details" string="Details">
+                        <field name="note" nolabel="1"/>
+                    </group>
                 </form>
             </field>
         </record>
@@ -37,11 +41,10 @@
             <field name="name">aeroo.printers.tree</field>
             <field name="model">aeroo.printers</field>
             <field name="arch" type="xml">
-                <tree string="Printers for Aeroo direct print" editable="bottom">
+                <tree string="Printers for Aeroo direct print" colors="red:state=='5',green:state=='3'">
+                    <field name="name"/>
                     <field name="active"/>
-                    <field name="name" readonly="1"/>
-                    <field name="group_ids" readonly="1"/>
-                    <field name="state" readonly="1"/>
+                    <field name="state"/>
                 </tree>
             </field>
         </record>
@@ -52,12 +55,9 @@
             <field name="type">search</field>
             <field name="arch" type="xml">
                 <search string="Report xml">
-                    <group col="10" colspan="4">
-                        <filter string="Inactive" name="inactive" icon="gtk-justify-fill" domain="[('active','=',False)]"/>
-                        <separator orientation="vertical"/>
-                        <field name="name"/>
-                        <field name="code"/>
-                    </group>
+                    <filter string="Inactive" name="inactive" domain="[('active','=',False)]"/>
+                     <field name="name"/>
+                    <field name="code"/>
                 </search>
             </field>
         </record>
@@ -90,69 +90,60 @@
             <field name="name">Printers</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">aeroo.printers</field>
-            <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
+            <field name="context">{'active_test': True}</field>
         </record>
 
         <record id="view_users_aeroo_printers_form" model="ir.ui.view">
             <field name="name">res.users.form.aeroo.printers</field>
             <field name="model">res.users</field>
-            <field name="type">form</field>
-    		<field name="inherit_id" ref="base.view_users_form"/>
+            <field name="inherit_id" ref="base.view_users_form"/>
             <field name="arch" type="xml">
-                <data>
-                    <xpath expr="//sheet/notebook/page[@string='Preferences']/group[1]" position="after">
-                        <group>
-                            <field name="context_def_purpose_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
-                            <field name="context_def_label_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
-                        </group>
-                    </xpath>
-                </data>
+                <xpath expr="//sheet/notebook/page[@string='Preferences']/group[1]" position="after">
+                    <group name="aeroo-print">
+                        <field name="context_def_purpose_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
+                        <field name="context_def_label_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
+                    </group>
+                </xpath>
             </field>
         </record>
 
         <record id="view_users_aeroo_printers_form_simple_modif" model="ir.ui.view">
             <field name="name">res.users.form.modif.aeroo.printers</field>
             <field name="model">res.users</field>
-            <field name="type">form</field>
-    		<field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+            <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
             <field name="arch" type="xml">
-                <data>
-                    <group name="preferences" position="after">
-                        <group string="Printers Preferences">
-                            <field name="context_def_purpose_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
-                            <field name="context_def_label_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
-                        </group>
+                <group name="preferences" position="after">
+                    <group string="Printers Preferences" name="aeroo-print">
+                        <field name="context_def_purpose_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
+                        <field name="context_def_label_printer" widget="selection" domain="[('code','not in',('user-def-gen-purpose-printer','user-def-label-printer'))]"/>
                     </group>
-                </data>
+                </group>
             </field>
         </record>
 
         <record id="aeroo_print_report_xml_view" model="ir.ui.view">
             <field name="name">ir.actions.report.xml.form.aeroo.printers</field>
             <field name="model">ir.actions.report.xml</field>
-            <field name="type">form</field>
-    		<field name="inherit_id" ref="report_aeroo.act_report_xml_view1"/>
+            <field name="inherit_id" ref="report_aeroo.act_report_xml_view1"/>
             <field name="arch" type="xml">
                 <field name="content_fname" position="after">
-                    <field name="printer_id" context="{'view_all':True}" widget="selection"/>
+                    <field name="printer_id" context="{'view_all': True}" widget="selection"/>
                 </field>
             </field>
         </record>
 
         <record id="action_aeroo_direct_print_wizard" model="ir.actions.act_window">
           <field name="name">Direct printing Configuration</field>
-          <field name="type">ir.actions.act_window</field>
           <field name="res_model">aeroo_printer.installer</field>
           <field name="view_id" ref="view_aeroo_printer_installer"/>
-          <field name="view_type">form</field>
           <field name="view_mode">form</field>
           <field name="target">new</field>
-          <field name="context">{'menu':True}</field>
+          <field name="context">{'menu': True}</field>
         </record>
 
-	    <menuitem id="menu_aeroo_printers" action="action_aeroo_printers" parent="report_aeroo.menu_ir_action_aeroo_reports_xml" sequence="10"/>
-    	<menuitem id="menu_aeroo_direct_print_wizard" action="action_aeroo_direct_print_wizard" icon="STOCK_CONVERT" parent="report_aeroo.menu_ir_action_aeroo_reports_xml" sequence="10"/>
+        <menuitem id="menu_aeroo_printers" action="action_aeroo_printers" parent="report_aeroo.menu_ir_action_aeroo_reports_xml" sequence="10"/>
+        <menuitem id="menu_aeroo_direct_print_wizard" action="action_aeroo_direct_print_wizard" parent="report_aeroo.menu_ir_action_aeroo_reports_xml" sequence="10"/>
 
     </data>
 </openerp>

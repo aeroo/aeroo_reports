@@ -30,6 +30,7 @@
 ##############################################################################
 
 from openerp import api, models, fields, _
+from openerp.exceptions import Warning as UserError
 
 from openerp.report import interface
 import cups
@@ -55,7 +56,7 @@ class report_print_actions(models.TransientModel):
             conn = cups.Connection()
             return conn.printFile(printer, temp_file.name, 'Aeroo Print', {'copies': report_xml.copies > 0 and str(report_xml.copies) or '1'})
         else:
-            raise osv.except_osv(_('Warning!'), _('Unsupported report format "%s". Is not possible direct print to printer.') % res[1])
+            raise UserError(_('Unsupported report format "%s". Is not possible direct print to printer.') % res[1])
         return False
     
     @api.multi
@@ -78,10 +79,10 @@ class report_print_actions(models.TransientModel):
                 conn.printFile(recs.printer, temp_file.name,
                     '%s (Aeroo Reports Print)' % report_xml.name , 
                     {'copies': recs.copies > 0 and str(recs.copies) or '1'})
-                return {
-                    'type': 'ir.actions.act_window_close'
-                }
-        new_recs = recs.with_context(aeroo_dont_print_to_pinter = True)
+                return True
+        # It seems that the context key aeroo_dont_print_to_printer is
+        # not used any more...
+        new_recs = recs.with_context(aeroo_dont_print_to_printer = True)
         res = super(report_print_actions, new_recs).to_print()
         return res
     
@@ -137,11 +138,11 @@ class aeroo_printers(models.Model):
     
     name = fields.Char(string='Description', size=256, required=True)
     code = fields.Char(string='Name', size=64, required=True)
-    note = fields.Text(string='Details')
+    note = fields.Text(string='Details', readonly=True)
     group_ids  = fields.Many2many('res.groups', 'aeroo_printer_groups_rel', 'printer_id', 'group_id', 'Groups')
     state = fields.Selection(compute='_get_state', selection=[('3', _('Idle')),
                                                             ('4', _('Busy')),
-                                                            ('5', _('Stopped'))], method=True, store=False, string='State')
+                                                            ('5', _('Stopped'))], store=False, string='State')
     active = fields.Boolean('Active')
         
     ### ends Fields
@@ -152,15 +153,16 @@ class aeroo_printers(models.Model):
         res = super(aeroo_printers, self).search(cr, user, args, offset, limit, order, context, count)
         return res
 
-    def refresh(self, cr, uid, ids, context={}):
+    @api.multi
+    def refresh(self):
+        self.ensure_one()
         conn = cups.Connection()
         printers = conn.getPrinters()
-        for r in self.browse(cr, uid, ids, context=context):
-            data = printers.get(r.code)
-            if not data:
-                raise osv.except_osv(_('Error!'), _('Printer "%s" not found!') % r.code)
-            note = '\n'.join(map(lambda key: "%s: %s" % (key, data[key]), data))
-            r.write({'note':note}, context=context)
+        data = printers.get(self.code)
+        if not data:
+            raise UserError(_('Printer "%s" not found!') % self.code)
+        note = '\n'.join(map(lambda key: "%s: %s" % (key, data[key]), data))
+        self.write({'note': note})
         return True
 
     _defaults = {
@@ -176,8 +178,7 @@ class res_users(models.Model):
     
     context_def_purpose_printer = fields.Many2one(
         'aeroo.printers',
-        string='Default Genreral Purpose Printer',
-        method=True,
+        string='Default General Purpose Printer',
         domain='[("code","not in",%s)]' % str(SPECIAL_PRINTERS),
         help="",
         required=False,
@@ -186,7 +187,6 @@ class res_users(models.Model):
     context_def_label_printer = fields.Many2one(
         'aeroo.printers',
         string='Default Label Printer',
-        method=True,
         domain='[("code","not in",%s)]' % str(SPECIAL_PRINTERS),
         help="",
         required=False,

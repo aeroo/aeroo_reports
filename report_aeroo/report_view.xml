@@ -134,7 +134,7 @@
             <field name="name">aeroo.print_actions.form</field>
             <field name="model">aeroo.print_actions</field>
             <field name="arch" type="xml">
-                <form string="Printing Options" version="7.0">
+                <form string="Printing Options">
                     <field name="state" invisible="1"/>
                     <group states="draft">
                         <field name="out_format" attrs="{'readonly':[('out_format_code','=','genshi-raw')]}" on_change="onchange_out_format(out_format)"/>
@@ -160,7 +160,7 @@
             <field name="name">aeroo.print_by_action.form</field>
             <field name="model">aeroo.print_by_action</field>
             <field name="arch" type="xml">
-                <form string="Test the Report" version="7.0">
+                <form string="Test the Report">
                    <group>
                         <field name="name"/>
                         <field name="object_ids" default_focus="1"/>
@@ -178,7 +178,7 @@
             <field name="name">aeroo.report_import.form</field>
             <field name="model">aeroo.report_import</field>
             <field name="arch" type="xml">
-                <form string="Install Report Package" version="7.0">
+                <form string="Install Report Package">
                     <group colspan="4" fill="0" states="draft">
                         <label string="This wizard installs prepackaged reports developed for Aeroo Reports engine." colspan="4"/>
                         <field name="file" colspan="4"/>
