@@ -8,11 +8,6 @@
       <field name="inherit_id" ref="base.res_config_installer"/>
       <field name="arch" type="xml">
           <data>
-<!--
-                <form position="attributes" version="7.0">
-                  <attribute name="string">Aeroo Reports Installation</attribute>
-                </form>
--->
                 <footer position="replace">
                     <footer>
                         <button name="action_next" type="object" string="Continue" invisible="context.get('menu',False)" class="oe_highlight"/>
@@ -20,7 +15,7 @@
                         <button special="cancel" string="Close" class="oe_link"/>
                     </footer>
                 </footer>
-                <separator string="title" position="replace">
+                <xpath expr="//separator" position="replace">
                     <p class="oe_grey">
                         Aeroo Reports for OpenERP is a comprehensive reporting engine based on Aeroo Library.
                     </p>
@@ -32,7 +27,7 @@
                           <field name="link" widget="url"/>
                         </group>
                     </group>
-                </separator>
+                </xpath>
           </data>
       </field>
     </record>
@@ -73,7 +68,7 @@
                         <button special="cancel" string="Close" class="oe_link"/>
                     </footer>
                 </footer>
-                <separator string="title" position="replace">
+                <xpath expr="//separator" position="replace">
                     <p class="oe_grey">
                         Configure Aeroo Reports connection to DOCS service and test document conversion.
                     </p>
@@ -108,7 +103,7 @@
                       <field name="state" invisible="1"/>
                     </group>
                   </group>
-                </separator>
+                </xpath>
           </data>
       </field>
     </record>

@@ -23,7 +23,8 @@
 import os
 import logging
 import openerp.tools as tools
-from openerp.tools.translate import trans_parse_rml, trans_parse_xsl, trans_parse_view, _extract_translatable_qweb_terms
+from openerp.tools.translate import trans_parse_rml, _extract_translatable_qweb_terms
+# from openerp.tools.translate import trans_parse_rml, trans_parse_xsl, trans_parse_view, _extract_translatable_qweb_terms
 import fnmatch
 from os.path import join
 from lxml import etree
@@ -119,9 +120,9 @@ def extend_trans_generate(lang, modules, cr):
                 view_id = get_root_view(xml_name)
                 push_qweb = lambda t,l: push(module, 'view', 'website', view_id, t)
                 _extract_translatable_qweb_terms(d, push_qweb)
-            else:
-                push_view = lambda t,l: push(module, 'view', obj.model, xml_name, t)
-                trans_parse_view(d, push_view)
+#             else:
+#                 push_view = lambda t,l: push(module, 'view', obj.model, xml_name, t)
+#                 trans_parse_view(d, push_view)
         elif model=='ir.actions.wizard':
             pass # TODO Can model really be 'ir.actions.wizard' ?
 
@@ -175,10 +176,10 @@ def extend_trans_generate(lang, modules, cr):
                     fname = obj.report_rml
                     parse_func = trans_parse_rml
                     report_type = "report"
-                elif obj.report_xsl:
-                    fname = obj.report_xsl
-                    parse_func = trans_parse_xsl
-                    report_type = "xsl"
+#                 elif obj.report_xsl:
+#                     fname = obj.report_xsl
+#                     parse_func = trans_parse_xsl
+#                     report_type = "xsl"
                 if fname and obj.report_type in ('pdf', 'xsl'):
                     try:
                         report_file = misc.file_open(fname)
