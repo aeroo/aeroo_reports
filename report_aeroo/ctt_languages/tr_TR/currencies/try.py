@@ -8,9 +8,9 @@ class iso4217_try(ctt_currency):
         self.language = u'tr_TR'
         self.code = u'TRY'
         self.fractions = 100
-        self.cur_singular = u' Lira'
+        self.cur_singular = u' lira'
         # default plural form for currency
-        self.cur_plural = u' Lira'
+        self.cur_plural = u' lira'
         self.frc_singular = u' kuruş'
         # default plural form for fractions
         self.frc_plural = u' kuruş'
