@@ -574,10 +574,29 @@ class Aeroo_report(report_sxw):
         basic.Serializer.add_custom_property(module_info['website'], 'URL')
         basic.Serializer.add_creation_date(time.strftime('%Y-%m-%dT%H:%M:%S'))
 
+        # stream filter function for translation
+        def _translate_stream(stream):
+            for kind, data, pos in stream:
+                result = (kind, data, pos)
+                if kind == 'TEXT' and len(data) > 3:
+                    result = (
+                        kind,
+                        pool.get('ir.translation')._get_source(
+                            cr, uid, report_xml.report_name,
+                            report_xml.report_type,
+                            oo_parser.localcontext.get(
+                                'lang',
+                                oo_parser.localcontext['user_lang']),
+                            data),
+                        pos)
+                yield result
+
         try:
             if deferred:
                 deferred.set_status(_('Generate document'))
-            data = basic.generate(**oo_parser.localcontext).render().getvalue()
+            data = basic.generate(**oo_parser.localcontext)\
+                    .filter(_translate_stream)\
+                    .render().getvalue()
         except osv.except_osv, e:
             raise
         except Exception, e:
