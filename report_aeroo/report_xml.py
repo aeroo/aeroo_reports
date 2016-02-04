@@ -289,7 +289,11 @@ class report_xml(models.Model):
                 try:
                     #TODO: Probably there's a need to check if path to the report template actually present (???)
                     fp = tools.file_open(report[name[:-8]], mode='rb')
-                    data = report.report_type == 'aeroo' and base64.encodestring(fp.read()) or fp.read()
+                    data = fp.read()
+                    if recs.env.context.get('bin_size'):
+                        data = tools.human_size(len(data))
+                    elif report.report_type == 'aeroo':
+                        data = base64.encodestring(data)
                 except IOError, e:
                     if e.errno == 13: # Permission denied on the template file
                         raise osv.except_osv(_(e.strerror), e.filename)
