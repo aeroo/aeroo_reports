@@ -33,7 +33,7 @@
 {
     'name': 'Aeroo Reports Web Controller',
     'category': 'Generic Modules/Aeroo Reports',
-    'version': '1.2.1',
+    'version': '9.0.1.0.0',
     'summary': "Additional file MIME types",
     'description':
         """
