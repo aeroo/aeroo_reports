@@ -31,7 +31,7 @@
 
 {
     'name': 'Aeroo Reports - Print Screen',
-    'version': '1.1',
+    'version': '9.0.1.0.0',
     'category': 'Generic Modules/Aeroo Reporting',
     'summary': 'Report any model in a spreadsheet report',
     'description': """
