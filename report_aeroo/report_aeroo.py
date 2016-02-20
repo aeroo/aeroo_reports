@@ -642,9 +642,9 @@ class Aeroo_report(report_sxw):
         pdf = create_doc(etree.tostring(processed_rml),oo_parser.localcontext,logo,title.encode('utf8'))
         return (pdf, report_xml.report_type)
 
-    def create_source_pdf(self, cr, uid, ids, data, report_xml, context=None):
-        if not context:
-            context={}
+    def _create_source(self, cr, uid, ids, data, report_xml, context=None):
+        results = []
+        context = context or {}
         pool = registry(cr.dbname)
         attach = report_xml.attachment
         aeroo_docs = self.aeroo_docs_enabled(cr) # Detect DOCS conn. enabled
@@ -654,7 +654,6 @@ class Aeroo_report(report_sxw):
         if attach or aeroo_docs and report_xml.process_sep:
             objs = self.getObjects_mod(cr, uid, ids, report_xml.report_type, context)
             deferred = context.get('deferred_process')
-            results = []
             for obj in objs:
                 aeroo_print.start_time = time.time()
                 if deferred:
@@ -662,14 +661,6 @@ class Aeroo_report(report_sxw):
                 aname = attach and eval(attach, {'object':obj, 'time':time}) or False
                 result = False
                 if report_xml.attachment_use and aname and context.get('attachment_use', True):
-                    #aids = pool.get('ir.attachment').search(cr, uid, [('datas_fname','=',aname+'.pdf'),('res_model','=',self.table),('res_id','=',obj.id)])
-                    #if aids:
-                    #    brow_rec = pool.get('ir.attachment').browse(cr, uid, aids[0])
-                    #    if not brow_rec.datas:
-                    #        continue
-                    #    d = base64.decodestring(brow_rec.datas)
-                    #    results.append((d,'pdf'))
-                    #    continue
                     cr.execute("SELECT id, datas_fname FROM ir_attachment WHERE datas_fname ilike %s and res_model=%s and res_id=%s LIMIT 1", (aname+'.%',self.table,obj.id))
                     search_res = cr.dictfetchone()
                     if search_res:
@@ -700,82 +691,37 @@ class Aeroo_report(report_sxw):
                         )
                         cr.commit()
                 except Exception,e:
-                    tb_s = reduce(lambda x, y: x+y, traceback.format_exception(sys.exc_type, sys.exc_value, sys.exc_traceback))
-                    logger.error(str(e))
+                     self.logger(_("Create attachment error!")+'\n'+str(e), logging.ERROR)
                 results.append(result)
-            if results and len(results)==1:
-                return results[0]
-            if results:
-                if deferred:
-                    deferred.set_status(_('Concatenating single documents'))
-                not_pdf = filter(lambda r: r[1]!='pdf', results)
-                if not_pdf:
-                    raise osv.except_osv(_('Error!'), _('Unsupported combination of formats!'))
-                #if results[0][1]=='pdf':
-                output = PdfFileWriter()
-                for r in results:
-                    reader = PdfFileReader(StringIO(r[0]))
-                    for page in range(reader.getNumPages()):
-                        output.addPage(reader.getPage(page))
-                s = StringIO()
-                output.write(s)
-                return s.getvalue(), results[0][1]
+        return results
+
+    def create_source_pdf(self, cr, uid, ids, data, report_xml, context=None):
+        results = self._create_source(cr, uid, ids, data, report_xml, context) 
+        if results and len(results)==1:
+            return results[0]
+        if results:
+            if deferred:
+                deferred.set_status(_('Concatenating single documents'))
+            not_pdf = filter(lambda r: r[1]!='pdf', results)
+            if not_pdf:
+                raise osv.except_osv(_('Error!'), _('Unsupported combination of formats!'))
+            #if results[0][1]=='pdf':
+            output = PdfFileWriter()
+            for r in results:
+                reader = PdfFileReader(StringIO(r[0]))
+                for page in range(reader.getNumPages()):
+                    output.addPage(reader.getPage(page))
+            s = StringIO()
+            output.write(s)
+            return s.getvalue(), results[0][1]
         return self.create_single_pdf(cr, uid, ids, data, report_xml, context)
 
     def create_source_odt(self, cr, uid, ids, data, report_xml, context=None):
-        if not context:
-            context={}
-        pool = registry(cr.dbname)
-        results = []
-        attach = report_xml.attachment
-        aeroo_docs = self.aeroo_docs_enabled(cr) # Detect report_aeroo_docs module
-        context['aeroo_docs'] = aeroo_docs
-        print_id = context.get('print_id', False)
-        aeroo_print = self.active_prints[print_id] # Aeroo print object
-        deferred = context.get('deferred_process')
-        if attach or aeroo_docs and report_xml.process_sep:
-            objs = self.getObjects_mod(cr, uid, ids, report_xml.report_type, context)
-            for obj in objs:
-                aeroo_print.start_time = time.time()
-                if deferred:
-                    deferred.progress_update()
-                aname = attach and eval(attach, {'object':obj, 'time':time}) or False
-                result = False
-                if report_xml.attachment_use and aname and context.get('attachment_use', True):
-                    cr.execute("SELECT id, datas_fname FROM ir_attachment WHERE datas_fname ilike %s and res_model=%s and res_id=%s LIMIT 1", (aname+'.%',self.table,obj.id))
-                    search_res = cr.dictfetchone()
-                    if search_res:
-                        brow_rec = pool.get('ir.attachment').browse(cr, uid, search_res['id'])
-                        if not brow_rec.datas:
-                            continue
-                        d = base64.decodestring(brow_rec.datas)
-                        extension = search_res['datas_fname'].split('.')[1]
-                        results.append((d,extension))
-                        continue
-                result = self.create_single_pdf(cr, uid, [obj.id], data, report_xml, context)
-                try:
-                    if attach and aname:
-                        name = aname+'.'+result[1]
-                        datas = base64.encodestring(result[0])
-                        ctx = dict(context)
-                        ctx.pop('default_type', None)
-                        pool.get('ir.attachment').create(cr, uid, {
-                            'name': aname,
-                            'datas': datas,
-                            'datas_fname': name,
-                            'res_model': self.table,
-                            'res_id': obj.id,
-                            'type': 'binary'
-                            }, context=ctx
-                        )
-                        cr.commit()
-                except Exception,e:
-                    self.logger(_("Create attachment error!")+'\n'+str(e), logging.ERROR)
-                results.append(result)
-        docs_client = self.get_docs_conn(cr)
+        results = self._create_source(cr, uid, ids, data, report_xml, context)
         if results and len(results)==1:
             return results[0]
-        elif results and docs_client:
+        docs_client = self.get_docs_conn(cr)
+        if results and docs_client:
             if deferred:
                 deferred.set_status(_('Concatenating single documents'))
             not_odt = filter(lambda r: r[1]!='odt', results)
@@ -788,8 +734,7 @@ class Aeroo_report(report_sxw):
                     docs_ids.append(docs_id)
                 result = docs_client.join(docs_ids, out_mime=results[0][1])
             return (result, results[0][1])
-        else:
-            return self.create_single_pdf(cr, uid, ids, data, report_xml, context)
+        return self.create_single_pdf(cr, uid, ids, data, report_xml, context)
 
     # override needed to intercept the call to the proper 'create' method
     def create(self, cr, uid, ids, data, context=None):
