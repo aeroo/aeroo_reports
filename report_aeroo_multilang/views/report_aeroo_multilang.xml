@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="act_report_xml_view" model="ir.ui.view">
+            <field name="name">ir.actions.report.xml(report_aeroo_multilang)</field>
+            <field name="model">ir.actions.report.xml</field>
+            <field name="inherit_id" ref="report_aeroo.act_report_xml_view" />
+            <field name="arch" type="xml">
+                <field name="tml_source" position="after">
+                    <field name="lang" attrs="{'invisible': [('tml_source','&lt;&gt;','file')]}"/>
+                </field>
+                 <field name="stylesheet_id" position="before">
+                     <field name="alt_report_rml" attrs="{'invisible': [('tml_source','&lt;&gt;','file')],'required': [('lang','&lt;&gt;','')]}"/>
+                 </field>
+            </field>
+        </record>
+    </data>
+</odoo>
