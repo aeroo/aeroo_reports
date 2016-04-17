@@ -437,9 +437,7 @@ class report_xml(models.Model):
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         if self.env.context.get('default_report_type')=='aeroo':
             mda_mod = self.env['ir.model.data']
-            if view_type == 'form':
-                view_id = mda_mod.get_object_reference('report_aeroo', 'act_report_xml_view1')[1]
-            elif view_type == 'tree':
+            if view_type == 'tree':
                 view_id = mda_mod.get_object_reference('report_aeroo', 'act_aeroo_report_xml_view_tree')[1]
         res = super(report_xml, self).fields_view_get(view_id, view_type,
             toolbar=toolbar, submenu=submenu)

@@ -2,99 +2,67 @@
 <openerp>
     <data>
 
-		<record model="ir.ui.view" id="act_report_xml_view1">
-			<field name="name">ir.actions.report.xml.aeroo.form</field>
-			<field name="model">ir.actions.report.xml</field>
+		<record model="ir.ui.view" id="act_report_xml_view">
+            <field name="name">ir.actions.report.xml.aeroo.form</field>
+            <field name="model">ir.actions.report.xml</field>
+            <field name="inherit_id" ref="base.act_report_xml_view"/>
             <field name="priority">16</field>
-			<field name="arch" type="xml">
-                <form string="Aeroo Report">
-                    <group col="6" colspan="4">
-                        <field name="name"/>
-                        <field name="model"/>
-                        <field name="report_name"/>
-                        <field name="usage"/>
-                        <field name="copies" attrs="{'invisible': [('report_name','in',['printscreen.list'])]}"/>
-                        <field name="report_wizard" attrs="{'invisible': [('report_name','in',['printscreen.list'])]}"/>
-                        <field name="report_type" invisible="1"/>
-                        <field name="type" invisible="1"/>
-                    </group>
-                    <group colspan="4">
+            <field name="arch" type="xml">
+                <field name="report_rml" position="after">
+                    <field name="type" invisible="1"/>
+                    <field name="usage"/>
+                </field>
+                <field name="attachment" position="after">
+                    <field name="copies" attrs="{'invisible': [('report_name','in',['printscreen.list'])]}"/>
+                    <field name="report_wizard" attrs="{'invisible': [('report_name','in',['printscreen.list'])]}"/>
+                </field>
+                <page name='security' position="before">
+                    <page string="Aeroo template" name="lo_template"
+                        attrs="{'invisible': [('report_type', '!=', 'aeroo')]}">
                         <group>
-                            <field name="in_format" required="1" on_change="change_input_format(in_format)"/>
+                          <group>
+                              <field name="in_format" />
+                              <field name="charset" attrs="{'invisible': [('in_format','&lt;&gt;','genshi-raw')]}"/>
+                              <field name="tml_source"/>
+                              <field name="styles_mode"/>
+                          </group>
+                          <group>
+                              <field name="out_format"/>
+                              <field name="report_sxw_content_data" string="Template Content" attrs="{'invisible': [('tml_source','&lt;&gt;','database')],'required': [('tml_source','=','database')]}"/>
+                              <field name="report_rml" string="Template path" attrs="{'invisible': [('tml_source','&lt;&gt;','file')],'required': [('tml_source','=','file')]}"/>
+                              <field name="stylesheet_id" attrs="{'invisible': [('styles_mode','&lt;&gt;','specified')]}"/>
+                          </group>
                         </group>
-                        <group>
-                            <field name="out_format" required="1" domain="[('compatible_types','=',in_format)]"/>
+                    </page>
+                </page>
+                <page name='security' position="after">
+                    <page string="Advanced" attrs="{'invisible': [('report_type', '!=', 'aeroo')]}">
+                        <group colspan="4" col="6">
+                            <field name="content_fname"/>
+                            <field name="replace_report_id" domain="[('model','=',model),('id','&lt;&gt;',active_id)]"/>
+                            <field name="preload_mode" attrs="{'invisible': ['|',('in_format','=','genshi-raw'),('tml_source','=','parser')]}"/>
+                            <field name="fallback_false" attrs="{'invisible': [('in_format','=','genshi-raw')]}"/>
+                            <field name="process_sep"/>
+                            <field name="active"/>
+                            <field name="deferred"/>
+                            <field name="deferred_limit" attrs="{'invisible':['|',('deferred','=','off'),('deferred','=',False)]}"/>
                         </group>
-                    </group>
-
-                    <notebook colspan="4">
-                        <page string="Generic">
-                            <separator string="Template" colspan="4"/>
-                            <group colspan="4" col="8">
-                                <group colspan="2" col="2">
-                                    <field name="tml_source" colspan="2" required="1"/>
-                                </group>
-                                <group colspan="6">
-                                    <field name="report_sxw_content_data" string="Template Content" attrs="{'invisible': [('tml_source','&lt;&gt;','database')],'required': [('tml_source','=','database')]}"/>
-                                    <field name="report_rml" string="Template path" attrs="{'invisible': [('tml_source','&lt;&gt;','file')],'required': [('tml_source','=','file')]}"/>
-                                </group>
-                            </group>
-                            <separator string="Stylesheet" colspan="4"/>
-                            <group colspan="4" col="8">
-                                <field name="styles_mode" colspan="2"/>
-                                <group colspan="6">
-                                    <field name="stylesheet_id" attrs="{'invisible': [('styles_mode','&lt;&gt;','specified')]}"/>
-                                </group>
-                            </group>
-                            <group attrs="{'invisible': [('in_format','&lt;&gt;','genshi-raw')]}" colspan="4" col="8">
-                                <field name="charset" colspan="2"/>
-                                <separator colspan="2"/>
-                            </group>
-                            <group col="2" colspan="2">
-                                <separator string="Attachments" colspan="2"/>
-                                <group colspan="2">
-                                    <field name="attachment"/>
-                                </group>
-                                <field name="attachment_use" colspan="2"/>
-                            </group>
-                            <group col="2" colspan="2">
-                                <separator string="Miscellaneous" colspan="2"/>
-                                <field name="multi" colspan="2"/>
-                            </group>
-                        </page>
-                        <page string="Advanced">
-                            <group colspan="4" col="6">
-                                <field name="content_fname"/>
-                                <field name="replace_report_id" domain="[('model','=',model),('id','&lt;&gt;',active_id)]"/>
-                                <field name="preload_mode" attrs="{'invisible': ['|',('in_format','=','genshi-raw'),('tml_source','=','parser')]}"/>
-                                <field name="fallback_false" attrs="{'invisible': [('in_format','=','genshi-raw')]}"/>
-                                <field name="process_sep"/>
-                                <field name="active"/>
-                                <field name="deferred"/>
-                                <field name="deferred_limit" attrs="{'invisible':['|',('deferred','=','off'),('deferred','=',False)]}"/>
-                            </group>
-                            <group string="Parser" colspan="4" col="6">
-                            <group colspan="2">
-			                    <field name="parser_state"/>
-                            </group>
-                            <group colspan="4">
-                                <field name="parser_loc" attrs="{'invisible': [('parser_state','&lt;&gt;','loc')],'required': [('parser_state','=','loc')]}"/>
-                            </group>
-                            <group attrs="{'invisible': [('parser_state','&lt;&gt;','def')]}" colspan="6" expand="1">
-                                <separator string="Parser Definition" colspan="4"/>
-		                        <field name="parser_def" nolabel="1"/>
-                            </group>
-                            </group>
-                        </page>
-                        <page string="Security">
-                            <separator string="Groups" colspan="4"/>
-                            <field colspan="4" name="groups_id" nolabel="1"/>
-                        </page>
-                    </notebook>
-
-                </form>
-			</field>
-		</record>
+                        <group string="Parser" colspan="4" col="6">
+                        <group colspan="2">
+                            <field name="parser_state"/>
+                        </group>
+                        <group colspan="4">
+                            <field name="parser_loc" attrs="{'invisible': [('parser_state','&lt;&gt;','loc')],'required': [('parser_state','=','loc')]}"/>
+                        </group>
+                        <group attrs="{'invisible': [('parser_state','&lt;&gt;','def')]}" colspan="6" expand="1">
+                            <separator string="Parser Definition" colspan="4"/>
+                            <field name="parser_def" nolabel="1"/>
+                        </group>
+                        </group>
+                    </page>
+                </page>
+            </field>
+        </record>
 
         <record id="act_aeroo_report_xml_view_tree" model="ir.ui.view">
             <field name="name">ir.actions.report.xml.tree</field>
@@ -315,7 +283,7 @@
     <record model="ir.actions.act_window.view" id="act_aeroo_report_xml_form_view">
         <field name="sequence" eval="1"/>
         <field name="view_mode">form</field>
-        <field name="view_id" ref="act_report_xml_view1"/>
+        <field name="view_id" ref="act_report_xml_view"/>
         <field name="act_window_id" ref="action_aeroo_report_xml_tree"/>
     </record>
 
