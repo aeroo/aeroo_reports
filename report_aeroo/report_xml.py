@@ -32,7 +32,7 @@
 ################################################################################
 
 from openerp import models, fields, api, _
-from openerp.exceptions import except_orm, Warning
+from openerp.exceptions import except_orm, UserError 
 
 from openerp.osv.orm import transfer_modifiers_to_node
 import openerp.netsvc as netsvc
@@ -101,6 +101,24 @@ class report_xml(models.Model):
         enabled = icp.get_param('aeroo.docs_enabled')
         return enabled == 'True' and True or False
     
+    @api.multi
+    def get_template(self, model, rec_id, parser):
+        """Return the template to use accoring to the model instance
+        """
+        self.ensure_one()
+        tmpl = self.env.context.get('aeroo_tmpl')
+        if tmpl:
+            return tmpl
+        if self.tml_source in ('file', 'database'):
+            if not self.report_sxw_content or self.report_sxw_content=='False':
+                raise UserError(_('No template found!'))
+            return base64.decodestring(self.report_sxw_content)
+        record = self.env[model].browse(rec_id)
+        if hasattr(parser, 'get_template'):
+            template = parser.get_template(cr, uid, record)
+            return template
+        return self.report_sxw_content
+
     @api.model
     def load_from_file(self, path, key):
         class_inst = None

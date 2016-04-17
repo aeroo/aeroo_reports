@@ -343,15 +343,6 @@ class Aeroo_report(report_sxw):
                         setattr(o, field, xmldoc.firstChild)
         return objects
 
-    def get_other_template(self, cr, uid, model, rec_id, parser):
-        if hasattr(parser, 'get_template'):
-            pool = registry(cr.dbname)
-            record = pool.get(model).browse(cr, uid, rec_id, {})
-            template = parser.get_template(cr, uid, record)
-            return template
-        else:
-            return False
-
     def get_styles_file(self, cr, uid, report_xml, company=None, context=None):
         pool = registry(cr.dbname)
         style_io=None
@@ -396,8 +387,7 @@ class Aeroo_report(report_sxw):
         oo_parser.localcontext.update(xfunc.functions)
         model = context.get('active_model', data.get('model')) or data.get('model')
         rec_id = context.get('active_id', data.get('id')) or data.get('id')
-        file_data = tmpl or context.get('aeroo_tmpl') or \
-                self.get_other_template(cr, uid, model, rec_id, oo_parser) or report_xml.report_sxw_content # Get other Template
+        file_data = tmpl or report_xml.get_template(model, rec_id, oo_parser)
         if not file_data or file_data=='False':
             raise osv.except_osv(_('Error!'), _('No template found!'))
         ################################################
@@ -511,15 +501,10 @@ class Aeroo_report(report_sxw):
         company_id = False
         style_io=self.get_styles_file(cr, uid, report_xml, company=company_id, context=context)
 
-        if report_xml.tml_source in ('file', 'database'):
-            if not report_xml.report_sxw_content or report_xml.report_sxw_content=='False':
-                raise osv.except_osv(_('Error!'), _('No template found!'))
-            file_data = base64.decodestring(report_xml.report_sxw_content)
-        else:
-            model = context.get('active_model', data.get('model')) or data.get('model')
-            rec_id = context.get('active_id', data.get('id')) or data.get('id')
-            file_data = self.get_other_template(cr, uid, model, rec_id, oo_parser)
-        if not file_data and not report_xml.report_sxw_content:
+        model = context.get('active_model', data.get('model')) or data.get('model')
+        rec_id = context.get('active_id', data.get('id')) or data.get('id')
+        file_data = report_xml.get_template(model, rec_id, oo_parser)
+        if not file_data:
             self.logger("End process %s (%s), elapsed time: %s" % (self.name, self.table, time.time() - aeroo_print.start_time), logging.INFO) # debug mode
             return False, output
         #elif file_data:
