@@ -125,6 +125,9 @@ This module is based on the original work of Simone Orsi (Domsense)
              "installer.xml",
              "security/ir.model.access.csv"
              ],
+    'external_dependencies': {
+        'python': ['aeroolib',],
+    },             
     "license" : "GPL-3 or any later version",
     'installable': True,
     'active': False,
