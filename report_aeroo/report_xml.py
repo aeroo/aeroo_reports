@@ -534,9 +534,9 @@ class report_xml(models.Model):
         if 'report_type' in vals and vals['report_type'] == 'aeroo':
             parser=rml_parse
             vals['auto'] = False
-            if vals['parser_state']=='loc' and vals['parser_loc']:
+            if vals.get('parser_state')=='loc' and vals.get('parser_loc'):
                 parser=self.load_from_file(vals['parser_loc'], vals['name'].lower().replace(' ','_')) or parser
-            elif vals['parser_state']=='def' and vals['parser_def']:
+            elif vals.get('parser_state')=='def' and vals.get('parser_def'):
                 parser=self.load_from_source(vals['parser_def']) or parser
             res_id = super(report_xml, self).create(vals)
             if vals.get('report_wizard'):
