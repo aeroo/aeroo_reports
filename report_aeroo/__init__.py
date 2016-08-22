@@ -45,7 +45,6 @@ check_deps(check_list)
 
 
 import installer
-import translate
 import report_xml
 import report_aeroo
 import wizard
