@@ -30,6 +30,7 @@
 ##############################################################################
 
 from openerp import api, models, fields, _
+from openerp.osv import osv
 
 from openerp.report import interface
 import cups
