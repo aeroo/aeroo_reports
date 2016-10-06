@@ -12,9 +12,6 @@
                         <group attrs="{'invisible':[('state','&lt;&gt;','exist')]}">
                             <label string="Report Action already exist for this report."/>
                         </group>
-                        <group attrs="{'invisible':[('state','&lt;&gt;','exception')]}">
-                            <label string="Can not be create print button for the Special report."/>
-                        </group>
                         <group attrs="{'invisible':[('state','&lt;&gt;','done')]}">
                             <label string="The print button is successfully added."/>
                         </group>
@@ -23,7 +20,7 @@
                         <group>
                             <button name="do_action" string="_Ok" states="add" type="object" class="oe_highlight"/>
                               or  
-                            <button special="cancel" string="_Cancel" states="add,exist,exception,done" class="oe_link"/>
+                            <button special="cancel" string="_Cancel" states="add,exist,done" class="oe_link"/>
                         </group>
                     </footer>
                     <field name="state" invisible="1"/>
