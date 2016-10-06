@@ -3,13 +3,19 @@
 # © 2016 Savoir-faire Linux
 # License GPL-3.0 or later (http://www.gnu.org/licenses/gpl).
 
-from openerp import models, fields, api
+import imp
+import logging
+import os
+import sys
+
+from openerp import models, fields, api, tools, _
+from openerp.exceptions import ValidationError
+from openerp.report import interface
+from openerp.report.report_sxw import rml_parse
+from openerp.tools.config import config
 
 from report_aeroo import AerooReport
-from openerp.report.report_sxw import rml_parse
-from openerp.report import interface
 
-import logging
 logger = logging.getLogger('report_aeroo')
 
 
@@ -50,21 +56,54 @@ class report_xml(models.Model):
         res = AerooReport(self.env.cr, name, model, tmpl_path, parser=parser)
         return res
 
+    @api.model
+    def load_from_file(self, path, key):
+        class_inst = None
+        expected_class = 'Parser'
+        ad = os.path.abspath(
+            os.path.join(tools.ustr(config['root_path']), u'addons'))
+        mod_path_list = map(
+            lambda m: os.path.abspath(tools.ustr(m.strip())),
+            config['addons_path'].split(','))
+        mod_path_list.append(ad)
+        mod_path_list = list(set(mod_path_list))
+
+        for mod_path in mod_path_list:
+            if os.path.lexists(
+                mod_path + os.path.sep + path.split(os.path.sep)[0]
+            ):
+                filepath = mod_path + os.path.sep + path
+                filepath = os.path.normpath(filepath)
+                sys.path.append(os.path.dirname(filepath))
+                mod_name, file_ext = os.path.splitext(
+                    os.path.split(filepath)[-1])
+                mod_name = '%s_%s_%s' % (self.env.cr.dbname, mod_name, key)
+
+                if file_ext.lower() == '.py':
+                    py_mod = imp.load_source(mod_name, filepath)
+
+                if expected_class in dir(py_mod):
+                    class_inst = py_mod.Parser
+                return class_inst
+
+        raise ValidationError(_('Parser not found at: %s' % path))
+
     @api.cr
     def _lookup_report(self, cr, name):
         if 'report.' + name in interface.report_int._reports:
             new_report = interface.report_int._reports['report.' + name]
         else:
-            cr.execute("SELECT id, active, report_type, parser_state, \
-                        model, report_rml \
-                        FROM ir_act_report_xml \
-                        WHERE report_name=%s", (name,))
-            record = cr.dictfetchone()
-            if record['report_type'] == 'aeroo':
-                if record['active'] is True:
+            env = api.Environment(cr, 1, {})
+            action = env['ir.actions.report.xml'].search(
+                [('report_name', '=', name)], limit=1)
+            if action.report_type == 'aeroo':
+                if action.active is True:
                     parser = rml_parse
+                    if action.parser_loc:
+                        parser = self.load_from_file(
+                            cr, 1, action.parser_loc, action.id)
                     new_report = self.register_report(
-                        cr, 1, name, record['model'], record['report_rml'],
+                        cr, 1, name, action.model, action.report_rml,
                         parser)
                 else:
                     new_report = False
@@ -81,6 +120,11 @@ class report_xml(models.Model):
         ('database', 'Database'),
         ('file', 'File'),
     ], string='Template source', default='database', select=True)
+    parser_loc = fields.Char(
+        'Parser location',
+        help="Path to the parser location. Beginning of the path must be start \
+              with the module name!\n Like this: {module name}/{path to the \
+              parser.py file}")
     report_type = fields.Selection(selection_add=[('aeroo', 'Aeroo Reports')])
     in_format = fields.Selection(
         selection='_get_in_mimetypes',
