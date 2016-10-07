@@ -133,8 +133,11 @@ class AerooReport(report_sxw):
     def create(self, cr, uid, ids, data, context=None):
         if context is None:
             context = {}
+        else:
+            context = dict(context)
 
         env = api.Environment(cr, uid, context)
+
         if 'tz' not in context:
             context['tz'] = env.user.tz
 

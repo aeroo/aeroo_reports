@@ -134,7 +134,8 @@ class report_xml(models.Model):
     out_format = fields.Many2one(
         'report.mimetypes', 'Output Mime-type',
         default=_get_default_outformat)
-    active = fields.Boolean('Active', help='Disables the report if unchecked.')
+    active = fields.Boolean(
+        'Active', help='Disables the report if unchecked.', default=True)
     extras = fields.Char(
         'Extra options', compute='_compute_extras', method=True, size=256)
 
