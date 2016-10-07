@@ -59,14 +59,6 @@ class DynamicLookup(StrictLookup):
 
 class AerooReport(report_sxw):
 
-    def __init__(
-        self, cr, name, table, rml=False, parser=False, header=True,
-        store=False
-    ):
-        super(AerooReport, self).__init__(
-            name, table, rml, parser, header, store)
-        logger.info("registering %s (%s)" % (name, table), exc_info=1)
-
     def create_aeroo_report(
             self, cr, uid, ids, data, report_xml, context):
         """ Return an aeroo report generated with aeroolib

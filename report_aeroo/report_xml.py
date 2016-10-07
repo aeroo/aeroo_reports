@@ -53,7 +53,7 @@ class report_xml(models.Model):
         name = 'report.%s' % name
         if name in interface.report_int._reports:
             del interface.report_int._reports[name]
-        res = AerooReport(self.env.cr, name, model, tmpl_path, parser=parser)
+        res = AerooReport(name, model, tmpl_path, parser=parser)
         return res
 
     @api.model
