@@ -104,8 +104,8 @@ class report_xml(models.Model):
 
     @api.model
     def _get_default_outformat(self):
-        res = self.env['report.mimetypes'].search([('code', '=', 'oo-odt')])
-        return res and res[0].id or False
+        return self.env['report.mimetypes'].search(
+            [('code', '=', 'oo-odt')], limit=1)
 
     tml_source = fields.Selection([
         ('database', 'Database'),
