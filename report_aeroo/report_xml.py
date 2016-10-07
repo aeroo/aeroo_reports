@@ -19,15 +19,6 @@ from report_aeroo import AerooReport
 logger = logging.getLogger('report_aeroo')
 
 
-class res_company(models.Model):
-    _name = 'res.company'
-    _inherit = 'res.company'
-
-    stylesheet_id = fields.Many2one(
-        'report.stylesheets',
-        'Aeroo Global Stylesheet')
-
-
 class report_mimetypes(models.Model):
     """
     Aeroo Report Mime-Type
