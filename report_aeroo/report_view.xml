@@ -26,7 +26,13 @@
                         <page string="Generic">
                             <group string="Template">
                                 <field name="tml_source" required="1"/>
-                                <field name="report_rml" string="Template path" attrs="{'invisible': [('tml_source','&lt;&gt;','file')],'required': [('tml_source','=','file')]}"/>
+                                <field name="report_sxw_content_data"
+                                    string="Template Content"
+                                    attrs="{'invisible': [('tml_source', '!=', 'database')],'required': [('tml_source','=','database')]}"/>
+                                <field
+                                    name="report_rml"
+                                    string="Template path"
+                                    attrs="{'invisible': [('tml_source', '!=', 'file')],'required': [('tml_source','=','file')]}"/>
                                 <field name="parser_loc"/>
                             </group>
                             <group string="Attachments">
