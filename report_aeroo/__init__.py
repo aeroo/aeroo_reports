@@ -5,4 +5,5 @@
 
 from . import report_xml
 from . import report_aeroo
+from . import models
 from . import wizard

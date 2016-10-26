@@ -16,6 +16,8 @@ from openerp import api, models, registry
 from openerp.osv import osv
 from openerp.report.report_sxw import report_sxw
 from openerp.tools.translate import _
+from openerp.tools import safe_eval
+from openerp.exceptions import ValidationError
 from tempfile import NamedTemporaryFile
 
 from .extra_functions import ExtraFunctions
@@ -63,6 +65,11 @@ class AerooReport(report_sxw):
             self, cr, uid, ids, data, report_xml, context):
         """ Return an aeroo report generated with aeroolib
         """
+        if len(ids) > 1:
+            raise ValidationError(
+                _('Aeroo Reports do not support generating reports in batch. '
+                  'You must select one record at a time.'))
+
         context = context.copy()
         if self.name == 'report.printscreen.list':
             context['model'] = data['model']
@@ -85,18 +92,23 @@ class AerooReport(report_sxw):
 
         oo_parser.localcontext['data'] = data
         oo_parser.localcontext['user_lang'] = context.get('lang', False)
-        if len(objects) > 0:
-            oo_parser.localcontext['o'] = objects[0]
+        oo_parser.localcontext['o'] = objects[0]
+
         xfunc = ExtraFunctions(cr, uid, report_xml.id, oo_parser.localcontext)
         oo_parser.localcontext.update(xfunc.functions)
 
-        if not report_xml.report_sxw_content:
-            raise osv.except_osv(_('Error!'), _('No template found!'))
-        file_data = base64.decodestring(report_xml.report_sxw_content)
+        if report_xml.tml_source == 'lang':
+            lang = safe_eval(report_xml.lang_eval, {'o': objects[0]})
+            template = report_xml.template_from_lang(lang)
+
+        else:
+            template = report_xml.report_sxw_content
+            if not template:
+                raise osv.except_osv(_('Error!'), _('No template found!'))
+            template = base64.decodestring(template)
 
         template_io = StringIO()
-        template_io.write(
-            file_data or base64.decodestring(report_xml.report_sxw_content))
+        template_io.write(template)
         serializer = OOSerializer(template_io)
         basic = Template(
             source=template_io, serializer=serializer, lookup=DynamicLookup)

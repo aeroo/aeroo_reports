@@ -2,7 +2,7 @@
 <openerp>
     <data>
 
-        <record model="ir.ui.view" id="act_report_xml_view1">
+        <record id="act_report_xml_view1" model="ir.ui.view">
             <field name="name">ir.actions.report.xml.aeroo.form</field>
             <field name="model">ir.actions.report.xml</field>
             <field name="priority">16</field>
@@ -33,6 +33,20 @@
                                     name="report_rml"
                                     string="Template path"
                                     attrs="{'invisible': [('tml_source', '!=', 'file')],'required': [('tml_source','=','file')]}"/>
+                                <field
+                                    name="report_line_ids"
+                                    attrs="{'invisible': [('tml_source', '!=', 'lang')],'required': [('tml_source','=','lang')]}"
+                                >
+                                    <tree editable="bottom">
+                                        <field name="lang_id"/>
+                                        <field name="template_source"/>
+                                        <field name="template_data" filename="template_filename"/>
+                                        <field name="template_filename" invisible="1"/>
+                                        <field name="template_location"/>
+                                    </tree>
+                                </field>
+                                <field name="lang_eval"
+                                    attrs="{'invisible': [('tml_source', '!=', 'lang')],'required': [('tml_source','=','lang')]}"/>
                                 <field name="parser_loc"/>
                             </group>
                             <group string="Attachments">

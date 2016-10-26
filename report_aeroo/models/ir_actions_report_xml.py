@@ -3,6 +3,7 @@
 # © 2016 Savoir-faire Linux
 # License GPL-3.0 or later (http://www.gnu.org/licenses/gpl).
 
+import base64
 import imp
 import logging
 import os
@@ -14,30 +15,76 @@ from openerp.report import interface
 from openerp.report.report_sxw import rml_parse
 from openerp.tools.config import config
 
-from report_aeroo import AerooReport
+from ..report_aeroo import AerooReport
 
 logger = logging.getLogger('report_aeroo')
 
 
-class report_mimetypes(models.Model):
-    """
-    Aeroo Report Mime-Type
-    """
+class ReportXml(models.Model):
 
-    _name = 'report.mimetypes'
-    _description = 'Report Mime-Types'
-
-    name = fields.Char('Name', size=64, required=True, readonly=True)
-    code = fields.Char('Code', size=16, required=True, readonly=True)
-    compatible_types = fields.Char(
-        'Compatible Mime-Types', size=128,
-        readonly=True)
-    filter_name = fields.Char('Filter Name', size=128, readonly=True)
-
-
-class report_xml(models.Model):
-    _name = 'ir.actions.report.xml'
     _inherit = 'ir.actions.report.xml'
+
+    @api.model
+    def _get_default_outformat(self):
+        return self.env['report.mimetypes'].search(
+            [('code', '=', 'oo-odt')], limit=1)
+
+    tml_source = fields.Selection([
+        ('database', 'Database'),
+        ('file', 'File'),
+        ('lang', 'Different Template per Language'),
+    ], string='Template source', default='database', select=True)
+    parser_loc = fields.Char(
+        'Parser location',
+        help="Path to the parser location. Beginning of the path must be start \
+              with the module name!\n Like this: {module name}/{path to the \
+              parser.py file}")
+    report_type = fields.Selection(selection_add=[('aeroo', 'Aeroo Reports')])
+    in_format = fields.Selection(
+        selection='_get_in_mimetypes',
+        string='Template Mime-type',
+        default='oo-odt',
+    )
+    out_format = fields.Many2one(
+        'report.mimetypes', 'Output Mime-type',
+        default=_get_default_outformat)
+    active = fields.Boolean(
+        'Active', help='Disables the report if unchecked.', default=True)
+    extras = fields.Char(
+        'Extra options', compute='_compute_extras', method=True, size=256)
+
+    report_line_ids = fields.One2many(
+        'ir.actions.report.line', 'report_id', 'Templates by Language')
+    lang_eval = fields.Char(
+        'Language Evaluation',
+        help="Python expression used to determine the language "
+        "of the record being printed in the report.",
+        default="o.partner_id.lang")
+
+    @api.multi
+    def template_from_lang(self, lang):
+        self.ensure_one()
+
+        if not lang:
+            lang = 'en_US'
+
+        print(lang, self.report_line_ids)
+        line = next(
+            (l for l in self.report_line_ids if l.lang_id.code == lang), None)
+
+        if line is None:
+            raise ValidationError(
+                _('Could not render report %s in lang %s.') %
+                (self.name, lang))
+
+        if line.template_source == 'file':
+            fp = tools.file_open(line.template_location, mode='r')
+            data = fp.read()
+            fp.close()
+        else:
+            data = base64.decodestring(line.template_data)
+
+        return data
 
     @api.model
     def register_report(self, name, model, tmpl_path, parser):
@@ -77,7 +124,7 @@ class report_xml(models.Model):
                     class_inst = py_mod.Parser
                 return class_inst
 
-        raise ValidationError(_('Parser not found at: %s' % path))
+        raise ValidationError(_('Parser not found at: %s') % path)
 
     @api.cr
     def _lookup_report(self, cr, name):
@@ -99,36 +146,8 @@ class report_xml(models.Model):
                 else:
                     new_report = False
             else:
-                new_report = super(report_xml, self)._lookup_report(cr, name)
+                new_report = super(ReportXml, self)._lookup_report(cr, name)
         return new_report
-
-    @api.model
-    def _get_default_outformat(self):
-        return self.env['report.mimetypes'].search(
-            [('code', '=', 'oo-odt')], limit=1)
-
-    tml_source = fields.Selection([
-        ('database', 'Database'),
-        ('file', 'File'),
-    ], string='Template source', default='database', select=True)
-    parser_loc = fields.Char(
-        'Parser location',
-        help="Path to the parser location. Beginning of the path must be start \
-              with the module name!\n Like this: {module name}/{path to the \
-              parser.py file}")
-    report_type = fields.Selection(selection_add=[('aeroo', 'Aeroo Reports')])
-    in_format = fields.Selection(
-        selection='_get_in_mimetypes',
-        string='Template Mime-type',
-        default='oo-odt',
-    )
-    out_format = fields.Many2one(
-        'report.mimetypes', 'Output Mime-type',
-        default=_get_default_outformat)
-    active = fields.Boolean(
-        'Active', help='Disables the report if unchecked.', default=True)
-    extras = fields.Char(
-        'Extra options', compute='_compute_extras', method=True, size=256)
 
     @api.multi
     def _compute_extras(recs):
