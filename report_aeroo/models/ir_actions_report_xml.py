@@ -152,8 +152,8 @@ class ReportXml(models.Model):
     @api.multi
     def _compute_extras(recs):
         result = []
-        recs.env.cr.execute("SELECT id, state FROM ir_module_module WHERE \
-                             name='deferred_processing'")
+        recs.env.cr.execute("SELECT id, state FROM ir_module_module WHERE "
+                            "name='deferred_processing'")
         deferred_proc_module = recs.env.cr.dictfetchone()
         if deferred_proc_module and deferred_proc_module['state'] in (
                 'installed',
