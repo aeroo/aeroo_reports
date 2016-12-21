@@ -3,7 +3,6 @@
 # © 2016 Savoir-faire Linux
 # License GPL-3.0 or later (http://www.gnu.org/licenses/gpl).
 
-import base64
 import logging
 import os
 import subprocess
@@ -13,10 +12,8 @@ from aeroolib.plugins.opendocument import Template, OOSerializer
 from cStringIO import StringIO
 from genshi.template.eval import StrictLookup
 from openerp import api, models, registry
-from openerp.osv import osv
 from openerp.report.report_sxw import report_sxw
 from openerp.tools.translate import _
-from openerp.tools import safe_eval
 from openerp.exceptions import ValidationError
 from tempfile import NamedTemporaryFile
 
@@ -76,7 +73,7 @@ class AerooReport(report_sxw):
             context['ids'] = ids
 
         assert report_xml.out_format.code in (
-            'oo-odt', 'oo-ods', 'oo-doc', 'oo-xls', 'oo-csv', 'oo-dbf',
+            'oo-odt', 'oo-ods', 'oo-doc', 'oo-xls', 'oo-csv', 'oo-pdf',
         )
         assert report_xml.in_format in ('oo-odt', 'oo-ods')
 
@@ -97,15 +94,7 @@ class AerooReport(report_sxw):
         xfunc = ExtraFunctions(cr, uid, report_xml.id, oo_parser.localcontext)
         oo_parser.localcontext.update(xfunc.functions)
 
-        if report_xml.tml_source == 'lang':
-            lang = safe_eval(report_xml.lang_eval, {'o': objects[0]})
-            template = report_xml.template_from_lang(lang)
-
-        else:
-            template = report_xml.report_sxw_content
-            if not template:
-                raise osv.except_osv(_('Error!'), _('No template found!'))
-            template = base64.decodestring(template)
+        template = report_xml.get_aeroo_report_template(objects[0])
 
         template_io = StringIO()
         template_io.write(template)

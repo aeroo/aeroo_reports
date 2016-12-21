@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+  <data>
+    <menuitem id="menu_aeroo_dms_root"
+              parent="connector.menu_connector_root"
+              name="Aeroo Reports / DMS"
+              sequence="10"
+              groups="connector.group_connector_manager"/>
+
+    <menuitem id="menu_aeroo_dms_backend"
+              name="Backends"
+              parent="menu_aeroo_dms_root"
+              action="action_aeroo_dms_backend"/>
+  </data>
+</openerp>

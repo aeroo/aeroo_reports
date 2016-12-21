@@ -46,7 +46,8 @@ msgid "Aeroo Report"
 msgstr "Rapport Aeroo"
 
 #. module: report_aeroo
-#: model:ir.ui.menu,name:report_aeroo.menu_ir_action_aeroo_reports_xml
+#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_report_xml_tree
+#: model:ir.ui.menu,name:report_aeroo.menu_ir_action_aeroo_report_xml
 msgid "Aeroo Reports"
 msgstr "Rapports Aeroo"
 
@@ -339,12 +340,6 @@ msgstr "Types de fichier générés"
 #: model:ir.ui.view,arch_db:report_aeroo.act_aeroo_report_xml_view_tree
 msgid "Report xml"
 msgstr ""
-
-#. module: report_aeroo
-#: model:ir.actions.act_window,name:report_aeroo.action_aeroo_report_xml_tree
-#: model:ir.ui.menu,name:report_aeroo.menu_ir_action_aeroo_report_xml
-msgid "Reports"
-msgstr "Rapports"
 
 #. module: report_aeroo
 #: model:ir.ui.view,arch_db:report_aeroo.act_report_xml_view1
