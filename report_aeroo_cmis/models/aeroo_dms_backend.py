@@ -68,16 +68,3 @@ class AerooDmsBackend(models.Model):
         adapter = self._get_base_adapter()
         adapter.auth()
         return adapter
-
-    @api.model
-    def sanitize_input(self, file_name):
-        """Prevent injection by escaping: '%_"""
-        file_name = file_name.replace("'", r"\'")
-        file_name = file_name.replace("%", r"\%")
-        file_name = file_name.replace("_", r"\_")
-        return file_name
-
-    @api.model
-    def safe_query(self, query, file_name, repo):
-        args = map(self.sanitize_input, file_name)
-        return repo.query(query % ''.join(args))
