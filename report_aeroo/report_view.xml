@@ -123,8 +123,6 @@
             <field name="act_window_id" ref="base.ir_action_report_xml"/>
         </record>
 
-        <menuitem name="Aeroo Reports" id="menu_ir_action_aeroo_reports_xml" parent="base.menu_custom"/>
-
         <record id="action_aeroo_report_xml_tree" model="ir.actions.act_window">
             <field name="name">Reports</field>
             <field name="type">ir.actions.act_window</field>
@@ -151,7 +149,10 @@
             <field name="act_window_id" ref="action_aeroo_report_xml_tree"/>
         </record>
 
-        <menuitem action="action_aeroo_report_xml_tree" id="menu_ir_action_aeroo_report_xml" parent="menu_ir_action_aeroo_reports_xml" sequence="5"/>
+        <menuitem name="Aeroo Reports"
+            action="action_aeroo_report_xml_tree"
+            id="menu_ir_action_aeroo_report_xml"
+            parent="report.reporting_menuitem" sequence="5"/>
 
     </data>
 </openerp>
