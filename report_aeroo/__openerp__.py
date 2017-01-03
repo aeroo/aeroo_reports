@@ -11,7 +11,7 @@
     'author': 'Alistek',
     'website': 'http://www.alistek.com',
     'complexity': "easy",
-    'depends': ['base'],
+    'depends': ['base', 'report'],
     'data': [
         "report_view.xml",
         "data/report_aeroo_data.xml",

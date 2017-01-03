@@ -5,7 +5,7 @@
 import base64
 import traceback
 
-from openerp import api, fields, models, _
+from openerp import api, fields, models, _, tools
 from openerp.exceptions import ValidationError
 
 
@@ -55,7 +55,7 @@ class ReportXml(models.Model):
                 "from the DMS repository %s."
                 "Using last version of the template stored in database."
                 "<br/><br/>%s"
-            ) % (repo_name, traceback.format_exc())
+            ) % (repo_name, tools.ustr(traceback.format_exc()))
 
             record.message_post(message)
 
