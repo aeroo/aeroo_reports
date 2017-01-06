@@ -43,7 +43,7 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-_url = 'http://www.alistek.com/aeroo_banner/v7_0_report_aeroo.png'
+_url = 'http://www.alistek.com/aeroo_banner/v8_0_report_aeroo.png'
 
 class report_aeroo_installer(models.TransientModel):
     _name = 'report.aeroo.installer'
