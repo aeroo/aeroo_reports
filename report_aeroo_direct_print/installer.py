@@ -36,7 +36,7 @@ import os, base64
 import cups
 import urllib2
 
-_url = 'http://www.alistek.com/aeroo_banner/v6_0_report_aeroo_direct_print.png'
+_url = 'http://www.alistek.com/aeroo_banner/v8_0_report_aeroo_direct_print.png'
 
 class aeroo_printer_installer(osv.osv_memory):
     _name = 'aeroo_printer.installer'
