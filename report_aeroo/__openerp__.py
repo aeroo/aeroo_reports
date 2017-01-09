@@ -130,4 +130,9 @@ This module is based on the original work of Simone Orsi (Domsense)
     'active': False,
     'application': True,
     'auto_install': False,
+    'external_dependencies': {
+        'python': [
+            'elaphe'
+        ]
+    }
 }
