@@ -30,6 +30,12 @@ from lxml import etree
 from openerp.tools import misc
 from openerp.tools import osutil
 from babel.messages import extract
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+from aeroolib.plugins.opendocument import Template, OOSerializer
+import base64
 import openerp
 
 _logger = logging.getLogger(__name__)
@@ -169,6 +175,26 @@ def extend_trans_generate(lang, modules, cr):
                 trans_ids = trans_obj.search(cr, uid, [('type', '=', 'report'),('res_id', '=', obj.id)])
                 for t in trans_obj.read(cr, uid, trans_ids, ['name','src']):
                     push_translation(module, "report", t['name'], xml_name, t['src'].encode('UTF-8'))
+                if obj.in_format in ['oo-odt', 'oo-ods']\
+                        and obj.report_sxw_content:
+                    template_io = StringIO()
+                    template_io.write(
+                        base64.decodestring(obj.report_sxw_content))
+                    serializer = OOSerializer(template_io)
+                    basic = Template(source=template_io, serializer=serializer)
+
+                    def push_oo_translations(nodes):
+                        for node in nodes:
+                            if not isinstance(node, tuple):
+                                continue
+                            if node[0] == 'TEXT':
+                                push_translation(
+                                    module, obj.report_type, name, 0,
+                                    node[1].encode('UTF-8'), [str(node[2][2])])
+                            if node[0] == 'SUB':
+                                for n in node[1]:
+                                    push_oo_translations(n)
+                    push_oo_translations(basic.stream)
             ##############################
             else:
                 if obj.report_rml:
