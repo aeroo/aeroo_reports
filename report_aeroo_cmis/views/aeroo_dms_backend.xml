@@ -16,7 +16,7 @@
                         <field name="location"
                             placeholder="e.g. http://localhost:8080/alfresco/cmisatom"/>
                         <field name="username" groups="connector.group_connector_manager"/>
-                        <field name="password" groups="connector.group_connector_manager"/>
+                        <field name="password" groups="connector.group_connector_manager" password="1"/>
                         <field name="version"/>
                         <field name="active"/>
                     </group>
