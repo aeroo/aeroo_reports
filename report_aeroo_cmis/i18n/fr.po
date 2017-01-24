@@ -68,8 +68,8 @@ msgstr "Répertoire DMS"
 #. module: report_aeroo_cmis
 #: code:addons/report_aeroo_cmis/models/ir_actions_report_xml.py:53
 #, python-format
-msgid "Could not load the report template from the DMS repository %s.Using last version of the template stored in database.<br/><br/>%s"
-msgstr "Échec du chargement du rapport Aeroo depuis le répertoire DMS %s. Utilisation de la dernière version du rapport disponible en base de données.<br/><br/>%s"
+msgid "Could not load the report template %s from the DMS repository %s. Using last version of the template stored in database (%s).<br/><br/>%s"
+msgstr "Échec du chargement du modèle de rapport %s depuis le répertoire DMS %s. Utilisation de la dernière version du rapport disponible en base de données (%s).<br/><br/>%s"
 
 #. module: report_aeroo_cmis
 #: field:aeroo.dms.backend,create_uid:0
@@ -201,3 +201,9 @@ msgstr "Version"
 #: view:aeroo.dms.backend:report_aeroo_cmis.view_aeroo_dms_backend_form
 msgid "e.g. http://localhost:8080/alfresco/cmisatom"
 msgstr ""
+
+#. module: report_aeroo_cmis
+#: code:addons/report_aeroo_cmis/models/ir_actions_report_xml.py:83
+#, python-format
+msgid "Printing the report %s using version %s."
+msgstr "Impression du rapport %s en utilisant la version %s."

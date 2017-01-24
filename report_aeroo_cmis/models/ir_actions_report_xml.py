@@ -46,16 +46,17 @@ class ReportXml(models.Model):
                         "Import from DMS."
                     ))
 
-    def log_dms_exception_message(self, record):
+    def log_dms_exception_message(self, record, current_version):
         self.ensure_one()
         if hasattr(record, 'message_post'):
             repo_name = self.dms_repository_id.name_get()[0][1]
             message = _(
-                "Could not load the report template "
-                "from the DMS repository %s."
-                "Using last version of the template stored in database."
+                "Could not load the report template %s "
+                "from the DMS repository %s. "
+                "Using last version of the template stored in database (%s)."
                 "<br/><br/>%s"
-            ) % (repo_name, tools.ustr(traceback.format_exc()))
+            ) % (self.name, repo_name, current_version,
+                 tools.ustr(traceback.format_exc()))
 
             record.message_post(message)
 
@@ -69,7 +70,8 @@ class ReportXml(models.Model):
                 self.dms_path)
         except:
             if self.report_rml_content:
-                self.log_dms_exception_message(record)
+                self.log_dms_exception_message(
+                    record, self.dms_document_version)
                 return base64.decodestring(self.report_rml_content)
             else:
                 raise
@@ -77,6 +79,10 @@ class ReportXml(models.Model):
         if self.dms_document_version != version:
             self.report_rml_content = base64.encodestring(data)
             self.dms_document_version = version
+
+        message = _(
+            'Printing the report %s using version %s.') % (self.name, version)
+        record.message_post(message)
 
         return data
 

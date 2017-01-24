@@ -46,7 +46,8 @@ class IrActionsReportLine(models.Model):
                 self.template_location)
         except:
             if self.template_data:
-                self.report_id.log_dms_exception_message(record)
+                self.report_id.log_dms_exception_message(
+                    record, self.dms_document_version)
                 return base64.decodestring(self.template_data)
             else:
                 raise
