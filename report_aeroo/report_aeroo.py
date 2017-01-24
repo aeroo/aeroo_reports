@@ -114,9 +114,10 @@ class AerooReport(report_sxw):
 
             filedir, filename = os.path.split(temp_file.name)
 
-            subprocess.call([
+            subprocess.check_output([
                 "soffice", "--headless", "--convert-to", output_format,
-                "--outdir", filedir, temp_file.name])
+                "--outdir", filedir, temp_file.name
+            ])
 
             with open(temp_file.name[:-3] + output_format, 'r') as f:
                 data = f.read()
