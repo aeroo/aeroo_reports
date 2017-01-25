@@ -1,7 +1,7 @@
 =============
 Aeroo Reports
 =============
-Aeroo Reports for Odoo v9.0
+Aeroo Reports for Odoo v8.0
 
 Installation
 ------------
@@ -13,5 +13,5 @@ Installation
  - Install the python library Genshi
     - pip install Genshi
 
- - Install openoffice or libreoffice 
-    - apt-get install openoffice
+ - Install libreoffice
+    - apt-get install libreoffice, libreoffice-writer, openjdk-7-jre
