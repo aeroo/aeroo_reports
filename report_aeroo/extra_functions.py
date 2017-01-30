@@ -8,6 +8,7 @@ import logging
 import openerp.osv as osv
 import StringIO
 import time
+from datetime import datetime
 from aeroolib.plugins.opendocument import _filter
 from barcode import barcode
 from ctt_objects import supported_language
@@ -17,6 +18,8 @@ from openerp import registry, models
 from openerp.osv.orm import browse_record_list
 from openerp.tools import translate
 from openerp.tools.safe_eval import safe_eval as eval
+from openerp.tools import (
+    DEFAULT_SERVER_DATE_FORMAT, DEFAULT_SERVER_DATETIME_FORMAT)
 
 logger = logging.getLogger('report_aeroo')
 
@@ -97,7 +100,21 @@ class ExtraFunctions(object):
             'text_markup': self._text_markup,
             'text_remove_markup': self._text_remove_markup,
             '__filter': self.__filter,
+            'format_date': self._format_date,
+            'format_datetime': self._format_datetime,
         }
+
+    def _format_date(self, value, date_format):
+        if not value:
+            return ''
+        date = datetime.strptime(value, DEFAULT_SERVER_DATE_FORMAT)
+        return date.strftime(date_format)
+
+    def _format_datetime(self, value, datetime_format):
+        if not value:
+            return ''
+        date = datetime.strptime(value, DEFAULT_SERVER_DATETIME_FORMAT)
+        return date.strftime(datetime_format)
 
     def __filter(self, val):
         if isinstance(val, osv.orm.browse_null):

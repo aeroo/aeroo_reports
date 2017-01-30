@@ -6,7 +6,6 @@
 import logging
 import os
 import subprocess
-import threading
 
 from aeroolib.plugins.opendocument import Template, OOSerializer
 from cStringIO import StringIO
@@ -21,14 +20,6 @@ from .extra_functions import ExtraFunctions
 
 logger = logging.getLogger('report_aeroo')
 
-
-try:
-    aeroo_lock = threading.Lock()
-    msg = "Aeroo lock instantiated."
-    logger.info(msg)
-except Exception:
-    err_msg = "Could not instantiate Aeroo lock!!!"
-    logger.critical(msg)
 
 mime_dict = {
     'oo-odt': 'odt',
