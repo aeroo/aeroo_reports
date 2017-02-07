@@ -414,7 +414,7 @@ class Aeroo_report(report_sxw):
         oo_parser.localcontext['progress_update'] = deferred and deferred.progress_update or (lambda:True)
 
         aeroo_print.epl_images = []
-        basic = NewTextTemplate(source=base64.decodestring(file_data))
+        basic = NewTextTemplate(source=file_data)
         try:
             if genshi_version<='0.6':
                 data = preprocess(basic.generate(**oo_parser.localcontext).render().decode('utf8').encode(report_xml.charset), aeroo_print)
