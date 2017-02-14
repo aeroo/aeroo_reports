@@ -27,6 +27,8 @@ class DmsAdapter(CRUDAdapter):
 
     def read_document_from_path(self, repository_id, path):
         repo = self.client.getRepository(repository_id)
+        if isinstance(path, unicode):
+            path = path.encode('utf-8')
         doc = repo.getObjectByPath(path)
         output = StringIO()
         output.write(doc.getContentStream().read())

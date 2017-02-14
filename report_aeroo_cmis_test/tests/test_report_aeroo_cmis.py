@@ -21,10 +21,11 @@ class TestReportAerooCmis(common.SavepointCase):
         cls.report = cls.env.ref('report_aeroo_sample.aeroo_sample_report_id')
         repo = cls.backend.repository_ids[0].get_repository()
 
-        cls.folder_name = 'test_aeroo_reports'
+        cls.folder_name = u'Modèles Aeroo'
         for doc_name in ('template.odt', 'template_en.odt'):
             try:
-                repo.getObjectByPath('/%s/%s' % (cls.folder_name, doc_name))
+                repo.getObjectByPath('/%s/%s' % (
+                    cls.folder_name.encode('utf-8'), doc_name))
             except:
                 folders = repo.rootFolder.getChildren().getResults()
                 test_folder = next(
