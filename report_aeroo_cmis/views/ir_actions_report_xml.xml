@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+    <data>
+
+        <record id="act_report_xml_view1" model="ir.ui.view">
+            <field name="name">ir.actions.report.xml.aeroo.form</field>
+            <field name="model">ir.actions.report.xml</field>
+            <field name="inherit_id" ref="report_aeroo.act_report_xml_view1"/>
+            <field name="arch" type="xml">
+                <field name="tml_source" position="after">
+                    <field name="dms_repository_id"/>
+                    <field name="dms_path"
+                        attrs="{'invisible': [('tml_source', '!=', 'dms')]}"/>
+                    <field name="dms_document_version"
+                        attrs="{'invisible': [('tml_source', '!=', 'dms')]}"/>
+                </field>
+                <xpath expr="//field[@name='report_line_ids']//field[@name='template_location']" position="after">
+                    <field name="dms_document_version"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="act_aeroo_report_xml_view_tree" model="ir.ui.view">
+            <field name="name">ir.actions.report.xml.tree</field>
+            <field name="model">ir.actions.report.xml</field>
+            <field name="inherit_id" ref="report_aeroo.act_aeroo_report_xml_view_tree"/>
+            <field name="arch" type="xml">
+                <field name="tml_source" position="after">
+                    <field name="dms_repository_id"/>
+                </field>
+            </field>
+        </record>
+
+        <record id="act_aeroo_report_xml_search_view" model="ir.ui.view">
+            <field name="name">ir.actions.report.xml.search</field>
+            <field name="model">ir.actions.report.xml</field>
+            <field name="inherit_id" ref="report_aeroo.act_aeroo_report_xml_search_view"/>
+            <field name="arch" type="xml">
+                <field name="name" position="after">
+                    <field name="dms_repository_id" string="DMS Repository"/>
+                </field>
+                <group position="inside">
+                    <filter string="DMS Repository" domain="[('dms_repository_id', '!=', False)]" context="{'group_by':'dms_repository_id'}"/>
+                </group>
+            </field>
+        </record>
+
+    </data>
+</openerp>

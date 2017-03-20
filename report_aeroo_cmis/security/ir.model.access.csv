@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+aeroo_dms_backend_system,aeroo_dms_backend_system,model_aeroo_dms_backend,base.group_system,1,1,1,1
+aeroo_dms_backend_repository_system,aeroo_dms_backend_repository_system,model_aeroo_dms_backend_repository,base.group_system,1,1,1,1

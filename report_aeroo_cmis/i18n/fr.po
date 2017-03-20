@@ -1,0 +1,209 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* report_aeroo_cmis
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 8.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-12-23 18:07+0000\n"
+"PO-Revision-Date: 2016-12-23 13:17-0500\n"
+"Last-Translator: David Dufresne <david.dufresne@savoirfairelinux.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: \n"
+"Language: fr\n"
+"X-Generator: Poedit 1.8.7.1\n"
+
+#. module: report_aeroo_cmis
+#: selection:aeroo.dms.backend,version:0
+msgid "1.0"
+msgstr ""
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,active:0
+#: field:aeroo.dms.backend.repository,active:0
+msgid "Active"
+msgstr "Actif"
+
+#. module: report_aeroo_cmis
+#: model:ir.model,name:report_aeroo_cmis.model_aeroo_dms_backend
+msgid "Aeroo DMS Backend"
+msgstr "Backend DMS pour Rapports Aeroo"
+
+#. module: report_aeroo_cmis
+#: model:ir.model,name:report_aeroo_cmis.model_aeroo_dms_backend_repository
+msgid "Aeroo DMS Backend Repository"
+msgstr "Répertoire DMS pour Rapports Aeroo"
+
+#. module: report_aeroo_cmis
+#: view:aeroo.dms.backend:report_aeroo_cmis.view_aeroo_dms_backend_form
+#: view:aeroo.dms.backend:report_aeroo_cmis.view_aeroo_dms_backend_tree
+#: model:ir.actions.act_window,name:report_aeroo_cmis.action_aeroo_dms_backend
+msgid "Aeroo DMS Backend"
+msgstr "Backend DMS pour Rapports Aeroo"
+
+#. module: report_aeroo_cmis
+#: model:ir.ui.menu,name:report_aeroo_cmis.menu_aeroo_dms_root
+msgid "Aeroo Reports / DMS"
+msgstr "Rapports Aeroo /DMS"
+
+#. module: report_aeroo_cmis
+#: model:ir.ui.menu,name:report_aeroo_cmis.menu_aeroo_dms_backend
+msgid "Backends"
+msgstr "Backends"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend.repository,backend_id:0
+msgid "DMS Backend"
+msgstr "Backend DMS"
+
+#. module: report_aeroo_cmis
+#: view:ir.actions.report.xml:report_aeroo_cmis.act_aeroo_report_xml_search_view
+msgid "DMS Repository"
+msgstr "Répertoire DMS"
+
+#. module: report_aeroo_cmis
+#: code:addons/report_aeroo_cmis/models/ir_actions_report_xml.py:53
+#, python-format
+msgid "Could not load the report template %s from the DMS repository %s. Using last version of the template stored in database (%s).<br/><br/>%s"
+msgstr "Échec du chargement du modèle de rapport %s depuis le répertoire DMS %s. Utilisation de la dernière version du rapport disponible en base de données (%s).<br/><br/>%s"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,create_uid:0
+#: field:aeroo.dms.backend.repository,create_uid:0
+msgid "Created by"
+msgstr "Créé par"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,create_date:0
+#: field:aeroo.dms.backend.repository,create_date:0
+msgid "Created on"
+msgstr "Créé le"
+
+#. module: report_aeroo_cmis
+#: view:aeroo.dms.backend:report_aeroo_cmis.view_aeroo_dms_backend_form
+msgid "DMS Configuration"
+msgstr "Configuration du DMS"
+
+#. module: report_aeroo_cmis
+#: field:ir.actions.report.xml,dms_path:0
+msgid "DMS Path"
+msgstr "Chemin dans le DMS"
+
+#. module: report_aeroo_cmis
+#: field:ir.actions.report.xml,dms_repository_id:0
+msgid "DMS Repository"
+msgstr "Répertoire DMS"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,display_name:0
+#: field:aeroo.dms.backend.repository,display_name:0
+msgid "Display Name"
+msgstr ""
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,id:0 field:aeroo.dms.backend.repository,id:0
+msgid "ID"
+msgstr ""
+
+#. module: report_aeroo_cmis
+#: selection:ir.actions.report.line,template_source:0
+#: selection:ir.actions.report.xml,tml_source:0
+msgid "Import From DMS"
+msgstr "Importer du DMS"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,__last_update:0
+#: field:aeroo.dms.backend.repository,__last_update:0
+msgid "Last Modified on"
+msgstr "Modifié le"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,write_uid:0
+#: field:aeroo.dms.backend.repository,write_uid:0
+msgid "Last Updated by"
+msgstr "Mis-à-jour par"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,write_date:0
+#: field:aeroo.dms.backend.repository,write_date:0
+msgid "Last Updated on"
+msgstr "Mis-à-jour le"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,location:0
+msgid "Location"
+msgstr "Emplacement"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,name:0 field:aeroo.dms.backend.repository,name:0
+msgid "Name"
+msgstr "Nom"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,password:0
+msgid "Password"
+msgstr "Mot de passe"
+
+#. module: report_aeroo_cmis
+#: view:aeroo.dms.backend:report_aeroo_cmis.view_aeroo_dms_backend_form
+#: field:aeroo.dms.backend,repository_ids:0
+msgid "Repositories"
+msgstr "Répertoires"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend.repository,repository_id:0
+msgid "Repository id"
+msgstr "Identifiant du répertoire"
+
+#. module: report_aeroo_cmis
+#: field:ir.actions.report.xml,dms_document_version:0
+msgid "Template Version"
+msgstr "Version du modèle"
+
+#. module: report_aeroo_cmis
+#: sql_constraint:aeroo.dms.backend.repository:0
+msgid "The DMS repositoryId must be unique."
+msgstr "Le champ  DMS repositoryId doit être unique."
+
+#. module: report_aeroo_cmis
+#: code:addons/report_aeroo_cmis/models/ir_actions_report_xml.py:32
+#, python-format
+msgid "The DMS repository is mandatory if the template source is set to Import from DMS."
+msgstr "Le champ Répertoire DMS est obligatoire si la source du modèle est Importer du DMS."
+
+#. module: report_aeroo_cmis
+#: code:addons/report_aeroo_cmis/models/ir_actions_report_xml.py:43
+#, python-format
+msgid "The document DMS path is mandatory if the template source is set to Import from DMS."
+msgstr "Le champ Chemin dans le DMS est obligatoire si la source du modèle est Importer du DMS. "
+
+#. module: report_aeroo_cmis
+#: view:aeroo.dms.backend:report_aeroo_cmis.view_aeroo_dms_backend_form
+msgid "Update Repository List"
+msgstr "Mettre à jour la liste de répertoires"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,username:0
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#. module: report_aeroo_cmis
+#: field:aeroo.dms.backend,version:0
+#: field:ir.actions.report.line,dms_document_version:0
+msgid "Version"
+msgstr "Version"
+
+#. module: report_aeroo_cmis
+#: view:aeroo.dms.backend:report_aeroo_cmis.view_aeroo_dms_backend_form
+msgid "e.g. http://localhost:8080/alfresco/cmisatom"
+msgstr ""
+
+#. module: report_aeroo_cmis
+#: code:addons/report_aeroo_cmis/models/ir_actions_report_xml.py:83
+#, python-format
+msgid "Printing the report %s using version %s."
+msgstr "Impression du rapport %s en utilisant la version %s."
