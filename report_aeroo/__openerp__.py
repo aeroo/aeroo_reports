@@ -5,7 +5,7 @@
 
 {
     'name': 'Aeroo Reports',
-    'version': '1.2.1',
+    'version': '8.0.1.0.0',
     'category': 'Generic Modules/Aeroo Reports',
     'summary': 'Enterprise grade reporting solution',
     'author': 'Alistek',
@@ -13,11 +13,12 @@
     'complexity': "easy",
     'depends': ['base', 'report'],
     'data': [
+        "security/security.xml",
         "report_view.xml",
         "data/report_aeroo_data.xml",
         "wizard/add_print_button_view.xml",
         "wizard/remove_print_button_view.xml",
-        "security/ir.model.access.csv"
+        "security/ir.model.access.csv",
     ],
     "license": "GPL-3 or any later version",
     'installable': True,
