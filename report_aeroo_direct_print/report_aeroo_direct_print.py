@@ -35,6 +35,7 @@ from openerp.report import interface
 import cups
 from tempfile import NamedTemporaryFile
 import md5
+import osv
 
 SUPPORTED_PRINT_FORMAT = ('pdf','raw')
 SPECIAL_PRINTERS = ('user-def-gen-purpose-printer','user-def-label-printer')
