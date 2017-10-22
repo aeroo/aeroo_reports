@@ -151,7 +151,7 @@ class Aeroo_report(report_sxw):
         return enabled == 'True' and True or False
 
     def logger(self, message, level=logging.DEBUG):
-        logger.log(level, message, exc_info=1)
+        logger.log(level, message)
 
     def __init__(self, cr, name, table, rml=False, parser=False, header=True, store=False):
         super(Aeroo_report, self).__init__(name, table, rml, parser, header, store)
