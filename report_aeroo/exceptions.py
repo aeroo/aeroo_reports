@@ -5,10 +5,10 @@
 #
 ################################################################################
 
-from odoo import api, models
+from odoo.exceptions import except_orm
 
-class ReportSampleParser(models.AbstractModel):
-    _inherit = 'report.report_aeroo.abstract'
-    
-    _name = 'report.sample_report'
-
+class ConnectionError(except_orm):
+    """ Basic connection error.
+    Example: When try to connect Aeroo DOCS and connection fails."""
+    def __init__(self, msg):
+        super(ConnectionError, self).__init__(msg)

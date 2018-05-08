@@ -67,7 +67,7 @@ class report_aeroo_import(osv.osv_memory):
         return values
 
     def install_report(self, cr, uid, ids, context=None):
-        report_obj = self.pool.get('ir.actions.report.xml')
+        report_obj = self.pool.get('ir.actions.report')
         this = self.browse(cr, uid, ids[0], context=context)
         if report_obj.search(cr, uid, [('report_name','=',this.name)], context=context):
             raise osv.except_osv(_('Warning!'), _('Report with service name "%s" already exist in system!') % this.name)
@@ -79,7 +79,7 @@ class report_aeroo_import(osv.osv_memory):
         self.write(cr, uid, ids, {'state':'done'}, context=context)
         report_id = report_obj.search(cr, uid, [('report_name','=',this.name)], context=context)[-1]
         report = report_obj.browse(cr, uid, report_id, context=context)
-        event_id = self.pool.get('ir.values').set_action(cr, uid, report.report_name, 'client_print_multi', report.model, 'ir.actions.report.xml,%d' % report_id)
+        event_id = self.pool.get('ir.values').set_action(cr, uid, report.report_name, 'client_print_multi', report.model, 'ir.actions.report,%d' % report_id)
         if report.report_wizard:
             report._set_report_wizard(report.id)
 
@@ -99,7 +99,7 @@ class report_aeroo_import(osv.osv_memory):
         zip_stream.write(file_data)
         zip_obj = zipfile.ZipFile(zip_stream, mode='r', compression=zipfile.ZIP_DEFLATED)
         if zipfile.is_zipfile(zip_stream):
-            report_obj = self.pool.get('ir.actions.report.xml')
+            report_obj = self.pool.get('ir.actions.report')
             context['allformats'] = True
             mimetypes = dict(report_obj._get_in_mimetypes(cr, uid, context=context))
             styles_select = dict(report_obj._columns['styles_mode'].selection)
@@ -110,7 +110,7 @@ class report_aeroo_import(osv.osv_memory):
             tree = lxml.etree.parse(StringIO(data))
             root = tree.getroot()
             info = ''
-            report = root.xpath("//data/record[@model='ir.actions.report.xml']")[0]
+            report = root.xpath("//data/record[@model='ir.actions.report']")[0]
             style = root.xpath("//data/record[@model='report.stylesheets']")[0]
             rep_name = report.find("field[@name='name']").text
             rep_service = report.find("field[@name='report_name']").text

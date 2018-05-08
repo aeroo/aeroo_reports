@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2013 Alistek (http://www.alistek.com) All Rights Reserved.
@@ -29,10 +30,10 @@
 #
 ##############################################################################
 
-from openerp import api, models, fields, _
-from openerp.exceptions import except_orm, Warning
+from odoo import api, models, fields, _
+from odoo.exceptions import except_orm, Warning
 
-from openerp.report import interface
+from odoo.report import interface
 import re
 
 class report_print_actions(models.TransientModel):
@@ -56,7 +57,7 @@ class report_print_actions(models.TransientModel):
 
     def start_deferred(self, cr, uid, ids, context=None):
         this = self.browse(cr, uid, ids[0], context=context)
-        report_xml = self.pool.get('ir.actions.report.xml').browse(cr, uid, context['report_action_id'])
+        report_xml = self.pool.get('ir.actions.report').browse(cr, uid, context['report_action_id'])
         deferred_proc_obj = self.pool.get('deferred_processing.task')
         process_id = deferred_proc_obj.create(cr, uid, {'name':report_xml.name}, context=context)
         deferred_proc_obj.new_process(cr, uid, process_id, context=context)
@@ -84,7 +85,7 @@ class report_print_actions(models.TransientModel):
                 'report_type': 'aeroo'
                 }
         return {
-                'type': 'ir.actions.report.xml',
+                'type': 'ir.actions.report',
                 'report_name': report_xml.report_name,
                 'datas': data,
                 'context': context
@@ -128,7 +129,7 @@ class report_print_actions(models.TransientModel):
                 'report_type': 'aeroo'
                 }
         res = {
-               'type': 'ir.actions.report.xml',
+               'type': 'ir.actions.report',
                'report_name': report_xml.report_name,
                'datas': data,
                'context': recs.env.context
@@ -156,7 +157,7 @@ class report_print_actions(models.TransientModel):
     state = fields.Selection([('draft','Draft'),('confirm','Confirm'),
         ('done','Done'),],'State', select=True, readonly=True)
     print_ids = fields.Text()
-    report_id = fields.Many2one('ir.actions.report.xml', 'Report')
+    report_id = fields.Many2one('ir.actions.report', 'Report')
     
     ### ends Fields
 
@@ -171,7 +172,7 @@ class report_print_actions(models.TransientModel):
     @api.model
     def _get_report(self):
         report_id = self.env.context.get('report_action_id')
-        return report_id and self.env['ir.actions.report.xml'].browse(report_id)
+        return report_id and self.env['ir.actions.report'].browse(report_id)
     
     @api.model
     def default_get(self, allfields):

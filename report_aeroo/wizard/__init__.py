@@ -1,3 +1,4 @@
+# -*- encoding: utf-8 -*-
 ##############################################################################
 #
 # Copyright (c) 2008-2014 Alistek (http://www.alistek.com) All Rights Reserved.
@@ -29,8 +30,8 @@
 #
 ##############################################################################
 
-import add_print_button
-import remove_print_button
-import report_print_actions
-import report_print_by_action
-import report_import_wizard
+#from . import add_print_button
+#from . import remove_print_button
+#from . import report_print_actions
+#from . import report_print_by_action
+#from . import report_import_wizard

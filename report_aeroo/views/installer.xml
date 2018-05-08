@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+    
+    <!--DOCS Config wizard -->
+    
+    <record id="view_docs_config_installer" model="ir.ui.view">
+      <field name="name">docs_config.installer.view</field>
+      <field name="model">docs_config.installer</field>
+      <field name="inherit_id" ref="base.res_config_installer"/>
+      <field name="arch" type="xml">
+          <data>
+                <form position="attributes">
+                    <attribute name="string">Configure DOCS service connection</attribute>
+                </form>
+                <footer position="replace">
+                    <footer>
+                        <button name="check" type="object" string="Apply and Test" class="btn-primary" states="init"/>
+                        <button name="action_next" type="object" string="Finish" class="btn-primary" states="done"/>
+                        <button special="cancel" string="Close" class="btn-default"/>
+                    </footer>
+                </footer>
+                <separator position="replace">
+                  <field name="state" invisible="1" attrs="{'readonly':True, 'invisible': True}"/>
+                  <group col="4" colspan="4" expand="1">
+                    <group colspan="1" expand="0">
+                      <field name="config_logo" widget="image" nolabel="1" colspan="2"/>
+                    </group>
+                    <group col="2" colspan="3" expand="0">
+                      <p class="o_form_label" colspan="2">
+                        Configure Aeroo Reports connection to DOCS service and test document conversion.
+                      </p>
+                      <newline/>
+                      <group states="init" colspan="2" col="4">
+                          <group colspan="4" col="4">
+                              <field name="enabled"/>
+                              <group colspan="4">
+                                  <field name="host" attrs="{'readonly': [('enabled','=',False)]}"/>
+                                  <field name="port" attrs="{'readonly': [('enabled','=',False)]}"/>
+                              </group>
+                              <field name="auth_type" attrs="{'readonly': [('enabled','=',False)]}"/>
+                              <group colspan="4" attrs="{'invisible': [('auth_type','=',False)]}">
+                                <field name="username" attrs="{'required': [('auth_type','=','simple')], 'readonly': [('enabled','=',False)]}"/>
+                                <field name="password" password="True" attrs="{'required': [('auth_type','=','simple')], 'readonly': [('enabled','=',False)]}"/>
+                              </group>
+                          </group>
+                          <separator colspan="4"/>
+                      </group>
+                      <group colspan="4" states="error,done">
+                          <field name="msg" colspan="4" nolabel="1"/>
+                      </group>
+                      <group colspan="4" states="error">
+                          <separator string="Details" colspan="4"/>
+                          <field name="error_details" colspan="4" nolabel="1"/>
+                      </group>
+                    </group>
+                  </group>
+                </separator>
+          </data>
+      </field>
+    </record>
+
+    <record id="action_docs_config_installer" model="ir.actions.act_window">
+      <field name="name">Aeroo DOCS connection</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">docs_config.installer</field>
+      <field name="view_id" ref="view_docs_config_installer"/>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+    <record id="docs_config_installer_todo" model="ir.actions.todo">
+        <field name="action_id" ref="action_docs_config_installer"/>
+        <field name="restart">always</field>
+        <field name="sequence">3</field>
+        <field name="type">automatic</field>
+    </record>
+
+    <record id="action_docs_config_wizard" model="ir.actions.act_window">
+      <field name="name">Configure DOCS connection</field>
+      <field name="type">ir.actions.act_window</field>
+      <field name="res_model">docs_config.installer</field>
+      <field name="view_id" ref="view_docs_config_installer"/>
+      <field name="view_type">form</field>
+      <field name="view_mode">form</field>
+      <field name="target">new</field>
+    </record>
+
+	<menuitem id="menu_docs_config_wizard" action="action_docs_config_wizard" parent="menu_ir_action_aeroo_reports"/>
+
+  </data>
+</odoo>

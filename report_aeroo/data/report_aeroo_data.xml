@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<openerp>
+<odoo>
     <data noupdate="1">
 
 	    <record model="report.mimetypes" id="report_mimetypes_odt_odt" >
@@ -55,5 +55,5 @@
 		    <field name="filter_name">Text - txt - csv (StarCalc)</field>
 	    </record>
     </data>
-</openerp>
+</odoo>
 

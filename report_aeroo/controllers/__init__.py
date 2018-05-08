@@ -5,10 +5,4 @@
 #
 ################################################################################
 
-from odoo import api, models
-
-class ReportSampleParser(models.AbstractModel):
-    _inherit = 'report.report_aeroo.abstract'
-    
-    _name = 'report.sample_report'
-
+from . import main

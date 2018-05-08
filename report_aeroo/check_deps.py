@@ -30,8 +30,8 @@
 #
 ################################################################################
 
-from openerp.osv import osv
-from openerp.tools.translate import _
+from odoo.osv import osv
+from odoo.tools.translate import _
 
 __all__ = [
     'check_deps',
@@ -42,8 +42,8 @@ def check_deps(check_list):
     import_errors = []
     for imp in check_list:
         try:
-            exec imp in {}
-        except ImportError,e:
+            exec(imp in {})
+        except ImportError as e:
             error = True
             import_errors.append(str(e))
     if error:

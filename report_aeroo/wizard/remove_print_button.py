@@ -77,7 +77,7 @@ class aeroo_remove_print_button(osv.osv_memory):
         if report.report_wizard:
             report._unset_report_wizard()
         irval_mod = self.pool.get('ir.values')
-        event_id = irval_mod.search(cr, uid, [('value','=','ir.actions.report.xml,%d' % context['active_id'])])[0]
+        event_id = irval_mod.search(cr, uid, [('value','=','ir.actions.report,%d' % context['active_id'])])[0]
         res = irval_mod.unlink(cr, uid, [event_id])
         this.write({'state':'done'})
         return _reopen(self, this.id, this._model)

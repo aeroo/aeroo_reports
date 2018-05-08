@@ -48,7 +48,7 @@ class ServerException(Exception):
 class DOCSConnection():
     
     def __init__(self, host=DOCSHOST, port=DOCSPORT, username=None, password=None):
-        assert isinstance(host, basestring) and isinstance(port, (basestring, int))
+        assert isinstance(host, str) and isinstance(port, (str, int))
         self.host = host
         if isinstance(port, int):
             port = str(port)
@@ -87,7 +87,7 @@ class DOCSConnection():
         
     def upload(self, data, filename=False):
         assert len(data) > 0
-        data = b64encode(data)
+        data = b64encode(data).decode('utf8')
         identifier = False
         data_size = len(data)
         upload_complete = False

@@ -43,7 +43,7 @@ class report_print_by_action(models.TransientModel):
         if not valid_input:
             raise Warning(_("Input single record ID or number of comma separated IDs!"))
         print_ids = eval("[%s]" % valid_input, {})
-        rep_obj = recs.env['ir.actions.report.xml']
+        rep_obj = recs.env['ir.actions.report']
         report = rep_obj.browse(recs.env.context['active_ids'])[0]
         data = {
                 'model': report.model,
@@ -52,7 +52,7 @@ class report_print_by_action(models.TransientModel):
                 'report_type': 'aeroo'
                 }
         res =  {
-                'type': 'ir.actions.report.xml',
+                'type': 'ir.actions.report',
                 'report_name': report.report_name,
                 'datas': data,
                 'context': recs.env.context
@@ -68,7 +68,7 @@ class report_print_by_action(models.TransientModel):
     @api.model
     def fields_view_get(self, view_id=None, view_type='form', toolbar=False, submenu=False):
         if self.env.context.get('active_id'):
-            report = self.env['ir.actions.report.xml'].browse(self.env.context['active_ids'])
+            report = self.env['ir.actions.report'].browse(self.env.context['active_ids'])
             if report.report_name == 'aeroo.printscreen.list':
                 raise Warning(_("Print Screen report does not support this functionality!"))
         res = super(report_print_by_action, self).fields_view_get(view_id, 
@@ -77,7 +77,7 @@ class report_print_by_action(models.TransientModel):
     
     @api.model
     def _get_model(self):
-        rep_obj = self.env['ir.actions.report.xml']
+        rep_obj = self.env['ir.actions.report']
         report = rep_obj.browse(self.env.context['active_ids'])
         return report[0].model
     

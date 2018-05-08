@@ -161,7 +161,7 @@ def extend_trans_generate(lang, modules, cr):
                 for dummy, val in field_def.selection:
                     push_translation(module, 'selection', name, 0, encode(val))
 
-        elif model=='ir.actions.report.xml':
+        elif model=='ir.actions.report':
             name = encode(obj.report_name)
             fname = ""
             ##### Changes for Aeroo ######
