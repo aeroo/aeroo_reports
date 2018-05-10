@@ -176,7 +176,7 @@ class ReportAerooAbstract(models.AbstractModel):
             'time':     time,
             'asarray':  self._asarray,
             'average':  self._average,
-            'currency_to_text':self.currency_to_text,
+            'currency_to_text':self._currency_to_text,
             
             '__filter': self.__filter, # Don't use in the report template!
             'getLang':  self._get_lang,
