@@ -88,7 +88,7 @@ class aeroo_remove_print_button(osv.osv_memory):
             ('no_exist','Not Exist'),
             ('done','Done'),
             
-        ],'State', select=True, readonly=True),
+        ],'State', index=True, readonly=True),
     }
 
 aeroo_remove_print_button()

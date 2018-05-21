@@ -53,7 +53,7 @@ class report_aeroo_import(osv.osv_memory):
             ('info','Info'),
             ('done','Done'),
             
-        ],'State', select=True, readonly=True),
+        ],'State', index=True, readonly=True),
                         
     }
 

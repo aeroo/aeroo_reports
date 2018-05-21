@@ -155,7 +155,7 @@ class report_print_actions(models.TransientModel):
     copies = fields.Integer(string='Number of copies', required=True)
     message = fields.Text('Message')
     state = fields.Selection([('draft','Draft'),('confirm','Confirm'),
-        ('done','Done'),],'State', select=True, readonly=True)
+        ('done','Done'),],'State', index=True, readonly=True)
     print_ids = fields.Text()
     report_id = fields.Many2one('ir.actions.report', 'Report')
     

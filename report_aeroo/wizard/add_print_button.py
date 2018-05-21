@@ -103,6 +103,6 @@ class aeroo_add_print_button(models.TransientModel):
             ('exception','Exception'),
             ('done','Done'),
             ],
-            string='State', select=True, readonly=True, default=_check
+            string='State', index=True, readonly=True, default=_check
             )
 
