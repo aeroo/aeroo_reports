@@ -21,7 +21,7 @@
              #"wizard/add_print_button_view.xml",
              #"wizard/remove_print_button_view.xml",
              "views/installer.xml",
-             #"security/ir.model.access.csv"
+             "security/ir.model.access.csv"
              ],
     "license" : "GPL-3 or any later version",
     'installable': True,
