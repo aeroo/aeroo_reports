@@ -72,9 +72,7 @@
 
     <record id="docs_config_installer_todo" model="ir.actions.todo">
         <field name="action_id" ref="action_docs_config_installer"/>
-        <field name="restart">always</field>
         <field name="sequence">3</field>
-        <field name="type">automatic</field>
     </record>
 
     <record id="action_docs_config_wizard" model="ir.actions.act_window">
