@@ -19,6 +19,7 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import file_open
 from odoo.tools.translate import _
+from odoo.modules import module
 
 _logger = logging.getLogger(__name__)
 
@@ -74,10 +75,12 @@ class report_aeroo(models.Model):
         report_parser = self.env.get(report_model_name)
         context = dict(self.env.context)
         if report_parser is None:
-            raise UserError(_('%s report parser not found' % report_model_name))
+            report_parser = self.env['report.report_aeroo.abstract']
+        #     raise UserError(_('%s report parser not found' % report_model_name))
         
         context.update({
             'active_model': self.model,
+            'report_name': self.report_name,
             
             })
         
@@ -151,6 +154,53 @@ class report_aeroo(models.Model):
         icp = self.env['ir.config_parameter'].sudo()
         enabled = icp.get_param('aeroo.docs_enabled')
         return enabled == 'True' and True or False
+
+    @api.model
+    def load_from_file(self, path, key):
+        class_inst = None
+        expected_class = 'Parser'
+
+        try:
+            for mod_path in module.ad_paths:
+                if os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]):
+                    filepath = mod_path+os.path.sep+path
+                    filepath = os.path.normpath(filepath)
+                    sys.path.append(os.path.dirname(filepath))
+                    mod_name,file_ext = os.path.splitext(os.path.split(filepath)[-1])
+                    mod_name = '%s_%s_%s' % (self.env.cr.dbname, mod_name, key)
+
+                    if file_ext.lower() == '.py':
+                        py_mod = imp.load_source(mod_name, filepath)
+
+                    elif file_ext.lower() == '.pyc':
+                        py_mod = imp.load_compiled(mod_name, filepath)
+
+                    if expected_class in dir(py_mod):
+                        class_inst = py_mod.Parser
+                    return class_inst
+                elif os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]+'.zip'):
+                    zimp = zipimport.zipimporter(mod_path+os.path.sep+path.split(os.path.sep)[0]+'.zip')
+                    return zimp.load_module(path.split(os.path.sep)[0]).parser.Parser
+        except SyntaxError as e:
+            raise except_orm(_('Syntax Error !'), e)
+        except Exception as e:
+            _logger.error('Error loading report parser: %s'+(filepath and ' "%s"' % filepath or ''), e)
+            return None
+    
+    @api.model
+    def load_from_source(self, source):
+        source = "from openerp.report import report_sxw\n" + source
+        expected_class = 'Parser'
+        context = {'Parser':None}
+        try:
+            source.replace('\r','') in context
+            return context['Parser']
+        except SyntaxError as e:
+            raise except_orm(_('Syntax Error !'), e)
+        except Exception as e:
+            _logger.error("Error in 'load_from_source' method",
+                __name__, exc_info=True)
+            return None
     
     @api.model
     def _get_in_mimetypes(self):
@@ -248,10 +298,9 @@ class report_aeroo(models.Model):
         
         if 'report_type' in vals and vals['report_type'] == 'aeroo':
             parser = models.AbstractModel
-            vals['auto'] = False
-            if vals['parser_state']=='loc' and vals['parser_loc']:
+            if vals.get('parser_state') =='loc' and vals.get('parser_loc'):
                 parser=self.load_from_file(vals['parser_loc'], vals['name'].lower().replace(' ','_')) or parser
-            elif vals['parser_state']=='def' and vals['parser_def']:
+            elif vals.get('parser_state') =='def' and vals.get('parser_def'):
                 parser=self.load_from_source(vals['parser_def']) or parser
             model = self.env['ir.model']._get(vals.get('model'))
             vals['binding_model_id'] = model.id

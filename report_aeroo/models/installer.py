@@ -61,7 +61,7 @@ class docs_config_installer(models.TransientModel):
             ('init','Init'),
             ('error','Error'),
             ('done','Done'),
-            ],'State', select=True, readonly=True, default='init')
+            ],'State', index=True, readonly=True, default='init')
     msg = fields.Text('Message', readonly=True)
     error_details = fields.Text('Error Details', readonly=True)
     config_logo = fields.Binary(compute='_get_image_fn', string='Image',

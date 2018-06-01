@@ -294,7 +294,8 @@ class ReportAerooAbstract(models.AbstractModel):
         ctx = self.env.context
         
         rep_obj = self.env.get('ir.actions.report')
-        self.name = self._name.startswith('report.') and self._name[7:] or self._name
+        self.name = ctx.get('report_name')
+        # self.name = self._name.startswith('report.') and self._name[7:] or self._name
         report = rep_obj._get_report_from_name(self.name)
         #TODO
         #_logger.info("Start Aeroo Reports %s (%s)" % (name, ctx.get('active_model')), logging.INFO) # debug mode
