@@ -68,20 +68,18 @@ class report_aeroo(models.Model):
     _name = 'ir.actions.report'
     _inherit = 'ir.actions.report'
     
-    
     @api.model
     def render_aeroo(self, docids, data):
         report_model_name = 'report.%s' % self.report_name
+        
         report_parser = self.env.get(report_model_name)
         context = dict(self.env.context)
         if report_parser is None:
             report_parser = self.env['report.report_aeroo.abstract']
-        #     raise UserError(_('%s report parser not found' % report_model_name))
         
         context.update({
             'active_model': self.model,
             'report_name': self.report_name,
-            
             })
         
         return report_parser.with_context(context).aeroo_report(docids, data)
@@ -154,53 +152,6 @@ class report_aeroo(models.Model):
         icp = self.env['ir.config_parameter'].sudo()
         enabled = icp.get_param('aeroo.docs_enabled')
         return enabled == 'True' and True or False
-
-    @api.model
-    def load_from_file(self, path, key):
-        class_inst = None
-        expected_class = 'Parser'
-
-        try:
-            for mod_path in module.ad_paths:
-                if os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]):
-                    filepath = mod_path+os.path.sep+path
-                    filepath = os.path.normpath(filepath)
-                    sys.path.append(os.path.dirname(filepath))
-                    mod_name,file_ext = os.path.splitext(os.path.split(filepath)[-1])
-                    mod_name = '%s_%s_%s' % (self.env.cr.dbname, mod_name, key)
-
-                    if file_ext.lower() == '.py':
-                        py_mod = imp.load_source(mod_name, filepath)
-
-                    elif file_ext.lower() == '.pyc':
-                        py_mod = imp.load_compiled(mod_name, filepath)
-
-                    if expected_class in dir(py_mod):
-                        class_inst = py_mod.Parser
-                    return class_inst
-                elif os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]+'.zip'):
-                    zimp = zipimport.zipimporter(mod_path+os.path.sep+path.split(os.path.sep)[0]+'.zip')
-                    return zimp.load_module(path.split(os.path.sep)[0]).parser.Parser
-        except SyntaxError as e:
-            raise except_orm(_('Syntax Error !'), e)
-        except Exception as e:
-            _logger.error('Error loading report parser: %s'+(filepath and ' "%s"' % filepath or ''), e)
-            return None
-    
-    @api.model
-    def load_from_source(self, source):
-        source = "from openerp.report import report_sxw\n" + source
-        expected_class = 'Parser'
-        context = {'Parser':None}
-        try:
-            source.replace('\r','') in context
-            return context['Parser']
-        except SyntaxError as e:
-            raise except_orm(_('Syntax Error !'), e)
-        except Exception as e:
-            _logger.error("Error in 'load_from_source' method",
-                __name__, exc_info=True)
-            return None
     
     @api.model
     def _get_in_mimetypes(self):
@@ -230,11 +181,10 @@ class report_aeroo(models.Model):
         ('parser','Parser'),
         ], string='Template source', default='database', index=True)
     parser_def = fields.Text('Parser Definition',
-        default="""class Parser(report_sxw.rml_parse):
-    def __init__(self, cr, uid, name, context):
-        super(Parser, self).__init__(cr, uid, name, context)
-        self.context = context
-        self.localcontext.update({})"""
+        default="""from odoo import api, models
+class Parser(models.AbstractModel):
+    _inherit = 'report.report_aeroo.abstract'
+    _name = 'report.thisismyparserservicename'"""
         )
     parser_loc = fields.Char('Parser location', size=128,
         help="Path to the parser location. Beginning of the path must be start \
@@ -289,6 +239,45 @@ class report_aeroo(models.Model):
         trans_ids.unlink()
         res = super(report_aeroo, recs).unlink()
         return res
+        
+    @api.model
+    def unregister_report(self, report_name):
+        report_name = 'report.%s' % self.report_name
+        if self.env.get(report_name):
+            rep_model = self.env['ir.model'].search([('model','=',report_name)])
+            rep_model.with_context(_force_unlink=True).unlink()
+    
+    @api.model
+    def load_from_file(self, path, key):
+        class_inst = None
+        expected_class = 'Parser'
+
+        try:
+            for mod_path in module.ad_paths:
+                if os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]):
+                    filepath = mod_path+os.path.sep+path
+                    filepath = os.path.normpath(filepath)
+                    sys.path.append(os.path.dirname(filepath))
+                    mod_name,file_ext = os.path.splitext(os.path.split(filepath)[-1])
+                    mod_name = '%s_%s_%s' % (self.env.cr.dbname, mod_name, key)
+
+                    if file_ext.lower() == '.py':
+                        py_mod = imp.load_source(mod_name, filepath)
+
+                    elif file_ext.lower() == '.pyc':
+                        py_mod = imp.load_compiled(mod_name, filepath)
+
+                    if expected_class in dir(py_mod):
+                        class_inst = py_mod.Parser
+                    return class_inst
+                elif os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]+'.zip'):
+                    zimp = zipimport.zipimporter(mod_path+os.path.sep+path.split(os.path.sep)[0]+'.zip')
+                    return zimp.load_module(path.split(os.path.sep)[0]).parser.Parser
+        except SyntaxError as e:
+            raise except_orm(_('Syntax Error !'), e)
+        except Exception as e:
+            _logger.error('Error loading report parser: %s'+(filepath and ' "%s"' % filepath or ''), e)
+            return None
     
     @api.model
     def create(self, vals):
@@ -296,97 +285,62 @@ class report_aeroo(models.Model):
             res_id = super(report_aeroo, self).create(vals)
             return res_id
         
-        if 'report_type' in vals and vals['report_type'] == 'aeroo':
+        if 'report_type' in vals and vals.get('report_type') == 'aeroo':
             parser = models.AbstractModel
-            if vals.get('parser_state') =='loc' and vals.get('parser_loc'):
-                parser=self.load_from_file(vals['parser_loc'], vals['name'].lower().replace(' ','_')) or parser
-            elif vals.get('parser_state') =='def' and vals.get('parser_def'):
-                parser=self.load_from_source(vals['parser_def']) or parser
-            model = self.env['ir.model']._get(vals.get('model'))
-            vals['binding_model_id'] = model.id
+            ir_model = self.env['ir.model']
+            model_data = {'model': vals['report_name'],
+                          'name': vals['name'],
+                          'parser_def': vals['parser_def'],
+                         }
+            if vals['parser_state']=='loc' and vals['parser_loc']:
+                parser=self.load_from_file(vals['parser_loc'], vals['name'].lower().replace(' ','_')) or parser #TODO Revise
+            elif vals['parser_state']=='def' and vals['parser_def']:
+                parser = ir_model._custom_aeroo_parser(model_data)
+            elif vals['parser_state']=='default':
+                parser = ir_model._default_aeroo_parser(model_data)
+            model = ir_model._get(vals.get('model'))
             res_id = super(report_aeroo, self).create(vals)
-            if vals.get('report_wizard'):
-                wizard_id = self._set_report_wizard(self.env.cr, self.env.uid, vals['replace_report_id'] or res_id, \
-                            res_id, linked_report_id=res_id, report_name=vals['name'], context=self.env.context)
-                res_id.write({'wizard_id': wizard_id})
-            if vals.get('replace_report_id'):
-                self.link_inherit_report(self.env.cr, self.env.uid, res_id, new_replace_report_id=vals['replace_report_id'], context=self.env.context)
+            parser._build_model(self.pool, self.env.cr)
             return res_id
             
     @api.one
-    def write(recs, vals):
-        if 'report_data' in vals:
-            if vals['report_data']:
-                try:
-                    b64decode(vals['report_data'])
-                except binascii.Error:
-                    vals['report_data'] = False
-        if vals.get('report_type', recs.report_type) != 'aeroo':
-            res = super(report_aeroo, recs).write(vals)
+    def write(rec, vals):
+        orec = rec.read()[0]
+        if vals.get('report_type') and orec['report_type'] != vals['report_type']:
+            raise UserError(_("Changing report type not allowed!"))
+        
+        if 'report_data' in vals and vals['report_data']:
+            try:
+                b64decode(vals['report_data'])
+            except binascii.Error:
+                vals['report_data'] = False
+        
+        res = super(report_aeroo, rec).write(vals)
+        if orec['report_type'] != 'aeroo':
             return res
-        # Continues if this is Aeroo report
-        if vals.get('report_wizard') and vals.get('active', recs.active) and \
-                (recs.replace_report_id and vals.get('replace_report_id',True) \
-                or not recs.replace_report_id):
-            vals['wizard_id'] = recs._set_report_wizard(report_action_id=recs.ids, linked_report_id=vals.get('replace_report_id'))
-            vals['wizard_id'] = vals['wizard_id'] and vals['wizard_id'][0]
-            #recs.report_wizard = True
-            #recs.wizard_id = vals['wizard_id']
-        elif 'report_wizard' in vals and not vals['report_wizard'] and recs.report_wizard:
-            recs._unset_report_wizard()
-            vals['wizard_id'] = False
-            #recs.report_wizard = False
-            #recs.wizard_id = False
-        parser = models.AbstractModel
-        p_state = vals.get('parser_state', False)
-        if p_state == 'loc':
-            parser = recs.load_from_file(vals.get('parser_loc', False) or recs.parser_loc, recs.id) or parser
-        elif p_state == 'def':
-            parser = recs.load_from_source((vals.get('parser_loc', False) or recs.parser_def or '')) or parser
-        elif p_state == 'default':
-            parser = models.AbstractModel
-        elif recs.parser_state=='loc':
-            parser = recs.load_from_file(recs.parser_loc, recs.id) or parser
-        elif recs.parser_state=='def':
-            parser = recs.load_from_source(recs.parser_def) or parser
-        elif recs.parser_state=='default':
-            parser = models.AbstractModel
-        if vals.get('parser_loc', False):
-            parser = recs.load_from_file(vals['parser_loc'], recs.id) or parser
-        elif vals.get('parser_def', False):
-            parser = recs.load_from_source(vals['parser_def']) or parser
-        if vals.get('report_name', False) and vals['report_name'] != recs.report_name:
-            report_name = vals['report_name']
-        else:
-            report_name = recs.report_name
-        ##### Link / unlink inherited report #####
-        link_vals = {}
-        now_unlinked = False
-        if 'replace_report_id' in vals and vals.get('active', recs.active):
-            if vals['replace_report_id']:
-                if recs.replace_report_id and vals['replace_report_id'] != recs.replace_report_id.id:
-                    recs_new = recs.with_context(keep_wizard = True)
-                    link_vals.update(recs_new.unlink_inherit_report())
-                    now_unlinked = True
-                link_vals.update(recs.link_inherit_report(new_replace_report_id=vals['replace_report_id'])[0])
-                recs.register_report(report_name, vals.get('model', recs.model), vals.get('report_rml', recs.report_rml), parser)
-            else:
-                link_vals.update(recs.unlink_inherit_report()[0])
-                now_unlinked = True
-        ##########################################
-        #try:
-        #    if vals.get('active', recs.active):
-        #        recs.register_report(report_name, vals.get('model', recs.model), vals.get('report_rml', recs.report_rml), parser)
-        #        if not recs.active and vals.get('replace_report_id',recs.replace_report_id):
-        #            link_vals.update(recs.link_inherit_report(new_replace_report_id=vals.get('replace_report_id', False)))
-        #    elif not vals.get('active', recs.active):
-        #        recs.unregister_report(report_name)
-        #        if not now_unlinked:
-        #            link_vals.update(recs.unlink_inherit_report())
-        #except Exception as e:
-        #    logger.error("Error in report registration", exc_info=True)
-        #    raise except_orm(_('Report registration error !'), _('Report was not registered in system !'))
-        #vals.update(link_vals)
-        res = super(report_aeroo, recs).write(vals)
+        
+        try:
+            rec.unregister_report(orec['report_name'])
+        except Exception as e:
+            _logger.exception(_("Error unregistering Aeroo Reports report"))
+            raise UserError(_("Error unregistering Aeroo Reports report"))
+        
+        if rec.active:
+            ir_model = rec.env['ir.model']
+            model_data = {'model': rec.report_name,
+                          'name': rec.name,
+                          'parser_def': rec.parser_def,
+                         }
+            if rec.parser_state == 'default':
+                parser = ir_model._default_aeroo_parser(model_data)
+            
+            elif rec.parser_state == 'loc':
+                parser = rec.load_from_file(rec.parser_loc, rec.id) #TODO Revise
+            
+            elif rec.parser_state == 'def':
+                parser = ir_model._custom_aeroo_parser(model_data)
+            
+            parser._build_model(rec.pool, rec.env.cr)
+        
         return res
     

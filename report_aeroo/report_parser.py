@@ -7,6 +7,7 @@
 
 import logging
 from io import BytesIO
+from PIL import Image
 from base64 import b64decode
 import time
 
@@ -21,7 +22,8 @@ from genshi.template.eval import StrictLookup
 from odoo import release as odoo_release
 from odoo import api, models
 from odoo.tools import file_open, frozendict
-from odoo.tools.translate import _
+from odoo.tools.translate import _, translate
+from odoo.tools.misc import formatLang as odoo_fl
 from odoo.tools.safe_eval import safe_eval
 from odoo.modules import load_information_from_description_file
 from odoo.exceptions import MissingError
@@ -67,11 +69,118 @@ class ReportAerooAbstract(models.AbstractModel):
         y = len(localspace['value_list'])
         return float(x)/float(y)
     
+    def _asimage(self, field_value, rotate=None, size_x=None, size_y=None,
+                 uom='px', hold_ratio=False):
+        """
+        Prepare image for inserting into OpenOffice.org document
+        """
+        def size_by_uom(val, uom, dpi):
+            if uom=='px':
+                result=str(val/dpi)+'in'
+            elif uom=='cm':
+                result=str(val/2.54)+'in'
+            elif uom=='in':
+                result=str(val)+'in'
+            return result
+        ##############################################
+        if not field_value:
+            return BytesIO(), 'image/png'
+        field_value = b64decode(field_value)
+        tf = BytesIO(field_value)
+        tf.seek(0)
+        im=Image.open(tf)
+        format = im.format.lower()
+        dpi_x, dpi_y = map(float, im.info.get('dpi', (96, 96)))
+        try:
+            if rotate!=None:
+                im=im.rotate(int(rotate))
+                tf.seek(0)
+                im.save(tf, format)
+        except Exception as e:
+            _logger.exception("Error in '_asimage' method")
+
+        if hold_ratio:
+            img_ratio = im.size[0] / float(im.size[1])
+            if size_x and not size_y:
+                size_y = size_x / img_ratio
+            elif not size_x and size_y:
+                size_x = size_y * img_ratio
+            elif size_x and size_y:
+                size_y2 = size_x / img_ratio
+                size_x2 = size_y * img_ratio
+                if size_y2 > size_y:
+                    size_x = size_x2
+                elif size_x2 > size_x:
+                    size_y = size_y2
+
+        size_x = size_x and size_by_uom(size_x, uom, dpi_x) \
+                    or str(im.size[0]/dpi_x)+'in'
+        size_y = size_y and size_by_uom(size_y, uom, dpi_y) \
+                    or str(im.size[1]/dpi_y)+'in'
+        return tf, 'image/%s' % format, size_x, size_y
+    
     def _currency_to_text(self, currency):
         def c_to_text(sum, currency=currency, language=None):
             lang = supported_language.get(language or self._get_lang())
             return str(lang.currency_to_text(sum, currency), "UTF-8")
         return c_to_text
+        
+    def _get_selection_items(self, kind='items'):
+        def get_selection_item(obj, field, value=None):
+            try:
+                if isinstance(obj, models.AbstractModel): #TODO how to check for list of objects in new API?
+                    obj = obj[0]
+                if isinstance(obj, str):
+                    model = obj
+                    field_val = value
+                else:
+                    model = obj._name
+                    field_val = getattr(obj, field)
+                val = self.env[model].fields_get(allfields=[field]
+                                                )[field]['selection']
+                if kind=='item':
+                    if field_val:
+                        return dict(val)[field_val]
+                elif kind=='items':
+                    return val
+                return ''
+            except Exception as e:
+                _logger.exception("Error in '_get_selection_item' method",
+                                                                exc_info=True)
+                return ''
+        return get_selection_item
+    
+    def _get_log(self, obj, field=None):
+        if field:
+            return obj.get_metadata()[0][field]
+        else:
+            return obj.get_metadata()[0]
+            
+    def _translate_text(self, source):
+        trans_obj = self.env['ir.translation']
+        lang = self._get_lang()
+        name = 'ir.actions.report'
+        conds = [('res_id','=',self.report.id),
+                 ('type','=','report'),
+                 ('src','=',source),
+                 ('lang','=',lang)
+                ]
+        trans = trans_obj.search(conds)
+        if not trans:
+            vals = {'src':source,
+                    'type':'report',
+                    'lang':self._get_lang(),
+                    'res_id':self.report.id,
+                    'name':name,
+                   }
+            trans_obj.create(vals)
+        return translate(self.env.cr, name, 'report', lang, source) or source
+    
+    def _asarray(self, attr, field):
+        expr = "for o in objects:\n\tvalue_list.append(o.%s)" % field
+        localspace = {'objects':attr, 'value_list':[]}
+        exec(expr, localspace)
+        return localspace['value_list']
     
     # / Extra Functions ========================================================
     
@@ -101,7 +210,6 @@ class ReportAerooAbstract(models.AbstractModel):
                                )
         return data
     
-    
     def _get_lang(self, source='current'):
         if source=='current':
             return self.env.context['lang'] or self.env.context['user_lang']
@@ -110,8 +218,7 @@ class ReportAerooAbstract(models.AbstractModel):
         elif source=='user':
             return self.env.context['user_lang']
     
-    def set_lang(self, lang, obj=None):
-        _logger.exception('AEROO setLang======================= %s' % lang)
+    def _set_lang(self, lang, obj=None):
         self.localcontext.update(lang=lang)
         if obj is None and 'objects' in self.localcontext:
             obj = self.localcontext['objects']
@@ -120,6 +227,11 @@ class ReportAerooAbstract(models.AbstractModel):
             ctx_copy.update(lang=lang)
             obj.env.context=frozendict(ctx_copy)
             obj.invalidate_cache()
+    
+    def _format_lang(self, value, digits=None, grouping=True, monetary=False,
+                     dp=False, currency_obj=False):
+        return odoo_fl(self.env, value, digits, grouping, monetary, dp,
+                       currency_obj)
     
     def _set_objects(self, model, ids):
         _logger.exception('AEROO setobjects======================= %s - %s' % (model, ids))
@@ -166,6 +278,7 @@ class ReportAerooAbstract(models.AbstractModel):
         self.record_ids = ids
         self.ctx = ctx
         self.company = self.env.user.company_id
+        self.report = report
         
         #=======================================================================
         self.localcontext = {
@@ -177,13 +290,21 @@ class ReportAerooAbstract(models.AbstractModel):
             'asarray':  self._asarray,
             'average':  self._average,
             'currency_to_text':self._currency_to_text,
+            'asimage':self._asimage,
+            'get_selection_item':self._get_selection_items('item'),
+            'get_selection_items': self._get_selection_items(),
+            'get_log': self._get_log,
+            'asarray':self._asarray,
             
             '__filter': self.__filter, # Don't use in the report template!
             'getLang':  self._get_lang,
-            'setLang':  self.set_lang,
+            'setLang':  self._set_lang,
+            'formatLang': self._format_lang,
+            '_':self._translate_text,
+            'gettext':self._translate_text,
             'test':     self.test,
             }
-        self.set_lang(self.company.partner_id.lang)
+        self._set_lang(self.company.partner_id.lang)
         self._set_objects(self.model, ids)
         
         file_data = None
@@ -295,7 +416,6 @@ class ReportAerooAbstract(models.AbstractModel):
         
         rep_obj = self.env.get('ir.actions.report')
         self.name = ctx.get('report_name')
-        # self.name = self._name.startswith('report.') and self._name[7:] or self._name
         report = rep_obj._get_report_from_name(self.name)
         #TODO
         #_logger.info("Start Aeroo Reports %s (%s)" % (name, ctx.get('active_model')), logging.INFO) # debug mode

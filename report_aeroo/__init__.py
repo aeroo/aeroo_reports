@@ -20,7 +20,8 @@ from . import controllers
 from . import models
 from . import report_parser
 
-#from . import report
-#from . import wizard
+from . import report
+
+from . import wizard
 #from . import translate
 
