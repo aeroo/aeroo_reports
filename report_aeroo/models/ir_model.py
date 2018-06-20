@@ -23,11 +23,16 @@ class IrModel(models.Model):
         """
         super(IrModel, self)._add_manual_models()
         cr = self.env.cr
-        sql_stmt = """SELECT report_name, name, parser_state, parser_def
+        #sql_stmt = """SELECT report_name, name, parser_state, parser_def
+        #           FROM ir_act_report_xml WHERE
+        #           report_type = 'aeroo'
+        #           AND active = True
+        #           AND parser_state in ('default', 'def')
+        #           ORDER BY id
+        #           """
+        sql_stmt = """SELECT report_name, name
                    FROM ir_act_report_xml WHERE
                    report_type = 'aeroo'
-                   AND active = True
-                   AND parser_state in ('default', 'def')
                    ORDER BY id
                    """
         cr.execute(sql_stmt)
