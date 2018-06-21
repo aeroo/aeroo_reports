@@ -24,7 +24,7 @@ from odoo.modules import module
 _logger = logging.getLogger(__name__)
 
 # ------------------------------------------------------------------------------
-class report_stylesheets(models.Model):
+class ReportStylesheets(models.Model):
     '''
     Aeroo Report Stylesheets
     '''
@@ -38,7 +38,7 @@ class report_stylesheets(models.Model):
     ### ends Fields
 
 # ------------------------------------------------------------------------------
-class res_company(models.Model):
+class ResCompany(models.Model):
     _name = 'res.company'
     _inherit = 'res.company'
 
@@ -48,7 +48,7 @@ class res_company(models.Model):
     ### ends Fields
 
 # ------------------------------------------------------------------------------
-class report_mimetypes(models.Model):
+class ReportMimetypes(models.Model):
     '''
     Aeroo Report Mime-Type
     '''
@@ -64,7 +64,7 @@ class report_mimetypes(models.Model):
     ### ends Fields
 
 # ------------------------------------------------------------------------------
-class report_aeroo(models.Model):
+class ReportAeroo(models.Model):
     _name = 'ir.actions.report'
     _inherit = 'ir.actions.report'
     
@@ -343,4 +343,3 @@ class Parser(models.AbstractModel):
             parser._build_model(rec.pool, rec.env.cr)
         
         return res
-    
