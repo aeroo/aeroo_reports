@@ -86,7 +86,7 @@ class ReportAeroo(models.Model):
     
     @api.model
     def _get_report_from_name(self, report_name):
-        res = super(report_aeroo, self)._get_report_from_name(report_name)
+        res = super(ReportAeroo, self)._get_report_from_name(report_name)
         if res:
             return res
         report_obj = self.env['ir.actions.report']
@@ -237,7 +237,7 @@ class Parser(models.AbstractModel):
         trans_obj = recs.env['ir.translation']
         trans_ids = trans_obj.search([('type','=','report'),('res_id','in',recs.ids)])
         trans_ids.unlink()
-        res = super(report_aeroo, recs).unlink()
+        res = super(ReportAeroo, recs).unlink()
         return res
         
     @api.model
@@ -282,7 +282,7 @@ class Parser(models.AbstractModel):
     @api.model
     def create(self, vals):
         if vals.get('report_type') != 'aeroo':
-            res_id = super(report_aeroo, self).create(vals)
+            res_id = super(ReportAeroo, self).create(vals)
             return res_id
         
         if 'report_type' in vals and vals.get('report_type') == 'aeroo':
@@ -299,7 +299,7 @@ class Parser(models.AbstractModel):
             elif vals['parser_state']=='default':
                 parser = ir_model._default_aeroo_parser(model_data)
             model = ir_model._get(vals.get('model'))
-            res_id = super(report_aeroo, self).create(vals)
+            res_id = super(ReportAeroo, self).create(vals)
             parser._build_model(self.pool, self.env.cr)
             return res_id
             
@@ -315,7 +315,7 @@ class Parser(models.AbstractModel):
             except binascii.Error:
                 vals['report_data'] = False
         
-        res = super(report_aeroo, rec).write(vals)
+        res = super(ReportAeroo, rec).write(vals)
         if orec['report_type'] != 'aeroo':
             return res
         

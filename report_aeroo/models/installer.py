@@ -71,7 +71,7 @@ class DocsConfigInstaller(models.TransientModel):
     @api.model
     def default_get(self, allfields):
         icp = self.env['ir.config_parameter'].sudo()
-        defaults = super(docs_config_installer, self).default_get(allfields)
+        defaults = super(DocsConfigInstaller, self).default_get(allfields)
         enabled = icp.get_param('aeroo.docs_enabled')
         defaults['enabled'] = enabled == 'True' and True or False
         defaults['host'] = icp.get_param('aeroo.docs_host') or 'localhost'
