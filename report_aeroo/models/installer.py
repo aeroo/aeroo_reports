@@ -16,7 +16,7 @@ from odoo.tools.translate import _
 
 _url = 'xhttp://www.alistek.com/aeroo_banner/v11_1_report_aeroo.png'
 
-class DocsConfigInstaller(models.TransientModel):
+class docs_config_installer(models.TransientModel):
     _name = 'docs_config.installer'
     _inherit = 'res.config.installer'
     _rec_name = 'host'
@@ -123,3 +123,4 @@ class DocsConfigInstaller(models.TransientModel):
         result = act_obj.search([('id','=',act_id)]).read()[0]
         result['res_id'] = self.id
         return result
+        
