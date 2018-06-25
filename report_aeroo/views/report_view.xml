@@ -2,6 +2,33 @@
 <odoo>
     <data>
         <!--========================-->
+        <record id="act_aeroo_print_by_action_view_form" model="ir.ui.view">
+            <field name="name">aeroo.print_by_action.form</field>
+            <field name="model">aeroo.print_by_action</field>
+            <field name="arch" type="xml">
+                <form string="Test the Report">
+                   <group>
+                        <field name="name"/>
+                        <field name="object_ids" default_focus="1"/>
+                   </group>
+                    <footer>
+                        <button icon="fa-file-text" name="to_print" string="_Print" type="object" default_focus="1" class="oe_highlight"/>
+                         or 
+                        <button special="cancel" string="Close" type="object" class="oe_link"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+        <!--========================-->
+        <act_window name="Test the Report"
+            res_model="aeroo.print_by_action"
+            src_model="ir.actions.report"
+            view_mode="form"
+            target="new"
+            key2="client_action_multi"
+            id="action_aeroo_print_by_action_window"/>
+        <!--========================-->
+        <!--========================-->
         <record model="ir.ui.view" id="act_aeroo_report_xml_view">
 			<field name="name">ir.actions.report.aeroo.form</field>
 			<field name="model">ir.actions.report</field>
@@ -11,7 +38,7 @@
                     <field name="binding_model_id" invisible="1"/>
                     <sheet modifiers="{}">
                         <div class="oe_button_box" name="button_box">
-                            <button name="%(action_aeroo_print_by_action_window)d" string="Test the Report!" type="action"
+                            <button name="%(act_aeroo_print_by_action_view_form)d" string="Test the Report!" type="action"
                                     icon="fa-file-text"
                                     help="Test report without leaving this form." class="oe_stat_button"/>
                             <button name="create_action" string="Add in the 'Print' menu" type="object"

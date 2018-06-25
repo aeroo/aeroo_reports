@@ -12,7 +12,7 @@ import re
 import logging
 _logger = logging.getLogger(__name__)
 
-class report_print_by_action(models.TransientModel):
+class ReportPrintByAction(models.TransientModel):
     _name = 'aeroo.print_by_action'
     
     @api.multi
@@ -78,4 +78,3 @@ class report_print_by_action(models.TransientModel):
         res = super(report_print_by_action, self).fields_view_get(view_id, 
                                     view_type, toolbar=toolbar, submenu=submenu)
         return res
-

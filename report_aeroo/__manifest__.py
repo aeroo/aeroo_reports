@@ -18,7 +18,6 @@
              "views/report_view.xml",
              "data/report_aeroo_data.xml", 
              "views/webclient_report_action.xml",
-             "views/report_print_by_action.xml",
              #"wizard/add_print_button_view.xml",
              #"wizard/remove_print_button_view.xml",
              "views/installer.xml",
