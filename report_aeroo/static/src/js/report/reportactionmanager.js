@@ -18,12 +18,17 @@ ActionManager.include({
         if (c_action.report_type !== 'aeroo') {
             return self._super(action, options);
         }
-        
+
         framework.blockUI();
         var aeroo_url = 'report/aeroo/' + c_action.report_name;
-        if(c_action.context.active_ids){
-            aeroo_url += '/' + c_action.context.active_ids.join(',');
+        if (_.isUndefined(action.data) || _.isNull(action.data) || (_.isObject(action.data) && _.isEmpty(action.data))) {
+            if (action.context.active_ids) {
+                aeroo_url += '/' + c_action.context.active_ids.join(',');
+                // odoo does not send context if no data, but I find it quite useful to send it regardless data or no data
+                aeroo_url += '?context=' + encodeURIComponent(JSON.stringify(c_action.context));
+            }
         }else{
+            aeroo_url += '/' + c_action.context.active_ids.join(',');
             aeroo_url += '?options=' + encodeURIComponent(JSON.stringify(c_action.data));
             aeroo_url += '&context=' + encodeURIComponent(JSON.stringify(c_action.context));
         }
