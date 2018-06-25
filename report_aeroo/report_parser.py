@@ -384,31 +384,27 @@ class ReportAerooAbstract(models.AbstractModel):
         elif code =='genshi-raw':
             return self.simple_report(ids, data, report, ctx, output='raw')
     
-    
     def assemble_tasks(self, ids, data, report, ctx):
         code = report.out_format.code
-        localcontext = {
-                        'data':data,
-                        'time':time,
-                        #TODO Add more variables
-                       }
-        
         result = self.single_report(ids, data, report, ctx)
+
+        filename = 'report'
+        if report.print_report_name and not len(ids) > 1:
+            obj = self.env[report.model].browse(ids)
+            print_report_name = safe_eval(
+                report.print_report_name, {'object': obj, 'time': time})
+        
         if report.in_format == code:
-            if report.content_fname:
-                fname = safe_eval(report.content_fname, localcontext)
-            else:
-                fname = 'report.%s' % mime_dict[report.in_format]
-            return result[0], result[1], fname
+            filename = '%s.%s' % (
+                print_report_name, mime_dict[report.in_format])
+            return result[0], result[1], filename
         else:
             try:
                 self.get_docs_conn()
                 result = self._generate_doc(result[0], report)
-                if report.content_fname:
-                    fname = safe_eval(report.content_fname, localcontext)
-                else:
-                    fname = 'report.%s' % mime_dict[report.out_format.code]
-                return result, mime_dict[code], fname
+                filename = '%s.%s' % (
+                    print_report_name, mime_dict[report.out_format.code])
+                return result, mime_dict[code], filename
             except Exception as e:
                 _logger.exception(_("Aeroo DOCS error!\n%s") % str(e))
                 if report.disable_fallback:
@@ -416,8 +412,8 @@ class ReportAerooAbstract(models.AbstractModel):
                     _logger.exception(e[0])
                     raise ConnectionError(_('Could not connect Aeroo DOCS!'))
         # only if fallback
-        fname = 'report.%s' % mime_dict[report.in_format]
-        return result[0], result[1], fname
+        filename = '%s.%s' % (print_report_name, mime_dict[report.in_format])
+        return result[0], result[1], filename
     
     def aeroo_report(self, ids, data):
         ctx = self.env.context
