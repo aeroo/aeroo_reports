@@ -309,6 +309,8 @@ class ReportAerooAbstract(models.AbstractModel):
             '_':self._translate_text,
             'gettext':self._translate_text,
             'test':     self.test,
+            'fields':     fields,
+            'company':     self.env.user.company_id,
             }
         self._set_lang(self.company.partner_id.lang)
         self._set_objects(self.model, ids)
