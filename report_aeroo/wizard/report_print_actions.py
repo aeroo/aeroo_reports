@@ -11,7 +11,7 @@ from odoo.exceptions import except_orm, Warning
 from odoo.report import interface
 import re
 
-class report_print_actions(models.TransientModel):
+class ReportPrintActions(models.TransientModel):
     _name = 'aeroo.print_actions'
     _description = 'Aeroo reports print wizard'
 
@@ -170,4 +170,3 @@ class report_print_actions(models.TransientModel):
     _defaults = {
         'state': 'draft',
     }
-
