@@ -399,7 +399,7 @@ class ReportAerooAbstract(models.AbstractModel):
         code = report.out_format.code
         result = self.single_report(ids, data, report, ctx)
 
-        filename = 'report'
+        print_report_name = 'report'
         if report.print_report_name and not len(ids) > 1:
             obj = self.env[report.model].browse(ids)
             print_report_name = safe_eval(
