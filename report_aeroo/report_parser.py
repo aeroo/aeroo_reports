@@ -228,10 +228,16 @@ class ReportAerooAbstract(models.AbstractModel):
             obj.env.context=frozendict(ctx_copy)
             obj.invalidate_cache()
     
-    def _format_lang(self, value, digits=None, grouping=True, monetary=False,
-                     dp=False, currency_obj=False):
-        return odoo_fl(self.env, value, digits, grouping, monetary, dp,
-                       currency_obj)
+    def _format_lang(
+            self, value, digits=None, grouping=True, monetary=False, dp=False,
+            currency_obj=False, date=False, date_time=False):
+        """ We add date and date_time for backwards compatibility. Odoo has
+        split the method in two (formatlang and format_date)
+        """
+        if date or date_time:
+            return odoo_fd(self.env, value)
+        return odoo_fl(
+            self.env, value, digits, grouping, monetary, dp, currency_obj)
     
     def _set_objects(self, model, ids):
         _logger.exception('AEROO setobjects======================= %s - %s' % (model, ids))
