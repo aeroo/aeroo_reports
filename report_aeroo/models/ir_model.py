@@ -13,34 +13,38 @@ from odoo.tools.translate import _
 
 _logger = logging.getLogger(__name__)
 
+
 class IrModel(models.Model):
     _name = 'ir.model'
     _inherit = 'ir.model'
-    
+
     def _add_manual_models(self):
         """
         Calls original function + loads Aeroo Reports 'dynamic' reports
         """
         super(IrModel, self)._add_manual_models()
-        cr = self.env.cr
-        sql_stmt = """SELECT report_name, name
-                   FROM ir_act_report_xml WHERE
-                   report_type = 'aeroo'
-                   ORDER BY id
-                   """
-        cr.execute(sql_stmt)
-        rm = self.env['ir.actions.report']
-        for report in cr.dictfetchall():
-            model_data = {'model': report['report_name'],
-                          'name': report['name'],
-                          'parser_def': report['parser_def'],
-                         }
-            if report['parser_state'] == 'default':
-                parser = self._default_aeroo_parser(model_data)
-            else:
-                parser = self._custom_aeroo_parser(model_data)
-            parser._build_model(self.pool, cr)
-    
+        if 'report_aeroo' in self.pool._init_modules:
+            _logger.info('Adding aeroo reports dynamic models')
+            cr = self.env.cr
+            sql_stmt = """SELECT report_name, name, parser_def, parser_state
+                    FROM ir_act_report_xml WHERE
+                    report_type = 'aeroo'
+                    AND parser_state in ('default', 'def')
+                    ORDER BY id
+                    """
+            cr.execute(sql_stmt)
+            for report in cr.dictfetchall():
+                model_data = {
+                    'model': report['report_name'],
+                    'name': report['name'],
+                    'parser_def': report['parser_def'],
+                }
+                if report['parser_state'] == 'default':
+                    parser = self._default_aeroo_parser(model_data)
+                else:
+                    parser = self._custom_aeroo_parser(model_data)
+                parser._build_model(self.pool, cr)
+
     @api.model
     def _default_aeroo_parser(self, model_data):
         """
@@ -55,13 +59,12 @@ class IrModel(models.Model):
             __doc__ = ''
             _transient = False
         return DefaultAerooParser
-        
+
     @api.model
     def _custom_aeroo_parser(self, model_data):
         """
         Instantiates custom parsers for Aeroo Reports "dynamic" reports
         """
-        expected_class = 'Parser'
         context = {'Parser': None}
         try:
             exec(model_data['parser_def'].replace('\r',''), context)
