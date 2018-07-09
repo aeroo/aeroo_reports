@@ -2,7 +2,7 @@
 <odoo>
     <data>
         <!--========================-->
-        <record id="act_aeroo_print_by_action_view_form" model="ir.ui.view">
+        <!--<record id="act_aeroo_print_by_action_view_form" model="ir.ui.view">
             <field name="name">aeroo.print_by_action.form</field>
             <field name="model">aeroo.print_by_action</field>
             <field name="arch" type="xml">
@@ -18,16 +18,16 @@
                     </footer>
                 </form>
             </field>
-        </record>
+        </record>-->
         <!--========================-->
-        <act_window name="Test the Report"
+        <!--<act_window name="Test the Report"
             res_model="aeroo.print_by_action"
             src_model="ir.actions.report"
             view_mode="form"
             target="new"
             key2="client_action_multi"
-            id="action_aeroo_print_by_action_window"/>
-        <!--========================-->
+            id="action_aeroo_print_by_action_window"/>-->
+        <!--========================-->-->
         
     </data>
 </odoo>

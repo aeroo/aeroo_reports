@@ -16,7 +16,7 @@ from odoo.tools.translate import _
 
 _url = 'xhttp://www.alistek.com/aeroo_banner/v11_1_report_aeroo.png'
 
-class docs_config_installer(models.TransientModel):
+class DocsConfigInstaller(models.TransientModel):
     _name = 'docs_config.installer'
     _inherit = 'res.config.installer'
     _rec_name = 'host'
@@ -71,7 +71,7 @@ class docs_config_installer(models.TransientModel):
     @api.model
     def default_get(self, allfields):
         icp = self.env['ir.config_parameter'].sudo()
-        defaults = super(docs_config_installer, self).default_get(allfields)
+        defaults = super(DocsConfigInstaller, self).default_get(allfields)
         enabled = icp.get_param('aeroo.docs_enabled')
         defaults['enabled'] = enabled == 'True' and True or False
         defaults['host'] = icp.get_param('aeroo.docs_host') or 'localhost'
@@ -123,4 +123,3 @@ class docs_config_installer(models.TransientModel):
         result = act_obj.search([('id','=',act_id)]).read()[0]
         result['res_id'] = self.id
         return result
-        

@@ -76,7 +76,7 @@
     </record>
 
     <record id="action_docs_config_wizard" model="ir.actions.act_window">
-      <field name="name">Configure DOCS connection</field>
+      <field name="name">Aeroo DOCS connection</field>
       <field name="type">ir.actions.act_window</field>
       <field name="res_model">docs_config.installer</field>
       <field name="view_id" ref="view_docs_config_installer"/>
@@ -85,7 +85,7 @@
       <field name="target">new</field>
     </record>
 
-	<menuitem id="menu_docs_config_wizard" action="action_docs_config_wizard" parent="menu_ir_action_aeroo_reports"/>
+	<menuitem id="menu_docs_config_wizard" action="action_docs_config_wizard" parent="base.reporting_menuitem" sequence="15"/>
 
   </data>
 </odoo>
