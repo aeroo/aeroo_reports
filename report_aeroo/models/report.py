@@ -74,6 +74,13 @@ class ReportAeroo(models.Model):
 
         report_parser = self.env.get(report_model_name)
         context = dict(self.env.context)
+        if report_parser is None and self.parser_loc:
+            try:
+                report_parser = self.env[
+                    self.load_from_file(self.parser_loc, self.id)._name]
+            except Exception:
+                _logger.warning(
+                    'Could not load parser from file %s', self.parser_loc)
         if report_parser is None:
             report_parser = self.env['report.report_aeroo.abstract']
 
@@ -255,7 +262,6 @@ class Parser(models.AbstractModel):
     def load_from_file(self, path, key):
         class_inst = None
         expected_class = 'Parser'
-
         try:
             for mod_path in module.ad_paths:
                 if os.path.lexists(mod_path+os.path.sep+path.split(os.path.sep)[0]):
