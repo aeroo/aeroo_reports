@@ -242,11 +242,17 @@ class Parser(models.AbstractModel):
         self.out_format = False
 
     @api.multi
-    def unlink(recs):
-        trans_obj = recs.env['ir.translation']
-        trans_ids = trans_obj.search([('type','=','report'),('res_id','in',recs.ids)])
+    def unlink(self):
+        trans_obj = self.env['ir.translation']
+        trans_ids = trans_obj.search(
+            [('type', '=', 'report'), ('res_id', 'in', self.ids)])
         trans_ids.unlink()
-        res = super(ReportAeroo, recs).unlink()
+        res = super(ReportAeroo, self).unlink()
+        try:
+            self.unregister_report()
+        except Exception:
+            _logger.exception(_("Error unregistering Aeroo Reports report"))
+            raise UserError(_("Error unregistering Aeroo Reports report"))
         return res
 
     @api.multi
