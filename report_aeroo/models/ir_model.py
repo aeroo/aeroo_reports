@@ -29,7 +29,8 @@ class IrModel(models.Model):
             sql_stmt = """SELECT report_name, name, parser_def, parser_state
                     FROM ir_act_report_xml WHERE
                     report_type = 'aeroo'
-                    AND parser_state in ('default', 'def')
+                    AND parser_state = 'def'
+                    AND parser_def is Not null
                     ORDER BY id
                     """
             cr.execute(sql_stmt)
