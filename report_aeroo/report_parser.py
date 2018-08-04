@@ -453,3 +453,18 @@ class ReportAerooAbstract(models.AbstractModel):
         #_logger.info("End Aeroo Reports %s (%s), total elapsed time: %s" % (name, model), time() - aeroo_print.start_total_time), logging.INFO) # debug mode
 
         return res
+
+    # @api.model
+    # def get_report_values(self, docids, data=None):
+    #     # report = self.env['ir.actions.report']._get_report_from_name(
+    #     #     'account_test.report_accounttest')
+    #     # records = self.env['accounting.assert.test'].browse(self.ids)
+    #     return {
+    #         # 'doc_ids': self._ids,
+    #         'doc_ids': docids,
+    #         # 'doc_model': report.model,
+    #         # 'docs': records,
+    #         'data': data,
+    #         # 'execute_code': self.execute_code,
+    #         # 'datetime': datetime
+    #     }
