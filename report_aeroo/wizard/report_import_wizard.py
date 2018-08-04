@@ -104,7 +104,7 @@ class report_aeroo_import(osv.osv_memory):
             info += "Template: %s\n" % (tml_source=='parser' and 'defined by parser' or 'static')
             if rep_format=='genshi-raw':
                 info += "Charset: %s\n" % rep_charset
-            info += "Parser: %s\n" % (parser_state in ('def','loc') and 'customized' or 'default')
+            info += "Parser: %s\n" % (parser_state == 'loc' and 'customized' or 'default')
             info += "Stylesheet: %s%s\n" % (styles_select[styles_mode].lower(), style is not None and " (%s)" % style.find("field[@name='name']").text)
             self.write(cr, uid, ids, {'name':rep_service,'info':info,'state':'info','file':base64.encodestring(data)}, context=context)
         else:

@@ -66,7 +66,6 @@
                             </group>
                             <group string="Parser">
                                 <field name="parser_state"/>
-                                <field name="parser_def" attrs="{'invisible': [('parser_state','&lt;&gt;','def')]}"/>
                                 <field name="parser_loc" attrs="{'invisible': [('parser_state','&lt;&gt;','loc')],'required': [('parser_state','=','loc'), ('report_type','=','aeroo')]}"/>
                             </group>
                             <group string="Advanced">

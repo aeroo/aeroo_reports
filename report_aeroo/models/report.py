@@ -1,4 +1,3 @@
-# -*- encoding: utf-8 -*-
 ################################################################################
 #
 #  This file is part of Aeroo Reports software - for license refer LICENSE file  
@@ -76,6 +75,8 @@ class ReportAeroo(models.Model):
         context = dict(self.env.context)
         if report_parser is None and self.parser_loc:
             try:
+                # TODO we should simplify this and avoid needing load_from_file
+                # just to get model name
                 report_parser = self.env[
                     self.load_from_file(self.parser_loc, self.id)._name]
             except Exception:
@@ -199,7 +200,6 @@ class Parser(models.AbstractModel):
               parser.py file}")
     parser_state = fields.Selection([
         ('default',_('Default')),
-        ('def',_('Definition')),
         ('loc',_('Location')),
         ],'State of Parser', index=True, default='default')
     report_type = fields.Selection(selection_add=[('aeroo', _('Aeroo Reports'))])
@@ -247,22 +247,7 @@ class Parser(models.AbstractModel):
         trans_ids = trans_obj.search(
             [('type', '=', 'report'), ('res_id', 'in', self.ids)])
         trans_ids.unlink()
-        res = super(ReportAeroo, self).unlink()
-        try:
-            self.unregister_report()
-        except Exception:
-            _logger.exception(_("Error unregistering Aeroo Reports report"))
-            raise UserError(_("Error unregistering Aeroo Reports report"))
-        return res
-
-    @api.multi
-    def unregister_report(self):
-        for rec in self:
-            report_name = 'report.%s' % rec.report_name
-            if rec.env.get(report_name):
-                rep_model = self.env['ir.model'].search(
-                    [('model', '=', report_name)])
-                rep_model.with_context(_force_unlink=True).unlink()
+        return super(ReportAeroo, self).unlink()
 
     @api.model
     def load_from_file(self, path, key):
@@ -295,30 +280,6 @@ class Parser(models.AbstractModel):
             _logger.error('Error loading report parser: %s'+(filepath and ' "%s"' % filepath or ''), e)
             return None
 
-    @api.model
-    def create(self, vals):
-        rec = super(ReportAeroo, self).create(vals)
-        if rec.report_type != 'aeroo':
-            return rec
-
-        parser = models.AbstractModel
-        ir_model = self.env['ir.model']
-        model_data = {
-            'model': rec.report_name,
-            'name': rec.name,
-            'parser_def': rec.parser_def,
-        }
-        if rec.parser_state == 'loc' and rec.parser_loc:
-            # TODO Revise
-            parser = self.load_from_file(
-                rec.parser_loc, rec.name.lower().replace(' ', '_')) or parser
-        elif rec.parser_state == 'def' and rec.parser_def:
-            parser = ir_model._custom_aeroo_parser(model_data)
-        elif rec.parser_state == 'default':
-            parser = ir_model._default_aeroo_parser(model_data)
-        parser._build_model(self.pool, self.env.cr)
-        return rec
-
     @api.multi
     def write(self, vals):
 
@@ -333,29 +294,4 @@ class Parser(models.AbstractModel):
             except binascii.Error:
                 vals['report_data'] = False
 
-        res = super(ReportAeroo, self).write(vals)
-
-        for rec in self.filtered(lambda x: x.report_type == 'aeroo'):
-            try:
-                rec.unregister_report()
-            except Exception:
-                _logger.exception(_("Error unregistering Aeroo Reports report"))
-                raise UserError(_("Error unregistering Aeroo Reports report"))
-
-            ir_model = rec.env['ir.model']
-            model_data = {
-                'model': rec.report_name,
-                'name': rec.name,
-                'parser_def': rec.parser_def,
-            }
-            if rec.parser_state == 'default':
-                parser = ir_model._default_aeroo_parser(model_data)
-            elif rec.parser_state == 'loc':
-                # TODO Revise
-                parser = rec.load_from_file(rec.parser_loc, rec.id)
-            elif rec.parser_state == 'def':
-                parser = ir_model._custom_aeroo_parser(model_data)
-
-            parser._build_model(rec.pool, rec.env.cr)
-
-        return res
+        return super(ReportAeroo, self).write(vals)
