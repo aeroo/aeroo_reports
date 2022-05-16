@@ -1,36 +1,31 @@
-This is ALPHA version of Aeroo Reports for Odoo v11
+This is ALPHA version of Aeroo Reports for Odoo v15
 --------------------------------------------------------------------------------
 
 Enterprise grade reporting solution for Odoo
 --------------------------------------------------------------------------------
-Aeroo Reports for Odoo is a comprehensive and versatile reporting engine based
-on Aeroo Library.
+Aeroo Reports for Odoo is a comprehensive and versatile reporting engine
+based on Aeroo Library.
 
-It supports most of the current and leacy business document formats. Being it
-printable invoice, personalized HTML content for e-mail marketing or just an
-inventory labels - Aeroo Reports can do them all.
+It supports most of the current and leacy business document formats.
+Being it printable invoice, personalized HTML content for e-mail
+marketing or just an inventory labels - Aeroo Reports can do them all.
 
-Even more, using RAW reporting option, you can create reports for your custom
-document format, that gives full advantage of integrating bost office &
-industrial printing hardware and software.
+Even more, using RAW reporting option, you can create reports for your
+custom document format, that gives full advantage of integrating bost
+office & industrial printing hardware and software.
 
 Developing new reports is as easy as using mainstream office packages -
-OpenOffice.org/LibreOffice. That means, use them as WYSIWYG template editor.
+OpenOffice.org/LibreOffice. That means, use them as WYSIWYG template
+editor.
 
-For more information on how this technology differs from other
-reporting options, please reference reporting engine comparison matrix:
+For more information on how this technology differs from other reporting
+options, please reference reporting engine comparison matrix:
 http://www.alistek.com/wiki/index.php/Comparison_matrix_of_reporting_engines_for_OpenERP
 
 
-Sponsors of Aeroo Reports port for Odoo v11
+Original developer of Aeroo Reports and it's port for Odoo v15
 --------------------------------------------------------------------------------
-Special thanks goes to ADHOC commitment and FlectraHQ for making huge difference
-
-* ADHOC - https://www.adhoc.com.ar/
-* FlectraHQ - https://flectrahq.com/
-* BESCO - http://besco.vn"
-* Serpent CS - http://www.serpentcs.com/
-* CYSFuturo - support@​cysfuturo.com
+* alistek - https://www.alistek.com/
 
 Modules in this category
 --------------------------------------------------------------------------------

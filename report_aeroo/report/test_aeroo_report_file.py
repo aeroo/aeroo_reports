@@ -5,7 +5,7 @@ from odoo import api, models
 
 class TestAerooReport(models.AbstractModel):
     _inherit = 'report.report_aeroo.abstract'
-    
+    _description = 'Test report'
     _name = 'report.product_template_printer'
     
 

@@ -170,9 +170,6 @@ def get_code(message,xw=1,h=100,rotate=None):
     for w in widths:
         bits=bits+[i]*w*xw
         i=1-i
-
-    #print len(bits)
-    #print bits
     
     i=Image.new('1',(len(bits),h),1)
 

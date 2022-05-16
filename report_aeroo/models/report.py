@@ -6,7 +6,7 @@
 ################################################################################
 
 import encodings
-import imp
+import importlib
 import sys
 import os
 import binascii
@@ -14,12 +14,15 @@ from base64 import b64decode
 import zipimport
 from lxml import etree
 import logging
+import time
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 from odoo.tools import file_open
 from odoo.tools.translate import _
 from odoo.modules import module
+from odoo.tools.safe_eval import safe_eval
+from odoo.tools.safe_eval import time as eval_time
 
 _logger = logging.getLogger(__name__)
 
@@ -43,7 +46,7 @@ class ResCompany(models.Model):
     _inherit = 'res.company'
 
     ### Fields
-    stylesheet_id = fields.Many2one('report.stylesheets', 
+    stylesheet_id = fields.Many2one('report.stylesheets',
         'Aeroo Reports Global Stylesheet')
     ### ends Fields
 
@@ -67,23 +70,33 @@ class ReportMimetypes(models.Model):
 class ReportAeroo(models.Model):
     _name = 'ir.actions.report'
     _inherit = 'ir.actions.report'
-
+    
     @api.model
-    def render_aeroo(self, docids, data):
+    def render_aeroo(self, docids=None, data=None, get_filename=False):
+        if not data:
+            data = {}
         report_model_name = 'report.%s' % self.report_name
-
         report_parser = self.env.get(report_model_name)
         context = dict(self.env.context)
         if report_parser is None:
             report_parser = self.env['report.report_aeroo.abstract']
-
         context.update({
             'active_model': self.model,
             'report_name': self.report_name,
             })
+        record = self.env.get(self.model).browse(docids)
+        variables = {}
+        variables['object'] = record
+        variables['o'] = record
+        variables['time'] = eval_time
+        
+        report_name = safe_eval(report.print_report_name, variables)
 
-        return report_parser.with_context(context).aeroo_report(docids, data)
-
+        attachment_name = safe_eval(self.attachment, variables) if self.attachment else ''
+        res = report_parser.with_context(context).aeroo_report(docids, data)
+        return res[:2] if not get_filename else res[:]
+    
+    #===========================================================================
     @api.model
     def _get_report_from_name(self, report_name):
         res = super(ReportAeroo, self)._get_report_from_name(report_name)
@@ -94,8 +107,8 @@ class ReportAeroo(models.Model):
                       ('report_name', '=', report_name)]
         context = self.env['res.users'].context_get()
         return report_obj.with_context(context).search(conditions, limit=1)
-
-    @api.multi
+    
+    #===========================================================================
     def _read_template(self):
         self.ensure_one()
         fp = None
@@ -118,19 +131,21 @@ class ReportAeroo(models.Model):
             if fp is not None:
                 fp.close()
         return data
-
+    
+    #===========================================================================
     @api.model
     def _get_encodings(self):
         l = list(set(encodings._aliases.values()))
         l.sort()
         return zip(l, l)
-
+    
+    #===========================================================================
     @api.model
     def _get_default_outformat(self):
         res = self.env['report.mimetypes'].search([('code','=','oo-odt')])
         return res and res[0].id or False
-
-    @api.multi
+    
+    #===========================================================================
     def _get_extras(recs):
         result = []
         if recs.aeroo_docs_enabled():
@@ -145,7 +160,8 @@ class ReportAeroo(models.Model):
         result = ','.join(result)
         for rec in recs:
             rec.extras = result
-
+    
+    #===========================================================================
     @api.model
     def aeroo_docs_enabled(self):
         '''
@@ -154,14 +170,20 @@ class ReportAeroo(models.Model):
         icp = self.env['ir.config_parameter'].sudo()
         enabled = icp.get_param('aeroo.docs_enabled')
         return enabled == 'True' and True or False
-
+    
+    #===========================================================================
     @api.model
     def _get_in_mimetypes(self):
         mime_obj = self.env['report.mimetypes']
         domain = self.env.context.get('allformats') and [] or [('filter_name','=',False)]
         res = mime_obj.search(domain).read(['code', 'name'])
-        return [(r['code'], r['name']) for r in res]
-
+        if not res: # TODO: remove. Installing on clean DB, no data not initialized in v12
+                    # ValueError: Wrong value for ir.actions.report.in_format: 'oo-odt'
+            return [('oo-odt', 'oo-odt')]
+        else:
+            return [(r['code'], r['name']) for r in res]
+    
+    #===========================================================================
     ### Fields
     charset = fields.Selection('_get_encodings', string='Charset',
         required=True, default='utf_8')
@@ -195,7 +217,7 @@ class Parser(models.AbstractModel):
         ('def',_('Definition')),
         ('loc',_('Location')),
         ],'State of Parser', index=True, default='default')
-    report_type = fields.Selection(selection_add=[('aeroo', _('Aeroo Reports'))])
+    report_type = fields.Selection(selection_add=[('aeroo', _('Aeroo Reports'))], ondelete={'aeroo':'cascade'})
     process_sep = fields.Boolean('Process Separately',
         help='Generate the report for each object separately, \
               then merge reports.')
@@ -209,8 +231,7 @@ class Parser(models.AbstractModel):
     disable_fallback = fields.Boolean('Disable Format Fallback', 
         help='Raises error on format convertion failure. Prevents returning \
               original report file type if no convertion is available.')
-    extras = fields.Char('Extra options', compute='_get_extras', method=True,
-        size=256)
+    extras = fields.Char('Extra options', compute='_get_extras', size=256)
     deferred = fields.Selection([
         ('off',_('Off')),
         ('adaptive',_('Adaptive')),
@@ -228,29 +249,57 @@ class Parser(models.AbstractModel):
     wizard_id = fields.Many2one('ir.actions.act_window', 'Wizard Action')
     report_data = fields.Binary(string='Template Content', attachment=True)
     ### ends Fields
-
+    
+    #===========================================================================
     @api.onchange('in_format')
     def onchange_in_format(self):
         # TODO get first available format
         self.out_format = False
-
-    @api.multi
+    
+    #===========================================================================
     def unlink(recs):
         trans_obj = recs.env['ir.translation']
         trans_ids = trans_obj.search([('type','=','report'),('res_id','in',recs.ids)])
         trans_ids.unlink()
         res = super(ReportAeroo, recs).unlink()
         return res
-
-    @api.multi
+    #===========================================================================
+    def register_report(self, parser_state=None, model_data=None):
+        ir_model = self.env['ir.model']
+        model_data = {
+            'model': self.report_name,
+            'name': self.name,
+            'parser_def': self.parser_def,
+            } or model_data
+        parser_state = self.parser_state or parser_state
+        
+        if parser_state == 'default':
+            parser = ir_model._default_aeroo_parser(model_data)
+        elif parser_state == 'loc':
+            # TODO Revise
+            parser = self.load_from_file(self.parser_loc, self.id)
+        elif parser_state == 'def':
+            parser = ir_model._custom_aeroo_parser(model_data)
+        parser._build_model(self.pool, self.env.cr)
+    #===========================================================================
     def unregister_report(self):
-        for rec in self:
-            report_name = 'report.%s' % rec.report_name
-            if rec.env.get(report_name):
-                rep_model = self.env['ir.model'].search(
-                    [('model', '=', report_name)])
-                rep_model.with_context(_force_unlink=True).unlink()
-
+        report_name = 'report.%s' % self.report_name
+        _logger.exception("++++++++++++++++ 1: %s" % self.pool.get(report_name))
+        _logger.exception("++++++++++++++++ 1a: %s" % self.env.get(report_name))
+        if self.pool.get(report_name):
+            self.clear_caches()
+            rep_model = self.env['ir.model'].search(
+                [('model', '=', report_name)])
+            _logger.exception("++++++++++++++++ x: %s" % type(self.env))
+            _logger.exception("++++++++++++++++ x: %s" % rep_model)
+            rep_model.with_context(_force_unlink=True).unlink()
+            
+            self.pool.setup_models(self.env.cr)
+        _logger.exception("++++++++++++++++ 2: %s" % self.pool.get(report_name))
+        _logger.exception("++++++++++++++++ 2a: %s" % self.env.get(report_name))
+            
+    
+    #===========================================================================
     @api.model
     def load_from_file(self, path, key):
         class_inst = None
@@ -266,10 +315,10 @@ class Parser(models.AbstractModel):
                     mod_name = '%s_%s_%s' % (self.env.cr.dbname, mod_name, key)
 
                     if file_ext.lower() == '.py':
-                        py_mod = imp.load_source(mod_name, filepath)
+                        py_mod = importlib.load_source(mod_name, filepath)
 
                     elif file_ext.lower() == '.pyc':
-                        py_mod = imp.load_compiled(mod_name, filepath)
+                        py_mod = importlib.load_compiled(mod_name, filepath)
 
                     if expected_class in dir(py_mod):
                         class_inst = py_mod.Parser
@@ -282,39 +331,43 @@ class Parser(models.AbstractModel):
         except Exception as e:
             _logger.error('Error loading report parser: %s'+(filepath and ' "%s"' % filepath or ''), e)
             return None
-
+    
+    #===========================================================================
     @api.model
     def create(self, vals):
         rec = super(ReportAeroo, self).create(vals)
         if rec.report_type != 'aeroo':
             return rec
-
-        parser = models.AbstractModel
-        ir_model = self.env['ir.model']
         model_data = {
-            'model': rec.report_name,
-            'name': rec.name,
-            'parser_def': rec.parser_def,
-        }
-        if rec.parser_state == 'loc' and rec.parser_loc:
-            # TODO Revise
-            parser = self.load_from_file(
-                rec.parser_loc, rec.name.lower().replace(' ', '_')) or parser
-        elif rec.parser_state == 'def' and rec.parser_def:
-            parser = ir_model._custom_aeroo_parser(model_data)
-        elif rec.parser_state == 'default':
-            parser = ir_model._default_aeroo_parser(model_data)
-        parser._build_model(self.pool, self.env.cr)
+            'model': vals['report_name'],
+            'name': vals['name'],
+            'parser_def': vals['parser_def'],
+            }
+        self.register_report(parser_state=vals['parser_state'], model_data=model_data)
+        #parser = models.AbstractModel
+        #ir_model = self.env['ir.model']
+        #model_data = {
+        #    'model': rec.report_name,
+        #    'name': rec.name,
+        #    'parser_def': rec.parser_def,
+        #}
+        #if rec.parser_state == 'loc' and rec.parser_loc:
+        #    # TODO Revise
+        #    parser = self.load_from_file(
+        #        rec.parser_loc, rec.name.lower().replace(' ', '_')) or parser
+        #elif rec.parser_state == 'def' and rec.parser_def:
+        #    parser = ir_model._custom_aeroo_parser(model_data)
+        #elif rec.parser_state == 'default':
+        #    parser = ir_model._default_aeroo_parser(model_data)
+        #parser._build_model(self.pool, self.env.cr)
         return rec
-
-    @api.multi
+    
+    #===========================================================================
     def write(self, vals):
-
         # TODO remove or adapt, it shouldn't be necessary
         # if vals.get('report_type') and \
         #         orec['report_type'] != vals['report_type']:
         #     raise UserError(_("Changing report type not allowed!"))
-
         if 'report_data' in vals and vals['report_data']:
             try:
                 b64decode(vals['report_data'])
@@ -322,28 +375,14 @@ class Parser(models.AbstractModel):
                 vals['report_data'] = False
 
         res = super(ReportAeroo, self).write(vals)
-
-        for rec in self.filtered(lambda x: x.report_type == 'aeroo'):
-            try:
-                rec.unregister_report()
-            except Exception:
-                _logger.exception(_("Error unregistering Aeroo Reports report"))
-                raise UserError(_("Error unregistering Aeroo Reports report"))
-
-            ir_model = rec.env['ir.model']
-            model_data = {
-                'model': rec.report_name,
-                'name': rec.name,
-                'parser_def': rec.parser_def,
-            }
-            if rec.parser_state == 'default':
-                parser = ir_model._default_aeroo_parser(model_data)
-            elif rec.parser_state == 'loc':
-                # TODO Revise
-                parser = rec.load_from_file(rec.parser_loc, rec.id)
-            elif rec.parser_state == 'def':
-                parser = ir_model._custom_aeroo_parser(model_data)
-
-            parser._build_model(rec.pool, rec.env.cr)
+        
+        #for rec in self.filtered(lambda x: x.report_type == 'aeroo'):
+        #    try:
+        #        rec.unregister_report()
+        #    except Exception:
+        #        _logger.exception(_("Error unregistering Aeroo Reports report"))
+        #        raise UserError(_("Error unregistering Aeroo Reports report"))
+        #
+        #    #self.register_report()
 
         return res

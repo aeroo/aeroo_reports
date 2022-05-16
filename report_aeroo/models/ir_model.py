@@ -24,7 +24,7 @@ class IrModel(models.Model):
         """
         super(IrModel, self)._add_manual_models()
         if 'report_aeroo' in self.pool._init_modules:
-            _logger.info('Adding aeroo reports dynamic models')
+            _logger.info('Adding Aeroo Reports dynamic models')
             cr = self.env.cr
             sql_stmt = """SELECT report_name, name, parser_def, parser_state
                     FROM ir_act_report_xml WHERE
@@ -44,6 +44,7 @@ class IrModel(models.Model):
                 else:
                     parser = self._custom_aeroo_parser(model_data)
                 parser._build_model(self.pool, cr)
+            _logger.info('Adding Aeroo Reports dynamic models...Done!')
 
     @api.model
     def _default_aeroo_parser(self, model_data):
@@ -52,7 +53,7 @@ class IrModel(models.Model):
         """
         class DefaultAerooParser(models.AbstractModel):
             _inherit = 'report.report_aeroo.abstract'
-            _name = 'report.%s' % pycompat.to_native(model_data['model'])
+            _name = 'report.%s' % pycompat.to_text(model_data['model'])
             _description = model_data['name'],
             _module = False
             _custom = True

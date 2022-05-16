@@ -10,10 +10,11 @@ from io import BytesIO
 from PIL import Image
 from base64 import b64decode
 import time
+from random import randint
 
 from aeroolib.plugins.opendocument import Template, OOSerializer, _filter
 from aeroolib import __version__ as aeroolib_version
-from currency2text import supported_language, currency_to_text
+from currency2text import supported_language
 from .docs_client_lib import DOCSConnection
 from .exceptions import ConnectionError
 
@@ -26,6 +27,8 @@ from odoo.tools.translate import _, translate
 from odoo.tools.misc import formatLang as odoo_fl
 from odoo.tools.misc import format_date as odoo_fd
 from odoo.tools.safe_eval import safe_eval
+from odoo.tools.safe_eval import time as eval_time
+from odoo.tools.pdf import merge_pdf
 from odoo.modules import load_information_from_description_file
 from odoo.exceptions import MissingError
 
@@ -41,9 +44,46 @@ mime_dict = {'oo-odt': 'odt',
              }
 
 
+class Counter(object):
+    def __init__(self, name, start=0, interval=1):
+        self.name = name
+        self._number = start
+        self._interval = interval
+
+    def next(self, increment=True):
+        if increment:
+            self._number += self._interval
+            return self._number
+        else:
+            return self._number + self._interval
+
+    def get_inc(self):
+        return self._number
+
+    def prev(self, decrement=True):
+        if decrement:
+            self._number -= self._interval
+            return self._number
+        else:
+            return self._number-self._interval
+
+class AerooPersistent(object):
+    unique_ids = [] # static property
+    def __init__(self):
+        unique_id = False
+        while(not unique_id or unique_id in self.unique_ids):
+            unique_id = randint(1, 99999)
+        self.unique_ids.append(unique_id)
+        self.id = unique_id
+        self.counters = {}
+        self.start_time = time.time()
+        self.start_total_time = time.time()
+
 class ReportAerooAbstract(models.AbstractModel):
     _name = 'report.report_aeroo.abstract'
-    docs_client = None
+    _description = 'Abstract model for Aeroo Reports parser'
+    docs_client = []
+    localcontext = {}
 
     def __filter(self, val):
         if isinstance(val, models.BaseModel):
@@ -121,12 +161,22 @@ class ReportAerooAbstract(models.AbstractModel):
             or str(im.size[1]/dpi_y)+'in'
         return tf, 'image/%s' % format, size_x, size_y
 
-    def _currency_to_text(self, currency):
-        def c_to_text(sum, currency=currency, language=None):
-            lang = supported_language.get(language or self._get_lang())
-            return str(lang.currency_to_text(sum, currency), "UTF-8")
-        return c_to_text
+    def _search_ids(self, model, domain):
+        return [x.id for x in self.env[model].search(domain)]
 
+    def _search(self, model, domain):
+        return self.env[model].search(domain)
+
+    def _currency_to_text(self, sum, currency, language = None):
+        lang = supported_language.get(language or self._get_lang())
+        return str(lang.currency_to_text(sum, currency), "UTF-8")
+
+    def _get_safe(self, expression, obj):
+        try:
+            return eval(expression, {'o':obj})
+        except Exception as e:
+            return None
+    
     def _get_selection_items(self, kind='items'):
         def get_selection_item(obj, field, value=None):
             try:
@@ -163,7 +213,7 @@ class ReportAerooAbstract(models.AbstractModel):
         trans_obj = self.env['ir.translation']
         lang = self._get_lang()
         name = 'ir.actions.report'
-        conds = [('res_id', '=', self.report.id),
+        conds = [('res_id', '=', self.env['ir.actions.report']._get_report_from_name(report_name).id),
                  ('type', '=', 'report'),
                  ('src', '=', source),
                  ('lang', '=', lang)
@@ -174,7 +224,7 @@ class ReportAerooAbstract(models.AbstractModel):
                 'src': source,
                 'type': 'report',
                 'lang': self._get_lang(),
-                'res_id': self.report.id,
+                'res_id': self.env['ir.actions.report']._get_report_from_name(report_name).id,
                 'name': name,
             }
             trans_obj.create(vals)
@@ -185,7 +235,27 @@ class ReportAerooAbstract(models.AbstractModel):
         localspace = {'objects': attr, 'value_list': []}
         exec(expr, localspace)
         return localspace['value_list']
+    
+    ##### Counter functions #####
+    def _def_inc(self, aeroo_persistent):
+        def def_inc(name, start=0, interval=1):
+            aeroo_persistent.counters[name] = Counter(name, start, interval)
+        return def_inc
 
+    def _get_inc(self, aeroo_persistent):
+        def get_inc(name):
+            return aeroo_persistent.counters[name].get_inc()
+        return get_inc
+
+    def _prev(self, aeroo_persistent):
+        def prev(name):
+            return aeroo_persistent.counters[name].prev()
+        return prev
+
+    def _next(self, aeroo_persistent):
+        def next(name):
+            return aeroo_persistent.counters[name].next()
+        return next
     # / Extra Functions ========================================================
 
     def get_docs_conn(self):
@@ -201,10 +271,12 @@ class ReportAerooAbstract(models.AbstractModel):
         docs_client = DOCSConnection(
             docs_host, docs_port, username=docs_username,
             password=docs_password)
-        self.docs_client = docs_client
+        if not docs_client:
+            raise UserError(_("Unable to connect to Aeroo DOCS service."))
+        self.docs_client.append(docs_client)
 
-    def _generate_doc(self, data, report):
-        docs = self.docs_client
+    def _convert_format(self, data, report):
+        docs = self.docs_client[0]
         token = docs.upload(data)
         if report.out_format.code == 'oo-dbf':
             data = docs.convert(identifier=token)  # TODO What format?
@@ -245,8 +317,6 @@ class ReportAerooAbstract(models.AbstractModel):
             self.env, value, digits, grouping, monetary, dp, currency_obj)
 
     def _set_objects(self, model, docids):
-        _logger.exception(
-            'AEROO setobjects======================= %s - %s' % (model, docids))
         lctx = self.localcontext
         lang = lctx['lang']
         objects = None
@@ -258,9 +328,7 @@ class ReportAerooAbstract(models.AbstractModel):
             objects = self.env.get(model).browse(docids)
         lctx['objects'] = objects
         lctx['o'] = objects and objects[0] or None
-        _logger.exception(
-            'AEROO setobjects======================= %s' % (lang,))
-
+        
     def test(self, obj):
         _logger.exception(
             'AEROO TEST1======================= %s - %s' %
@@ -279,7 +347,7 @@ class ReportAerooAbstract(models.AbstractModel):
         style_io = None
         if report.styles_mode != 'default':
             if report.styles_mode == 'global':
-                styles = self.company.stylesheet_id
+                styles = self.env.user.company_id.stylesheet_id
             elif report.styles_mode == 'specified':
                 styles = report.stylesheet_id
             if styles:
@@ -289,15 +357,16 @@ class ReportAerooAbstract(models.AbstractModel):
     def complex_report(self, docids, data, report, ctx):
         """ Returns an aeroo report generated by aeroolib
         """
-        self.model = ctx.get('active_model', False)
+        aeroo_prst = AerooPersistent()
+        #self.model = ctx.get('active_model', False)
         # tmpl_type = 'odt'
-        self.record_ids = docids
-        self.ctx = ctx
-        self.company = self.env.user.company_id
-        self.report = report
-
+        #self.record_ids = docids
+        #self.ctx = ctx
+        #self.company = self.env.user.company_id
+        #self.report = report
+        
         #=======================================================================
-        self.localcontext = {
+        self.localcontext.update({
             'user':     self.env.user,
             'user_lang': ctx.get('lang', False),
             'data':     data,
@@ -305,13 +374,20 @@ class ReportAerooAbstract(models.AbstractModel):
             'time':     time,
             'asarray':  self._asarray,
             'average':  self._average,
+            'search':   self._search,
+            'search_ids':   self._search_ids,
             'currency_to_text': self._currency_to_text,
-            'asimage': self._asimage,
+            'asimage':  self._asimage,
+            'safe':     self._get_safe,
             'get_selection_item': self._get_selection_items('item'),
             'get_selection_items': self._get_selection_items(),
             'get_log': self._get_log,
             'asarray': self._asarray,
-
+            'def_inc': self._def_inc(aeroo_prst),
+            'get_inc': self._get_inc(aeroo_prst),
+            'prev':    self._prev(aeroo_prst),
+            'next':    self._next(aeroo_prst),
+            
             '__filter': self.__filter,  # Don't use in the report template!
             'getLang':  self._get_lang,
             'setLang':  self._set_lang,
@@ -321,11 +397,11 @@ class ReportAerooAbstract(models.AbstractModel):
             'test':     self.test,
             'fields':     fields,
             'company':     self.env.user.company_id,
-        }
+            })
         self.localcontext.update(ctx)
-        self._set_lang(self.company.partner_id.lang)
-        self._set_objects(self.model, docids)
-
+        self._set_lang(self.env.user.company_id.partner_id.lang)
+        self._set_objects(ctx.get('active_model', False), docids)
+        
         file_data = None
         if report.tml_source == 'database':
             if not report.report_data or report.report_data == 'False':
@@ -341,7 +417,7 @@ class ReportAerooAbstract(models.AbstractModel):
             file_data = report._read_template()
         else:
             rec_id = ctx.get('active_id', data.get('id')) or data.get('id')
-            file_data = self.get_other_template(self.model, rec_id)
+            file_data = self.get_other_template(ctx.get('active_model', False), rec_id)
 
         if not file_data:
             # TODO log report ID etc.
@@ -362,7 +438,7 @@ class ReportAerooAbstract(models.AbstractModel):
         # Add metadata
         ser = basic.Serializer
         model_obj = self.env.get('ir.model')
-        model_name = model_obj.search([('model', '=', self.model)])[0].name
+        model_name = model_obj.search([('model', '=', ctx.get('active_model', False))])[0].name
         ser.add_title(model_name)
 
         user_name = self.env.user.name
@@ -380,9 +456,22 @@ class ReportAerooAbstract(models.AbstractModel):
         file_data = basic.generate(**self.localcontext).render().getvalue()
         #=======================================================================
         code = mime_dict[report.in_format]
-        #_logger.info("End process %s (%s), elapsed time: %s" % (self.name, self.model, time.time() - aeroo_print.start_time), logging.INFO) # debug mode
-
-        return file_data, code
+        if isinstance(docids,list) and len(docids) > 1:
+            report_name = 'report'
+        else:
+            obj = self.localcontext['objects']
+            if report.print_report_name:
+                variables = {}
+                variables['object'] = obj
+                variables['time'] = eval_time
+                # variables['time'] = time #TODO cann't pass module directly, due to some misterious Odoo limitation
+                
+                report_name = safe_eval(report.print_report_name, variables)
+            else:
+                report_name = 'report'
+        _logger.info("    - subprocess end '%s' (%s), elapsed time: %s" % (self._context.get('report_name'), ctx.get('active_model', False), time.time() - aeroo_prst.start_time))
+        
+        return file_data, report_name, code
 
     def simple_report(self, docids, data, report, ctx, output='raw'):
         pass
@@ -395,45 +484,57 @@ class ReportAerooAbstract(models.AbstractModel):
         elif code == 'genshi-raw':
             return self.simple_report(docids, data, report, ctx, output='raw')
 
+    def consume_convert(self, tokens, in_mime, out_mime):
+        docs = self.docs_client[0]
+        for token in tokens:
+            yield docs.convert(identifier=token, out_mime=out_mime,
+                                in_mime=in_mime)
+    
     def assemble_tasks(self, docids, data, report, ctx):
-        code = report.out_format.code
-        result = self.single_report(docids, data, report, ctx)
-
-        print_report_name = 'report'
-        if report.print_report_name and not len(docids) > 1:
-            obj = self.env[report.model].browse(docids)
-            print_report_name = safe_eval(
-                report.print_report_name, {'object': obj, 'time': time})
-
-        if report.in_format == code:
-            filename = '%s.%s' % (
-                print_report_name, mime_dict[report.in_format])
-            return result[0], result[1], filename
+        out_format = report.out_format.code
+        in_format = report.in_format
+        out_mime = mime_dict[out_format]
+        in_mime = mime_dict[in_format]
+        result = False
+        extension = in_mime
+        if report.process_sep == True or report.attachment_use:
+            tokens = []
+            for docid in docids:
+                single_result, report_name, code = self.single_report(docid, data, report, ctx)
+                
+                if in_format != out_format:
+                    self.get_docs_conn()
+                    token = self.docs_client[0].upload(single_result)
+                    tokens += [token]
+            result = merge_pdf(self.consume_convert(tokens, in_mime, out_mime))
+            if isinstance(docids,list) and len(docids) > 1:
+                report_name = 'report'
+            extension = out_mime #TODO extension override
         else:
-            try:
+            single_result, report_name, code = self.single_report(docids, data, report, ctx)
+            if in_format == out_format:
+                result = single_result
+            else:
                 self.get_docs_conn()
-                result = self._generate_doc(result[0], report)
-                filename = '%s.%s' % (
-                    print_report_name, mime_dict[report.out_format.code])
-                return result, mime_dict[code], filename
-            except Exception as e:
-                _logger.exception(_("Aeroo DOCS error!\n%s") % str(e))
-                if report.disable_fallback:
-                    result = None
-                    _logger.exception(e[0])
-                    raise ConnectionError(_('Could not connect Aeroo DOCS!'))
-        # only if fallback
-        filename = '%s.%s' % (print_report_name, mime_dict[report.in_format])
-        return result[0], result[1], filename
+                token = self.docs_client[0].upload(single_result)
+                result = self.docs_client[0].convert(identifier=token,
+                                out_mime=out_mime,
+                                in_mime=in_mime)
+                extension = out_mime #TODO extension override
+            
+        
+        filename = "%s.%s" % (report_name, extension)
+        
+        return result, out_mime, filename
 
     @api.model
     def aeroo_report(self, docids, data):
-
-        self.name = self._context.get('report_name')
-        report = self.env['ir.actions.report']._get_report_from_name(self.name)
-        # TODO
-        #_logger.info("Start Aeroo Reports %s (%s)" % (name, ctx.get('active_model')), logging.INFO) # debug mode
-
+        #self.name = self._context.get('report_name') #TODO remove there is no "name" attribute
+        report_name = self._context.get('report_name')
+        start_total_time = time.time()
+        report = self.env['ir.actions.report']._get_report_from_name(report_name)
+        _logger.info("Start Aeroo Reports %s (%s)" % (report_name, self.env.context.get('active_model')))
+        
         if 'tz' not in self._context:
             self = self.with_context(tz=self.env.user.tz)
 
@@ -450,6 +551,6 @@ class ReportAerooAbstract(models.AbstractModel):
         # TODO we should propagate context in the proper way, just with self
         res = self.assemble_tasks(docids, data, report, self._context)
         # TODO
-        #_logger.info("End Aeroo Reports %s (%s), total elapsed time: %s" % (name, model), time() - aeroo_print.start_total_time), logging.INFO) # debug mode
+        _logger.info("End Aeroo Reports %s (%s), total elapsed time: %s" % (report_name, self.env.context.get('active_model'), time.time() - start_total_time))
 
         return res

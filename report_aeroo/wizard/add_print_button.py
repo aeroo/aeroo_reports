@@ -48,7 +48,6 @@ class aeroo_add_print_button(models.TransientModel):
             else:
 	            return 'exist'
     
-    @api.multi
     def do_action(self):
         irval_mod = self.env.get('ir.values')
         this = self.browse(cr, uid, ids[0], context=context)

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
         <record id="view_aeroo_add_print_button" model="ir.ui.view">
             <field name="name">Add Print Button</field>
             <field name="model">aeroo.add_print_button</field>
@@ -38,6 +37,4 @@
             target="new"
             key2="client_action_multi"
             id="action_aeroo_add_print_button"/>
-
-    </data>
 </odoo>

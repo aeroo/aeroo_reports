@@ -3,3 +3,6 @@
 "report_stylesheets_user","report.stylesheets.user","model_report_stylesheets",,1,0,0,0
 "report_mimetypes_system","report.mimetypes.system","model_report_mimetypes","base.group_system",1,1,1,1
 "report_mimetypes_user","report.mimetypes.user","model_report_mimetypes","base.group_user",1,0,0,0
+"report_docs_config_installer","report_docs_config_installer","model_docs_config_installer","base.group_user",1,0,0,0
+"aeroo_print_by_action","aeroo_print_by_action","model_aeroo_print_by_action","base.group_user",1,1,1,1
+"docs_config_installer","docs_config_installer","model_docs_config_installer","base.group_user",1,1,1,1

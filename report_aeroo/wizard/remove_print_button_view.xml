@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<openerp>
-    <data>
+<odoo>
         <record id="view_aeroo_remove_print_button" model="ir.ui.view">
             <field name="name">Remove Print Button</field>
             <field name="model">aeroo.remove_print_button</field>
@@ -36,6 +35,4 @@
             target="new"
             key2="client_action_multi"
             id="action_aeroo_remove_print_button"/>
-
-    </data>
-</openerp>
+</odoo>

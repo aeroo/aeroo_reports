@@ -14,8 +14,8 @@ _logger = logging.getLogger(__name__)
 
 class report_print_by_action(models.TransientModel):
     _name = 'aeroo.print_by_action'
+    _description = 'Wizard for Aeroo Reports report development - testing and debugging'
     
-    @api.multi
     def to_print(recs):
         valid_input = re.match('^\s*\[?\s*((\d+)(\s*,\s*\d+)*)\s*\]?\s*$',
                                                             recs[0].object_ids)
@@ -38,14 +38,14 @@ class report_print_by_action(models.TransientModel):
                 'report_type': 'aeroo',
                 }
         res =  {
+                'name': report.report_name,
                 'type': 'ir.actions.report',
                 'report_name': report.report_name,
+                'binding_type': 'report',
                 'report_type': report.report_type,
-                'datas': data,
+                'data': data,
                 'context': ctx,
-                'target': 'current',
                 }
-        _logger.exception('AEROO by_action======================= %s' % (res,))
         return res
     
     @api.model

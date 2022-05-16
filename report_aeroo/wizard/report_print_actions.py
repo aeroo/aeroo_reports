@@ -50,7 +50,6 @@ class report_print_actions(models.TransientModel):
         act_win['view_mode'] = 'form,tree'
         return act_win
     
-    @api.multi
     def simple_print(recs):
         report_xml = recs._get_report()
         data = {
@@ -66,7 +65,6 @@ class report_print_actions(models.TransientModel):
                 'context': context
                 }
     
-    @api.multi
     def get_strids(recs):
         valid_input = re.match('^\[\s*((\d+)(\s*,\s*\d+)*)\s*\]$',
             recs.print_ids)
@@ -74,7 +72,6 @@ class report_print_actions(models.TransientModel):
             raise Warning(_("Wrong or not ids!"))
         return eval(recs.print_ids, {})
     
-    @api.multi
     def to_print(recs=None):
         report_xml = recs._get_report()
         obj_print_ids = recs.get_strids()

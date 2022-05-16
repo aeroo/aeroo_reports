@@ -13,38 +13,37 @@ from odoo.addons.report_aeroo.docs_client_lib import DOCSConnection
 from odoo import api, fields, models
 from odoo.tools import file_open
 from odoo.tools.translate import _
+from urllib.request import urlopen, Request
 
-_url = 'xhttp://www.alistek.com/aeroo_banner/v11_1_report_aeroo.png'
+_url = 'http://www.alistek.com/aeroo_banner/v11_1_report_aeroo.png'
 
 class DocsConfigInstaller(models.TransientModel):
     _name = 'docs_config.installer'
+    _description = 'Wizard for configuration of Aeroo DOCS connection parameters'
     _inherit = 'res.config.installer'
     _rec_name = 'host'
-    _logo_image = None
     
     @api.model
     def _get_image(self):
-        if self._logo_image:
-            return self._logo_image
         try:
-            im = urllib2.urlopen(_url.encode("UTF-8"))
-            if im.headers.maintype != 'image':
-                raise TypeError(im.headers.maintype)
+            im = urlopen(Request(_url))
+            if im.getheader('Content-Type') != 'image/png;':
+                raise TypeError(im.getheader('Content-Type'))
         except Exception as e:
             path = os.path.join('report_aeroo','config_pixmaps',
                     'module_banner_1.png')
             image_file = file_data = file_open(path,'rb')
             try:
                 file_data = image_file.read()
-                self._logo_image = b64encode(file_data)
-                return self._logo_image
+                _logo_image = b64encode(file_data)
+                return _logo_image
             finally:
                 image_file.close()
         else:
-            self._logo_image = b64encode(im.read())
-            return self._logo_image
+            _logo_image = b64encode(im.read())
+            return _logo_image
     
-    @api.one
+    
     def _get_image_fn(recs):
         recs.config_logo = recs._get_image()
     
@@ -68,6 +67,18 @@ class DocsConfigInstaller(models.TransientModel):
             default=_get_image)
     ### ends Fields
     
+    def read(self, fields=None, load='_classic_read'):
+        res = super(DocsConfigInstaller, self).read(fields=fields, load=load)
+        res = res and res[0] or {}
+        icp = self.env['ir.config_parameter'].sudo()
+        res['enabled'] = icp.get_param('aeroo.docs_enabled') and True or False
+        res['host'] = icp.get_param('aeroo.docs_host') or 'localhost'
+        res['port'] = int(icp.get_param('aeroo.docs_port')) or 8989
+        res['auth_type'] = icp.get_param('aeroo.docs_auth_type') == 'simple' and 'simple' or False
+        res['username'] = icp.get_param('aeroo.docs_username') or 'anonymous'
+        res['password'] = icp.get_param('aeroo.docs_password') or 'anonymous'
+        return [res]
+
     @api.model
     def default_get(self, allfields):
         icp = self.env['ir.config_parameter'].sudo()
@@ -76,18 +87,17 @@ class DocsConfigInstaller(models.TransientModel):
         defaults['enabled'] = enabled == 'True' and True or False
         defaults['host'] = icp.get_param('aeroo.docs_host') or 'localhost'
         defaults['port'] = int(icp.get_param('aeroo.docs_port')) or 8989
-        defaults['auth_type'] = icp.get_param('aeroo.docs_auth_type') or False
+        defaults['auth_type'] = icp.get_param('aeroo.docs_auth_type')  == 'simple' and 'simple' or False
         defaults['username'] = icp.get_param('aeroo.docs_username') or 'anonymous'
         defaults['password'] = icp.get_param('aeroo.docs_password') or 'anonymous'
         return defaults
     
-    @api.multi
     def check(self):
         icp = self.env['ir.config_parameter']
         icp.set_param('aeroo.docs_enabled', str(self.enabled))
         icp.set_param('aeroo.docs_host', self.host)
         icp.set_param('aeroo.docs_port', self.port)
-        icp.set_param('aeroo.docs_auth_type', self.auth_type or 'simple')
+        icp.set_param('aeroo.docs_auth_type', self.auth_type == 'simple' and 'simple' or False)
         icp.set_param('aeroo.docs_username', self.username)
         icp.set_param('aeroo.docs_password', self.password)
         error_details = ''
@@ -98,7 +108,8 @@ class DocsConfigInstaller(models.TransientModel):
                 fp = file_open('report_aeroo/test_temp.odt', mode='rb')
                 file_data = fp.read()
                 docs_client = DOCSConnection(self.host, self.port,
-                    username=self.username, password=self.password)
+                    username=self.auth_type == 'simple' and self.username or None,
+                    password=self.auth_type == 'simple' and self.password or None)
                 token = docs_client.upload(file_data)
                 data = docs_client.convert(identifier=token, out_mime='pdf')
             except Exception as e:
@@ -117,7 +128,7 @@ class DocsConfigInstaller(models.TransientModel):
         self.state = state
         mod_obj = self.env['ir.model.data']
         act_obj = self.env['ir.actions.act_window']
-        result = mod_obj.get_object_reference('report_aeroo',
+        result = mod_obj.check_object_reference('report_aeroo',
                      'action_docs_config_wizard')
         act_id = result and result[1] or False
         result = act_obj.search([('id','=',act_id)]).read()[0]
