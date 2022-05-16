@@ -4,4 +4,4 @@
 Aeroo Reports
 =============
 
-Unworkable Wannabe version of Aeroo Reports for Odoo v12
+Workable alpha  version of Aeroo Reports for Odoo v15
