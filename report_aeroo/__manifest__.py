@@ -7,7 +7,7 @@
 
 {
     'name': 'Aeroo Reports',
-    'version': '15.2.1',
+    'version': '15.0.2.1',
     'category': 'Generic Modules/Aeroo Reports',
     'summary': 'Enterprise grade reporting solution (odoo v15)',
     'author': 'Alistek',
@@ -32,7 +32,6 @@
              },
     'license' : "GPL-3 or any later version",
     'installable': True,
-    'active': False,
     'application': True,
     'auto_install': False,
 }

@@ -20,17 +20,24 @@
 #
 ##############################################################################
 
-import os
 import logging
-import openerp.tools as tools
-from openerp.tools.translate import trans_parse_rml, trans_parse_xsl, trans_parse_view, _extract_translatable_qweb_terms
+import os
+
+from odoo import api, fields, models, registry, _
+from odoo.tools import ormcache_context
+from odoo.exceptions import UserError
+from odoo.osv import expression
+
+import odoo.tools as tools
+from odoo.tools.translate import trans_parse_rml, _extract_translatable_qweb_terms, translate_xml_node
 import fnmatch
 from os.path import join
 from lxml import etree
-from openerp.tools import misc
-from openerp.tools import osutil
+from odoo.tools import misc
+from odoo.tools import osutil
 from babel.messages import extract
-import openerp
+
+
 
 _logger = logging.getLogger(__name__)
 
@@ -41,9 +48,9 @@ ENGLISH_SMALL_WORDS = set("as at by do go if in me no of ok on or to up us we".s
 def extend_trans_generate(lang, modules, cr):
     dbname = cr.dbname
 
-    registry = openerp.registry(dbname)
-    trans_obj = registry['ir.translation']
-    model_data_obj = registry['ir.model.data']
+    db_registry = registry(dbname)
+    trans_obj = db_registry['ir.translation']
+    model_data_obj = db_registry['ir.model.data']
     uid = 1
 
     query = 'SELECT name, model, res_id, module' \
@@ -77,7 +84,7 @@ def extend_trans_generate(lang, modules, cr):
         _to_translate.add(tnx)
 
     def encode(s):
-        if isinstance(s, unicode):
+        if isinstance(s, str):
             return s.encode('utf8')
         return s
 
@@ -121,14 +128,14 @@ def extend_trans_generate(lang, modules, cr):
                 _extract_translatable_qweb_terms(d, push_qweb)
             else:
                 push_view = lambda t,l: push(module, 'view', obj.model, xml_name, t)
-                trans_parse_view(d, push_view)
+               # trans_parse_view(d, push_view)
         elif model=='ir.actions.wizard':
             pass # TODO Can model really be 'ir.actions.wizard' ?
 
         elif model=='ir.model.fields':
             try:
                 field_name = encode(obj.name)
-            except AttributeError, exc:
+            except AttributeError as exc:
                 _logger.error("name error in %s: %s", xml_name, str(exc))
                 continue
             objmodel = registry.get(obj.model)
@@ -177,7 +184,7 @@ def extend_trans_generate(lang, modules, cr):
                     report_type = "report"
                 elif obj.report_xsl:
                     fname = obj.report_xsl
-                    parse_func = trans_parse_xsl
+                    # parse_func = trans_parse_xsl
                     report_type = "xsl"
                 if fname and obj.report_type in ('pdf', 'xsl'):
                     try:
@@ -240,7 +247,7 @@ def extend_trans_generate(lang, modules, cr):
         lambda m: m['name'],
         registry['ir.module.module'].search_read(cr, uid, [('state', '=', 'installed')], fields=['name']))
 
-    path_list = list(openerp.modules.module.ad_paths)
+    path_list = list(modules.module.ad_paths)
     # Also scan these non-addon paths
     for bin_path in ['osv', 'report' ]:
         path_list.append(os.path.join(tools.config['root_path'], bin_path))
