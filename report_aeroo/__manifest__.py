@@ -14,6 +14,9 @@
     'website': 'http://www.alistek.com',
     'complexity': "easy",
     'depends': ['base', 'web'],
+    'external_dependencies': {
+        'python': ['aeroolib', 'babel', 'genshi'],
+    },
     'data': [
              "data/report_aeroo_data.xml", 
              "views/report_view.xml",
