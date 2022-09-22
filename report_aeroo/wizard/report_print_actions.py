@@ -8,7 +8,7 @@
 from odoo import api, models, fields, _
 from odoo.exceptions import except_orm, Warning
 
-from odoo.report import interface
+# from odoo.report import interface
 import re
 
 class report_print_actions(models.TransientModel):
@@ -18,7 +18,6 @@ class report_print_actions(models.TransientModel):
     def _reopen(self, res_id, model):
         return {'type': 'ir.actions.act_window',
                 'view_mode': 'form',
-                'view_type': 'form',
                 'res_id': res_id,
                 'res_model': self._name,
                 'target': 'new',
@@ -36,7 +35,8 @@ class report_print_actions(models.TransientModel):
         deferred_proc_obj = self.pool.get('deferred_processing.task')
         process_id = deferred_proc_obj.create(cr, uid, {'name':report_xml.name}, context=context)
         deferred_proc_obj.new_process(cr, uid, process_id, context=context)
-        deferred_proc_obj.start_process_report(cr, uid, process_id, this.print_ids, context['report_action_id'], context=context)
+        deferred_proc_obj.start_process_report(cr, uid, process_id, this.print_ids, context['report_action_id'],
+                                               context=context)
 
         mod_obj = self.pool.get('ir.model.data')
         act_obj = self.pool.get('ir.actions.act_window')
@@ -50,41 +50,41 @@ class report_print_actions(models.TransientModel):
         act_win['view_mode'] = 'form,tree'
         return act_win
     
-    def simple_print(recs):
-        report_xml = recs._get_report()
+    def simple_print(self):
+        report_xml = self._get_report()
         data = {
-                'model':report_xml.model, 
-                'ids':this.print_ids,
-                'id':context['active_id'],
+                'model': report_xml.model,
+                'ids': self.print_ids,
+                'id': report_xml.id,
                 'report_type': 'aeroo'
                 }
         return {
                 'type': 'ir.actions.report',
                 'report_name': report_xml.report_name,
-                'datas': data,
-                'context': context
+                'data': data,
+                'context': context,
                 }
     
-    def get_strids(recs):
+    def get_strids(self):
         valid_input = re.match('^\[\s*((\d+)(\s*,\s*\d+)*)\s*\]$',
-            recs.print_ids)
+                               self.print_ids)
         if not valid_input:
             raise Warning(_("Wrong or not ids!"))
-        return eval(recs.print_ids, {})
+        return eval(self.print_ids, {})
     
-    def to_print(recs=None):
-        report_xml = recs._get_report()
-        obj_print_ids = recs.get_strids()
+    def to_print(self=None):
+        report_xml = self._get_report()
+        obj_print_ids = self.get_strids()
         print_ids = []
-        if recs.copies <= 1:
+        if self.copies <= 1:
             print_ids = obj_print_ids
         else:
-            copies = recs.copies
+            copies = self.copies
             while(copies):
                 print_ids.extend(obj_print_ids)
                 copies -= 1
-        if recs.check_if_deferred(report_xml, print_ids):
-            recs.write({
+        if self.check_if_deferred(report_xml, print_ids):
+            self.write({
                 'state': 'confirm',
                 'message': _("This process may take too long for interactive \
                     processing. It is advisable to defer the process as a \
@@ -92,7 +92,7 @@ class report_print_actions(models.TransientModel):
                     process?"),
                 'print_ids': str(print_ids)
                 })
-            return self._reopen(recs.id, recs._model)
+            return self._reopen(self.id, self._model)
         ##### Simple print #####
         data = {
                 'model': report_xml.model,
@@ -104,7 +104,7 @@ class report_print_actions(models.TransientModel):
                'type': 'ir.actions.report',
                'report_name': report_xml.report_name,
                'datas': data,
-               'context': recs.env.context
+               'context': self.env.context
                }
         return res
 

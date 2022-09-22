@@ -5,8 +5,8 @@
 #
 ################################################################################
 
-from openerp.tools.translate import _
-from openerp.osv import osv, fields
+from odoo.tools.translate import _
+from odoo.osv import osv, fields
 
 def _reopen(self, res_id, model):
     return {'type': 'ir.actions.act_window',
