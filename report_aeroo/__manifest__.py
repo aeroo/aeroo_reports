@@ -17,6 +17,7 @@
     'external_dependencies': {
         'python': ['aeroolib', 'babel', 'genshi'],
     },
+    "excludes": ["chain_report_aeroo"],
     'data': [
              "data/report_aeroo_data.xml", 
              "views/report_view.xml",
@@ -28,7 +29,9 @@
              "security/ir.model.access.csv"
              ],
     'assets':{
-              'web.assets_backend':['report_aeroo/static/src/js/action_manager_report.js',],
+              'web.assets_backend':[
+                  'report_aeroo/static/src/js/action_manager_report.js',
+              ],
              },
     'license' : "GPL-3 or any later version",
     'installable': True,
