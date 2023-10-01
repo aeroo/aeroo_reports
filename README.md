@@ -6,4 +6,4 @@ Aeroo Reports
 
 Workable alpha  version of Aeroo Reports for Odoo v15
 
-pip install -U git+https://github.com/odoochain/aeroolib@master
+pip install -U git+https://github.com/odoochain/aeroolib@chain
