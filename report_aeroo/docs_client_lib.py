@@ -70,6 +70,7 @@ class DOCSConnection():
     
     def test(self, ctd=None):
         # ctd stands for crash test dummy file
+        import os
         path = ctd or os.path.join('report_aeroo', 'test_temp.odt')
         with open(path, "r") as testfile:
             data=testfile.read()
